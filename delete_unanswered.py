@@ -52,9 +52,7 @@ async def delete_unanswered_in_chat(dialog):
         if m.id in replied_to:
             continue
 
-        # Delete the message
-        timestamp = m.date.strftime('%d.%m.%Y %H:%M')
-        text_preview = (m.text or '[media]')[:50].replace('\n', ' ')
+    e('\n', ' ')
         print(f"  DEL: {timestamp} - {text_preview}...")
 
         try:
@@ -89,3 +87,6 @@ if __name__ == '__main__':
     with SessionLock():
         with client:
             client.loop.run_until_complete(main())
+    # Delete the message
+        timestamp = m.date.strftime('%d.%m.%Y %H:%M')
+        text_preview = (m.text or '[media]')[:50].replac

@@ -14,12 +14,10 @@ Supports:
 import os
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
+from datetime import date, timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
-
-# TODO: Implement cost estimation for resources
-# TODO: Add resource tagging and filtering
 
 try:
     import boto3
@@ -77,6 +75,109 @@ class AWSClient:
         """Get current AWS identity."""
         sts = self._session.client("sts")
         return sts.get_caller_identity()
+
+    # === Cost Estimation ===
+
+    def estimate_monthly_costs(self, services: Optional[List[str]] = None, days: int = 30) -> Dict[str, float]:
+        """
+        Estimate recent costs grouped by AWS service.
+
+        Uses Cost Explorer to fetch unblended cost for the last `days` days
+        (default: rolling 30) and aggregates by service.
+        """
+        end = date.today()
+        start = end - timedelta(days=days)
+
+        ce = self._session.client("ce")
+        params: Dict[str, Any] = {
+            "TimePeriod": {"Start": start.isoformat(), "End": end.isoformat()},
+            "Granularity": "MONTHLY",
+            "Metrics": ["UnblendedCost"],
+            "GroupBy": [{"Type": "DIMENSION", "Key": "SERVICE"}],
+        }
+
+        if services:
+            params["Filter"] = {
+                "Dimensions": {
+                    "Key": "SERVICE",
+                    "Values": services,
+                },
+            }
+
+        response = ce.get_cost_and_usage(**params)
+        costs: Dict[str, float] = {}
+
+        for result in response.get("ResultsByTime", []):
+            for group in result.get("Groups", []):
+                service = group.get("Keys", ["unknown"])[0]
+                amount = group.get("Metrics", {}).get("UnblendedCost", {}).get("Amount", "0")
+                costs[service] = costs.get(service, 0.0) + float(amount)
+
+        return costs
+
+    # === Tagging & Filtering ===
+
+    def tag_resources(self, resource_arns: List[str], tags: Dict[str, str]) -> Dict[str, List[str]]:
+        """
+        Apply tags to multiple resources using the Resource Groups Tagging API.
+
+        Returns a mapping of succeeded and failed ARNs for quick feedback.
+        """
+        if not resource_arns or not tags:
+            return {"succeeded": [], "failed": resource_arns or []}
+
+        tagging = self._session.client("resourcegroupstaggingapi")
+        response = tagging.tag_resources(ResourceARNList=resource_arns, Tags=tags)
+        failed = list(response.get("FailedResourcesMap", {}).keys())
+        succeeded = [arn for arn in resource_arns if arn not in failed]
+        return {"succeeded": succeeded, "failed": failed}
+
+    def filter_resources(
+        self,
+        tag_filters: Optional[Dict[str, Any]] = None,
+        resource_type_filters: Optional[List[str]] = None,
+        limit: Optional[int] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Fetch resources that match the provided tag filters.
+
+        tag_filters example: {"env": "prod", "team": ["data", "ml"]}
+        resource_type_filters example: ["ec2:instance", "s3:bucket"]
+        """
+        tagging = self._session.client("resourcegroupstaggingapi")
+        aws_tag_filters = []
+        for key, value in (tag_filters or {}).items():
+            values = value if isinstance(value, list) else [value]
+            aws_tag_filters.append({"Key": key, "Values": values})
+
+        params: Dict[str, Any] = {}
+        if aws_tag_filters:
+            params["TagFilters"] = aws_tag_filters
+        if resource_type_filters:
+            params["ResourceTypeFilters"] = resource_type_filters
+
+        resources: List[Dict[str, Any]] = []
+        token: Optional[str] = None
+        while True:
+            if token:
+                params["PaginationToken"] = token
+            elif "PaginationToken" in params:
+                params.pop("PaginationToken")
+
+            response = tagging.get_resources(**params)
+            for item in response.get("ResourceTagMappingList", []):
+                resources.append({
+                    "arn": item.get("ResourceARN"),
+                    "tags": {tag["Key"]: tag["Value"] for tag in item.get("Tags", [])},
+                })
+                if limit and len(resources) >= limit:
+                    return resources[:limit]
+
+            token = response.get("PaginationToken")
+            if not token:
+                break
+
+        return resources
 
     # === EC2 ===
 
@@ -399,6 +500,11 @@ class AWSClient:
             resources["identity_error"] = str(e)
 
         try:
+            resources["cost_estimates"] = self.estimate_monthly_costs()
+        except Exception as e:
+            resources["cost_error"] = str(e)
+
+        try:
             resources["ec2_instances"] = self.list_ec2_instances()
         except Exception as e:
             resources["ec2_error"] = str(e)
@@ -458,6 +564,12 @@ def print_resources(resources: Dict[str, Any]) -> None:
         identity = resources["identity"]
         print(f"Account: {identity.get('Account')}")
         print(f"User ARN: {identity.get('Arn')}")
+
+    if "cost_estimates" in resources:
+        costs = resources["cost_estimates"]
+        print(f"\n=== Cost Estimates ({len(costs)}) ===")
+        for service, amount in sorted(costs.items(), key=lambda item: item[0]):
+            print(f"  {service}: ${amount:.2f} (last 30 days)")
 
     if "ec2_instances" in resources:
         instances = resources["ec2_instances"]
