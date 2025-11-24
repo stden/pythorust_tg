@@ -1,0 +1,12 @@
+# -*- coding: utf-8 -*-
+# pytest - фреймворк для написания и запуска тестов
+pytest # https://pypi.org/project/pytest/
+python-dotenv # Key-value pairs from ".env", set as enviroment vars: https://pypi.org/project/python-dotenv/
+pyyaml # YAML config parsing: https://pypi.org/project/PyYAML/
+openai # Official Python library for OpenAI API: https://pypi.org/project/openai/
+mcp # Model Context Protocol server utilities: https://pypi.org/project/mcp/
+requests # https://pypi.org/project/requests/
+behave # Behaviour-Driven Development: https://pypi.org/project/behave/
+telethon # Full-featured Telegram client library: https://pypi.org/project/telethon/
+kurigram # Modern MTProto API framework (Pyrogram fork): https://pypi.org/project/Kurigram/
+boto3 # AWS SDK for Python: https://pypi.org/project/boto3/

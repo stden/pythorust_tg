@@ -1,0 +1,23 @@
+[project]
+name = "my-telegram"
+version = "0.1.0"
+description = "Telegram chat reader and auto-responder toolkit"
+requires-python = ">=3.11"
+dependencies = [
+    "telethon>=1.38.1",
+    "openai>=1.59.5",
+    "mcp>=1.22.0,<2.0.0",
+    "requests>=2.32.3",
+    "pytest>=8.3.4",
+    "python-dotenv>=1.0.1",
+    "behave>=1.2.6",
+    "kurigram>=2.2.15",
+    "PyYAML>=6.0.2",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

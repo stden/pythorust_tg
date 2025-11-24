@@ -1,0 +1,356 @@
+//! Telegram Reader CLI - main entry point
+//!
+//! This is the unified CLI interface for all Telegram operations.
+
+use clap::{Parser, Subcommand};
+use tracing_subscriber::EnvFilter;
+
+use telegram_reader::commands;
+
+#[derive(Parser)]
+#[command(name = "telegram_reader")]
+#[command(about = "Telegram Chat Reader & Auto-responder", long_about = None)]
+#[command(version)]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// Read chat messages and export to markdown
+    Read {
+        /// Chat name from config (e.g., chat_alpha, chat_beta, chat_gamma)
+        #[arg(default_value = "chat_alpha")]
+        chat: String,
+
+        /// Maximum number of messages to fetch
+        #[arg(short, long)]
+        limit: Option<usize>,
+
+        /// Delete messages without reactions or replies
+        #[arg(short, long, default_value = "false")]
+        delete_unengaged: bool,
+    },
+
+    /// Simple chat export (tg.py equivalent)
+    Tg {
+        /// Chat name from config
+        #[arg(default_value = "chat_delta")]
+        chat: String,
+
+        /// Maximum number of messages to fetch
+        #[arg(short, long, default_value = "200")]
+        limit: usize,
+    },
+
+    /// List active chats
+    ListChats {
+        /// Number of chats to display
+        #[arg(short, long, default_value = "20")]
+        limit: usize,
+    },
+
+    /// Get most active chats
+    ActiveChats {
+        /// Number of chats to display
+        #[arg(short, long, default_value = "20")]
+        limit: usize,
+    },
+
+    /// Export a single chat by username
+    Export {
+        /// Username to export (without @)
+        username: String,
+
+        /// Output file path
+        #[arg(short, long)]
+        output: Option<String>,
+
+        /// Maximum number of messages
+        #[arg(short, long, default_value = "100")]
+        limit: usize,
+    },
+
+    /// Delete Zoom messages from a chat
+    DeleteZoom {
+        /// Username to clean (without @)
+        username: String,
+
+        /// Maximum messages to scan
+        #[arg(short, long, default_value = "3000")]
+        limit: usize,
+    },
+
+    /// Start AI auto-responder
+    AutoAnswer {
+        /// OpenAI model to use
+        #[arg(short, long, default_value = "gpt-4o-mini")]
+        model: String,
+    },
+
+    /// Initialize a new session (use only once!)
+    InitSession,
+
+    /// Create a Linear issue via GraphQL API
+    Linear {
+        /// Linear API key (fallback: LINEAR_API_KEY)
+        #[arg(long, env = "LINEAR_API_KEY")]
+        api_key: Option<String>,
+
+        /// Linear team key (fallback: LINEAR_TEAM_KEY)
+        #[arg(long, env = "LINEAR_TEAM_KEY")]
+        team: Option<String>,
+
+        /// Title for the issue
+        #[arg(short, long)]
+        title: String,
+
+        /// Optional description
+        #[arg(short, long)]
+        description: Option<String>,
+
+        /// Optional projectId
+        #[arg(long, env = "LINEAR_PROJECT_ID")]
+        project: Option<String>,
+
+        /// Priority 0..4 (default 1)
+        #[arg(long, env = "LINEAR_PRIORITY", default_value_t = 1)]
+        priority: i32,
+
+        /// Assign to user id
+        #[arg(long, env = "LINEAR_ASSIGNEE_ID")]
+        assignee: Option<String>,
+
+        /// Label IDs, comma-separated or repeated
+        #[arg(long, value_delimiter = ',', env = "LINEAR_LABEL_IDS")]
+        labels: Vec<String>,
+    },
+
+    /// Generate AI-powered chat digest/summary
+    Digest {
+        /// Chat name to analyze
+        chat: String,
+
+        /// Period in hours (default: 24)
+        #[arg(short = 'H', long, default_value = "24")]
+        hours: i64,
+
+        /// Maximum messages to analyze
+        #[arg(short, long, default_value = "500")]
+        limit: usize,
+
+        /// OpenAI model to use
+        #[arg(short, long, default_value = "gpt-4o-mini")]
+        model: String,
+    },
+
+    /// Moderate chat - filter profanity
+    Moderate {
+        /// Chat name to moderate
+        chat: String,
+
+        /// Delete messages with profanity (requires admin rights)
+        #[arg(short, long)]
+        delete: bool,
+
+        /// Send warning messages
+        #[arg(short, long, default_value = "true")]
+        warn: bool,
+    },
+
+    /// Analyze chat for profanity statistics
+    ProfanityStats {
+        /// Chat name to analyze
+        chat: String,
+
+        /// Maximum messages to analyze
+        #[arg(short, long, default_value = "1000")]
+        limit: usize,
+    },
+
+    /// Parse chat for CRM data (contacts, deals, action items)
+    Crm {
+        /// Chat name to analyze
+        chat: String,
+
+        /// Maximum messages to analyze
+        #[arg(short, long, default_value = "100")]
+        limit: usize,
+
+        /// OpenAI model to use
+        #[arg(short, long, default_value = "gpt-4o-mini")]
+        model: String,
+
+        /// Export contacts to CSV file
+        #[arg(long)]
+        export_csv: Option<String>,
+    },
+
+    /// Hunt for users matching specific criteria
+    Hunt {
+        /// Chat name(s) to search, comma-separated
+        #[arg(short, long, value_delimiter = ',')]
+        chats: Vec<String>,
+
+        /// Keywords to search (any match)
+        #[arg(short, long, value_delimiter = ',')]
+        keywords: Vec<String>,
+
+        /// Required keywords (must all match)
+        #[arg(short, long, value_delimiter = ',')]
+        required: Vec<String>,
+
+        /// Keywords to exclude
+        #[arg(short, long, value_delimiter = ',')]
+        exclude: Vec<String>,
+
+        /// Minimum messages from user
+        #[arg(long, default_value = "1")]
+        min_messages: usize,
+
+        /// Look back N days
+        #[arg(long, default_value = "30")]
+        days: i64,
+
+        /// Maximum messages to scan per chat
+        #[arg(short, long, default_value = "1000")]
+        limit: usize,
+
+        /// Export results to CSV
+        #[arg(long)]
+        export_csv: Option<String>,
+
+        /// Maximum results to display
+        #[arg(long, default_value = "50")]
+        top: usize,
+    },
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    // Load .env for local development
+    let _ = dotenvy::dotenv();
+
+    // Initialize logging
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env().add_directive("telegram_reader=info".parse()?))
+        .init();
+
+    let cli = Cli::parse();
+
+    match cli.command {
+        Commands::Read { chat, limit, delete_unengaged } => {
+            commands::read::run(&chat, limit, delete_unengaged).await?;
+        }
+        Commands::Tg { chat, limit } => {
+            commands::tg::run(&chat, limit).await?;
+        }
+        Commands::ListChats { limit } => {
+            commands::list_chats::run(limit).await?;
+        }
+        Commands::ActiveChats { limit } => {
+            commands::active_chats::run(limit).await?;
+        }
+        Commands::Export { username, output, limit } => {
+            commands::export::run(&username, output.as_deref(), limit).await?;
+        }
+        Commands::DeleteZoom { username, limit } => {
+            commands::delete_zoom::run(&username, limit).await?;
+        }
+        Commands::AutoAnswer { model } => {
+            commands::autoanswer::run(&model).await?;
+        }
+        Commands::InitSession => {
+            commands::init_session::run().await?;
+        }
+        Commands::Linear { api_key, team, title, description, project, priority, assignee, labels } => {
+            commands::linear::run(commands::linear::LinearArgs {
+                api_key,
+                team,
+                title,
+                description,
+                project,
+                priority,
+                assignee,
+                labels,
+            })
+            .await?;
+        }
+        Commands::Digest { chat, hours, limit, model } => {
+            let config = commands::digest::DigestConfig {
+                hours,
+                max_messages: limit,
+                model,
+                ..Default::default()
+            };
+            let digest = commands::digest::run(&chat, config).await?;
+            println!("{}", digest);
+        }
+        Commands::Moderate { chat, delete, warn } => {
+            let config = commands::moderate::ModerateConfig {
+                delete_profanity: delete,
+                send_warning: warn,
+                ..Default::default()
+            };
+            commands::moderate::run(&chat, config).await?;
+        }
+        Commands::ProfanityStats { chat, limit } => {
+            let stats = commands::moderate::analyze(&chat, limit).await?;
+            println!("\n📊 Profanity Statistics for '{}'", chat);
+            println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            println!("Total messages analyzed: {}", stats.total_messages);
+            println!("Messages with profanity: {} ({:.1}%)",
+                stats.messages_with_profanity,
+                stats.profanity_rate()
+            );
+            println!("\n🏴‍☠️ Top offenders:");
+            for (user, count) in stats.top_offenders(10) {
+                println!("  {} - {} violations", user, count);
+            }
+        }
+        Commands::Crm { chat, limit, model, export_csv } => {
+            let config = commands::crm::CrmConfig {
+                model,
+                max_messages: limit,
+            };
+            let extraction = commands::crm::parse_chat(&chat, config).await?;
+            commands::crm::print_extraction(&extraction);
+
+            if let Some(csv_path) = export_csv {
+                let csv = commands::crm::export_contacts_csv(&extraction);
+                std::fs::write(&csv_path, csv)?;
+                println!("\n📁 Contacts exported to {}", csv_path);
+            }
+        }
+        Commands::Hunt { chats, keywords, required, exclude, min_messages, days, limit, export_csv, top } => {
+            let criteria = commands::hunt::HuntCriteria {
+                keywords,
+                required_keywords: required,
+                exclude_keywords: exclude,
+                min_messages,
+                days_back: days,
+                ..Default::default()
+            };
+
+            let chat_refs: Vec<&str> = chats.iter().map(|s| s.as_str()).collect();
+            let results = if chat_refs.len() == 1 {
+                commands::hunt::hunt_users(chat_refs[0], criteria, limit).await?
+            } else {
+                commands::hunt::hunt_multiple_chats(&chat_refs, criteria, limit).await?
+            };
+
+            commands::hunt::print_results(&results, top);
+
+            if let Some(csv_path) = export_csv {
+                let csv = commands::hunt::export_csv(&results);
+                std::fs::write(&csv_path, csv)?;
+                println!("\n📁 Results exported to {}", csv_path);
+            }
+        }
+    }
+
+    Ok(())
+}
+
+// Commands are in src/commands/ directory
