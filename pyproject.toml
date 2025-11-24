@@ -9,10 +9,14 @@ dependencies = [
     "mcp>=1.22.0,<2.0.0",
     "requests>=2.32.3",
     "pytest>=8.3.4",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.0",
     "python-dotenv>=1.0.1",
     "behave>=1.2.6",
     "kurigram>=2.2.15",
     "PyYAML>=6.0.2",
+    "httpx>=0.27.0",
+    "respx>=0.21.0",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -21,3 +25,58 @@ packages = ["."]
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow tests",
+]
+
+[tool.coverage.run]
+source = ["integrations"]
+branch = true
+omit = [
+    "tests/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+    ".venv/*",
+    "venv/*",
+    "rust_telegram/*",
+    "codev/*",
+    ".claude/*",
+    "integrations/lightrag_setup.py",
+    "integrations/aws_client.py",
+    "integrations/kurigram_client.py",
+    "integrations/openai_client.py",
+    "integrations/claude_client.py",
+    "integrations/gemini_client.py",
+    "integrations/yandex_tts.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    "except ImportError",
+]
+show_missing = true
+precision = 2
+fail_under = 90
