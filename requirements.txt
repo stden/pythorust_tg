@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # pytest - фреймворк для написания и запуска тестов
 pytest # https://pypi.org/project/pytest/
+pytest-cov # Code coverage for pytest: https://pypi.org/project/pytest-cov/
+pytest-asyncio # Async support for pytest: https://pypi.org/project/pytest-asyncio/
+httpx # Async HTTP client: https://pypi.org/project/httpx/
 python-dotenv # Key-value pairs from ".env", set as enviroment vars: https://pypi.org/project/python-dotenv/
 pyyaml # YAML config parsing: https://pypi.org/project/PyYAML/
 openai # Official Python library for OpenAI API: https://pypi.org/project/openai/
