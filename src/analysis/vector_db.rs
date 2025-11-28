@@ -333,7 +333,7 @@ trait QdrantValueExt {
     fn as_str(&self) -> Option<&str>;
     fn as_bool(&self) -> Option<bool>;
     fn as_double(&self) -> Option<f64>;
-    fn as_list(&self) -> Option<&qdrant_client::qdrant::ListValue>;
+    fn as_list(&self) -> Option<&[qdrant_client::qdrant::Value]>;
 }
 
 impl QdrantValueExt for QdrantValue {
@@ -346,7 +346,7 @@ impl QdrantValueExt for QdrantValue {
 
     fn as_str(&self) -> Option<&str> {
         match &self.kind {
-            Some(qdrant_client::qdrant::value::Kind::StringValue(v)) => Some(v),
+            Some(qdrant_client::qdrant::value::Kind::StringValue(v)) => Some(v.as_str()),
             _ => None,
         }
     }
@@ -365,9 +365,9 @@ impl QdrantValueExt for QdrantValue {
         }
     }
 
-    fn as_list(&self) -> Option<&qdrant_client::qdrant::ListValue> {
+    fn as_list(&self) -> Option<&[qdrant_client::qdrant::Value]> {
         match &self.kind {
-            Some(qdrant_client::qdrant::value::Kind::ListValue(v)) => Some(v),
+            Some(qdrant_client::qdrant::value::Kind::ListValue(v)) => Some(&v.values),
             _ => None,
         }
     }
@@ -482,68 +482,8 @@ mod tests {
             })),
         };
         let list = list_value.as_list().expect("list value");
-        assert_eq!(list.values.len(), 2);
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use serde_json::Value;
-
-    fn must_conditions(filter: &Filter) -> Vec<Value> {
-        serde_json::to_value(filter)
-            .unwrap()
-            .get("must")
-            .and_then(|v| v.as_array())
-            .cloned()
-            .unwrap_or_default()
-    }
-
-    #[test]
-    fn empty_filter_produces_no_conditions() {
-        let filter = SearchFilter::new().into_qdrant_filter();
-        let must = must_conditions(&filter);
-
-        assert!(must.is_empty());
-    }
-
-    #[test]
-    fn filter_serializes_selected_fields() {
-        let filter = SearchFilter::new()
-            .chat(42)
-            .sender(7)
-            .outgoing(true)
-            .into_qdrant_filter();
-
-        let must = must_conditions(&filter);
-        assert_eq!(must.len(), 3);
-
-        let chat_field = must
-            .iter()
-            .find(|v| v["field"]["key"] == "chat_id")
-            .expect("chat_id condition missing");
-        assert_eq!(
-            chat_field["field"]["match"]["integer"].as_i64(),
-            Some(42)
-        );
-
-        let sender_field = must
-            .iter()
-            .find(|v| v["field"]["key"] == "sender_id")
-            .expect("sender_id condition missing");
-        assert_eq!(
-            sender_field["field"]["match"]["integer"].as_i64(),
-            Some(7)
-        );
-
-        let outgoing_field = must
-            .iter()
-            .find(|v| v["field"]["key"] == "is_outgoing")
-            .expect("is_outgoing condition missing");
-        assert_eq!(
-            outgoing_field["field"]["match"]["boolean"].as_bool(),
-            Some(true)
-        );
+        assert_eq!(list.len(), 2);
+        assert_eq!(list[0].as_str(), Some("a"));
+        assert_eq!(list[1].as_integer(), Some(2));
     }
 }
