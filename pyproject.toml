@@ -42,6 +42,7 @@ markers = [
     "unit: Unit tests",
     "integration: Integration tests",
     "slow: Slow tests",
+    "asyncio: Asyncio-based tests",
 ]
 
 [tool.coverage.run]
