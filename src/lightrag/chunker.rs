@@ -109,4 +109,96 @@ mod tests {
         assert_eq!(chunks[1].text, "four five six seven");
         assert_eq!(chunks[0].end - chunks[0].start, 4);
     }
+
+    #[test]
+    fn chunker_empty_text_returns_empty() {
+        let chunker = Chunker::new(4, 1);
+        let chunks = chunker.chunk("", "test");
+        assert!(chunks.is_empty());
+    }
+
+    #[test]
+    fn chunker_whitespace_only_returns_empty() {
+        let chunker = Chunker::new(4, 1);
+        let chunks = chunker.chunk("   \t\n  ", "test");
+        assert!(chunks.is_empty());
+    }
+
+    #[test]
+    fn chunker_single_word() {
+        let chunker = Chunker::new(4, 1);
+        let chunks = chunker.chunk("hello", "test");
+        assert_eq!(chunks.len(), 1);
+        assert_eq!(chunks[0].text, "hello");
+        assert_eq!(chunks[0].start, 0);
+        assert_eq!(chunks[0].end, 1);
+    }
+
+    #[test]
+    fn chunker_exact_size_text() {
+        let chunker = Chunker::new(3, 1);
+        let chunks = chunker.chunk("one two three", "test");
+        assert_eq!(chunks.len(), 1);
+        assert_eq!(chunks[0].text, "one two three");
+    }
+
+    #[test]
+    fn chunker_no_overlap() {
+        let chunker = Chunker::new(2, 0);
+        let chunks = chunker.chunk("a b c d e f", "test");
+        assert_eq!(chunks.len(), 3);
+        assert_eq!(chunks[0].text, "a b");
+        assert_eq!(chunks[1].text, "c d");
+        assert_eq!(chunks[2].text, "e f");
+    }
+
+    #[test]
+    fn chunker_large_overlap() {
+        // Overlap larger than size should be clamped
+        let chunker = Chunker::new(3, 10);
+        let chunks = chunker.chunk("a b c d e f g", "test");
+        // With size=3 and overlap clamped to 2, step=1
+        assert!(chunks.len() > 1);
+    }
+
+    #[test]
+    fn chunker_zero_size_uses_minimum() {
+        let chunker = Chunker::new(0, 0);
+        let chunks = chunker.chunk("word", "test");
+        // Size 0 should become 1
+        assert_eq!(chunks.len(), 1);
+    }
+
+    #[test]
+    fn chunk_has_unique_id() {
+        let c1 = Chunk::new("text1".into(), 0, 1, "src");
+        let c2 = Chunk::new("text2".into(), 0, 1, "src");
+        assert_ne!(c1.id, c2.id);
+    }
+
+    #[test]
+    fn chunk_stores_source() {
+        let chunk = Chunk::new("text".into(), 0, 1, "my_source");
+        assert_eq!(chunk.source, "my_source");
+    }
+
+    #[test]
+    fn chunker_with_strategy() {
+        let chunker = Chunker::with_strategy(3, 1, ChunkingStrategy::Words);
+        let chunks = chunker.chunk("one two three four", "test");
+        assert!(!chunks.is_empty());
+    }
+
+    #[test]
+    fn chunker_preserves_word_boundaries() {
+        let chunker = Chunker::new(2, 0);
+        let text = "hello world test case";
+        let chunks = chunker.chunk(text, "test");
+
+        // Each chunk should be valid words joined by space
+        for chunk in &chunks {
+            assert!(!chunk.text.starts_with(' '));
+            assert!(!chunk.text.ends_with(' '));
+        }
+    }
 }

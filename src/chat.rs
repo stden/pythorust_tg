@@ -115,3 +115,39 @@ pub async fn find_chat(client: &Client, name: &str) -> Result<Peer> {
         .map_err(|e| Error::TelegramError(e.to_string()))?
         .ok_or_else(|| Error::ChatNotFound(format!("Chat '{}' not found", name)))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::ChatEntity;
+
+    #[test]
+    fn test_chat_entity_channel() {
+        let entity = ChatEntity::channel(123456);
+        assert!(matches!(entity, ChatEntity::Channel(123456)));
+    }
+
+    #[test]
+    fn test_chat_entity_chat() {
+        let entity = ChatEntity::chat(789);
+        assert!(matches!(entity, ChatEntity::Chat(789)));
+    }
+
+    #[test]
+    fn test_chat_entity_username_strips_at() {
+        let entity = ChatEntity::username("@testuser");
+        assert!(matches!(entity, ChatEntity::Username(ref u) if u == "testuser"));
+    }
+
+    #[test]
+    fn test_chat_entity_username_without_at() {
+        let entity = ChatEntity::username("testuser");
+        assert!(matches!(entity, ChatEntity::Username(ref u) if u == "testuser"));
+    }
+
+    #[test]
+    fn test_chat_entity_user_id() {
+        let entity = ChatEntity::user_id(999);
+        assert!(matches!(entity, ChatEntity::UserId(999)));
+    }
+}

@@ -691,4 +691,119 @@ mod tests {
         assert!(config.retention_days >= 1);
         assert!(config.max_backups >= 1);
     }
+
+    #[test]
+    fn test_monitor_config_check_interval() {
+        let config = N8nMonitorConfig::default();
+        assert!(config.check_interval_secs >= 1);
+        assert!(config.timeout_secs >= 1);
+    }
+
+    #[test]
+    fn test_monitor_config_restart_command() {
+        let config = N8nMonitorConfig::default();
+        assert!(!config.restart_command.is_empty());
+    }
+
+    #[test]
+    fn test_backup_config_backup_dir() {
+        let config = N8nBackupConfig::default();
+        assert!(!config.backup_dir.as_os_str().is_empty());
+    }
+
+    #[test]
+    fn test_health_check_result_healthy() {
+        let result = HealthCheckResult {
+            is_healthy: true,
+            status_code: Some(200),
+            response_time_ms: 50,
+            error: None,
+        };
+        assert!(result.is_healthy);
+        assert_eq!(result.status_code, Some(200));
+    }
+
+    #[test]
+    fn test_health_check_result_unhealthy() {
+        let result = HealthCheckResult {
+            is_healthy: false,
+            status_code: Some(500),
+            response_time_ms: 100,
+            error: Some("Internal Server Error".to_string()),
+        };
+        assert!(!result.is_healthy);
+        assert!(result.error.is_some());
+    }
+
+    #[test]
+    fn test_workflow_serialization() {
+        let workflow = Workflow {
+            id: "123".to_string(),
+            name: "Test Workflow".to_string(),
+            active: true,
+            extra: serde_json::json!({}),
+        };
+
+        let json = serde_json::to_string(&workflow).unwrap();
+        assert!(json.contains("Test Workflow"));
+        assert!(json.contains("123"));
+
+        let parsed: Workflow = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.id, "123");
+        assert_eq!(parsed.name, "Test Workflow");
+        assert!(parsed.active);
+    }
+
+    #[test]
+    fn test_backup_info_serialization() {
+        let info = BackupInfo {
+            timestamp: "20241201_120000".to_string(),
+            datetime: "2024-12-01T12:00:00Z".to_string(),
+            n8n_url: "http://localhost:5678".to_string(),
+            workflows_count: 10,
+            credentials_count: 5,
+        };
+
+        let json = serde_json::to_string_pretty(&info).unwrap();
+        assert!(json.contains("20241201_120000"));
+        assert!(json.contains("workflows_count"));
+
+        let parsed: BackupInfo = serde_json::from_str(&json).unwrap();
+        assert_eq!(parsed.workflows_count, 10);
+        assert_eq!(parsed.credentials_count, 5);
+    }
+
+    #[test]
+    fn test_workflow_with_extra_fields() {
+        let json = r#"{
+            "id": "456",
+            "name": "Complex Workflow",
+            "active": false,
+            "nodes": [],
+            "connections": {}
+        }"#;
+
+        let workflow: Workflow = serde_json::from_str(json).unwrap();
+        assert_eq!(workflow.id, "456");
+        assert_eq!(workflow.name, "Complex Workflow");
+        assert!(!workflow.active);
+        // Extra fields should be captured in `extra`
+        assert!(workflow.extra.get("nodes").is_some());
+    }
+
+    #[test]
+    fn test_monitor_config_telegram_optional() {
+        let config = N8nMonitorConfig::default();
+        // Telegram config should be optional (None if env vars not set)
+        // This test just verifies the structure allows None
+        let _ = config.telegram_bot_token;
+        let _ = config.telegram_chat_id;
+    }
+
+    #[test]
+    fn test_backup_config_api_key_optional() {
+        let config = N8nBackupConfig::default();
+        // API key should be optional
+        let _ = config.api_key;
+    }
 }
