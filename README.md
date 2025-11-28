@@ -273,6 +273,12 @@ uv run python analyze_with_lightrag.py --index --limit 3000
 uv run python analyze_with_lightrag.py --query "кто ищет дизайнеров?" --mode hybrid
 ```
 
+- Rust CLI (in-memory индекс):
+```bash
+cargo run --bin lightrag -- --index --limit 3000
+cargo run --bin lightrag -- --index --query "кто ищет дизайнеров?" --mode hybrid --results 5
+```
+
 - Забирает сообщения и реакции из MySQL (`telegram_messages`, `telegram_chats`) и строит граф знаний LightRAG
 - Требуются `OPENAI_API_KEY` и MySQL переменные из `.env` (`MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`)
 - Поддерживает режимы `naive | local | global | hybrid` для запросов (`--mode`)

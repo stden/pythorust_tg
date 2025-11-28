@@ -3,6 +3,7 @@
 //! This is the unified CLI interface for all Telegram operations.
 
 use clap::{Parser, Subcommand};
+use std::path::PathBuf;
 use tracing_subscriber::EnvFilter;
 
 use telegram_reader::commands;
@@ -84,6 +85,64 @@ enum Commands {
         /// Maximum messages to scan
         #[arg(short, long, default_value = "3000")]
         limit: usize,
+    },
+
+    /// Analyze chat content with AI (categorization, insights)
+    Analyze {
+        /// Chat username/ID/alias to analyze
+        chat: String,
+
+        /// LLM provider: openai | claude | gemini
+        #[arg(long, default_value = "openai")]
+        provider: String,
+
+        /// Model name (defaults per provider)
+        #[arg(long)]
+        model: Option<String>,
+
+        /// Maximum number of messages to analyze
+        #[arg(long, default_value = "1000")]
+        limit: usize,
+
+        /// Days to look back
+        #[arg(long, default_value = "30")]
+        days: i64,
+
+        /// Output format: json | markdown | both
+        #[arg(long, default_value = "both")]
+        output_format: String,
+
+        /// Output directory
+        #[arg(long, default_value = "analysis_results")]
+        output_dir: PathBuf,
+
+        /// Custom prompt file (Markdown)
+        #[arg(long)]
+        prompt: Option<PathBuf>,
+
+        /// Suppress verbose logging
+        #[arg(long, default_value_t = false)]
+        quiet: bool,
+
+        /// Include media-only messages
+        #[arg(long, default_value_t = false)]
+        include_media: bool,
+
+        /// Include bot messages
+        #[arg(long, default_value_t = false)]
+        include_bots: bool,
+
+        /// Minimum message length
+        #[arg(long, default_value = "10")]
+        min_length: usize,
+
+        /// Temperature for LLM sampling
+        #[arg(long, default_value = "0.3")]
+        temperature: f32,
+
+        /// Max tokens for LLM response
+        #[arg(long, default_value = "2000")]
+        max_tokens: u32,
     },
 
     /// Start AI auto-responder
@@ -210,6 +269,9 @@ enum Commands {
         limit: usize,
     },
 
+    /// Send predefined viral questions to multiple chats
+    SendViral,
+
     /// N8N service monitor with auto-restart
     N8nMonitor,
 
@@ -313,6 +375,47 @@ async fn main() -> anyhow::Result<()> {
         Commands::AutoAnswer { model } => {
             commands::autoanswer::run(&model).await?;
         }
+        Commands::Analyze {
+            chat,
+            provider,
+            model,
+            limit,
+            days,
+            output_format,
+            output_dir,
+            prompt,
+            quiet,
+            include_media,
+            include_bots,
+            min_length,
+            temperature,
+            max_tokens,
+        } => {
+            let cfg = commands::chat_analyzer::AnalyzerConfig {
+                message_limit: limit,
+                days_back: days,
+                llm_provider: commands::chat_analyzer::LlmProvider::from_str(&provider),
+                model,
+                temperature,
+                max_tokens,
+                min_message_length: min_length,
+                include_media,
+                exclude_bots: !include_bots,
+                output_format: commands::chat_analyzer::OutputFormat::from_str(&output_format),
+                output_dir,
+                prompt_path: prompt,
+                verbose: !quiet,
+            };
+
+            let result = commands::chat_analyzer::run(&chat, cfg).await?;
+            println!(
+                "Chat: {}\nCategory: {}\nSentiment: {}\nMessages analyzed: {}",
+                result.chat_name,
+                result.category,
+                result.sentiment,
+                result.activity_metrics.total_messages
+            );
+        }
         Commands::InitSession => {
             commands::init_session::run().await?;
         }
@@ -402,6 +505,9 @@ async fn main() -> anyhow::Result<()> {
             limit,
         } => {
             commands::like::run(&chat, &user, Some(&emoji), limit).await?;
+        }
+        Commands::SendViral => {
+            commands::send_viral::run().await?;
         }
         Commands::N8nMonitor => {
             commands::n8n::run_monitor_cli().await?;

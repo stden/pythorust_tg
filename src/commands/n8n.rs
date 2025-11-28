@@ -179,11 +179,7 @@ pub async fn check_health(config: &N8nMonitorConfig) -> HealthCheckResult {
 }
 
 /// Send Telegram alert via Bot API
-pub async fn send_telegram_alert(
-    bot_token: &str,
-    chat_id: &str,
-    message: &str,
-) -> Result<()> {
+pub async fn send_telegram_alert(bot_token: &str, chat_id: &str, message: &str) -> Result<()> {
     let client = Client::new();
     let url = format!("https://api.telegram.org/bot{}/sendMessage", bot_token);
 
@@ -241,12 +237,8 @@ pub async fn restart_n8n(config: &N8nMonitorConfig) -> Result<bool> {
             if let (Some(ref token), Some(ref chat_id)) =
                 (&config.telegram_bot_token, &config.telegram_chat_id)
             {
-                let _ = send_telegram_alert(
-                    token,
-                    chat_id,
-                    "N8N restarted but still unhealthy",
-                )
-                .await;
+                let _ =
+                    send_telegram_alert(token, chat_id, "N8N restarted but still unhealthy").await;
             }
             Ok(false)
         }
@@ -354,7 +346,10 @@ pub async fn get_workflows(config: &N8nBackupConfig) -> Result<Vec<Workflow>> {
         request = request.header("X-N8N-API-KEY", api_key);
     }
 
-    let response = request.send().await.context("Failed to connect to N8N API")?;
+    let response = request
+        .send()
+        .await
+        .context("Failed to connect to N8N API")?;
 
     if response.status().is_success() {
         let api_response: ApiResponse<Vec<Workflow>> = response.json().await?;
@@ -626,7 +621,10 @@ pub async fn restore_backup(config: &N8nBackupConfig, backup_file: &Path) -> Res
         let workflows: Vec<serde_json::Value> = serde_json::from_str(&content)?;
         info!("Found {} workflows in backup", workflows.len());
         warn!("Workflow restoration via API not yet implemented");
-        info!("You can manually import workflows from: {:?}", workflows_file);
+        info!(
+            "You can manually import workflows from: {:?}",
+            workflows_file
+        );
     }
 
     info!("Backup extracted successfully");
@@ -667,7 +665,10 @@ pub async fn run_backup_cli(action: &str, file: Option<&Path>) -> Result<()> {
             restore_backup(&config, file).await?;
         }
         _ => {
-            anyhow::bail!("Unknown action: {}. Use: backup, list, cleanup, restore", action);
+            anyhow::bail!(
+                "Unknown action: {}. Use: backup, list, cleanup, restore",
+                action
+            );
         }
     }
 

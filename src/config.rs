@@ -88,7 +88,10 @@ where
         None => Ok(None),
         Some(serde_yaml::Value::String(s)) => Ok(Some(s)),
         Some(serde_yaml::Value::Number(n)) => Ok(Some(n.to_string())),
-        Some(other) => Err(D::Error::custom(format!("expected string or number, got {:?}", other))),
+        Some(other) => Err(D::Error::custom(format!(
+            "expected string or number, got {:?}",
+            other
+        ))),
     }
 }
 

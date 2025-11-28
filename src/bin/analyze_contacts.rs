@@ -93,10 +93,13 @@ async fn main() -> Result<()> {
                 let text = msg.text();
                 if !text.is_empty() && text.len() > 5 {
                     // Check if message is from me or the other person
-                    let sender_id = msg.sender().map(|s| match s {
-                        Peer::User(u) => u.raw.id(),
-                        _ => 0,
-                    }).unwrap_or(0);
+                    let sender_id = msg
+                        .sender()
+                        .map(|s| match s {
+                            Peer::User(u) => u.raw.id(),
+                            _ => 0,
+                        })
+                        .unwrap_or(0);
 
                     if sender_id == my_id {
                         my_messages.push(text.to_string());
@@ -173,7 +176,10 @@ async fn main() -> Result<()> {
 
     let mut output = String::new();
     output.push_str("# Анализ контактов Telegram\n\n");
-    output.push_str(&format!("Дата: {}\n\n", Utc::now().format("%d.%m.%Y %H:%M")));
+    output.push_str(&format!(
+        "Дата: {}\n\n",
+        Utc::now().format("%d.%m.%Y %H:%M")
+    ));
 
     for analysis in &analyses {
         output.push_str(&format!("## {} (ID: {})\n\n", analysis.name, analysis.id));
@@ -184,7 +190,10 @@ async fn main() -> Result<()> {
         }
 
         let suggestion = suggest_value(&analysis);
-        output.push_str(&format!("\n### Чем могу быть полезен\n\n{}\n\n", suggestion));
+        output.push_str(&format!(
+            "\n### Чем могу быть полезен\n\n{}\n\n",
+            suggestion
+        ));
 
         output.push_str("---\n\n");
     }
@@ -201,12 +210,39 @@ fn extract_topics(messages: &[String]) -> Vec<String> {
 
     // Keywords to look for
     let keywords = [
-        "работа", "деньги", "бизнес", "проект", "встреча", "курс",
-        "обучение", "консультация", "помощь", "вопрос", "идея",
-        "разработка", "код", "программа", "сайт", "бот", "телеграм",
-        "автоматизация", "AI", "ИИ", "нейросеть", "чат", "продажи",
-        "маркетинг", "реклама", "клиенты", "трафик", "воронка",
-        "психология", "отношения", "здоровье", "спорт", "путешествия",
+        "работа",
+        "деньги",
+        "бизнес",
+        "проект",
+        "встреча",
+        "курс",
+        "обучение",
+        "консультация",
+        "помощь",
+        "вопрос",
+        "идея",
+        "разработка",
+        "код",
+        "программа",
+        "сайт",
+        "бот",
+        "телеграм",
+        "автоматизация",
+        "AI",
+        "ИИ",
+        "нейросеть",
+        "чат",
+        "продажи",
+        "маркетинг",
+        "реклама",
+        "клиенты",
+        "трафик",
+        "воронка",
+        "психология",
+        "отношения",
+        "здоровье",
+        "спорт",
+        "путешествия",
     ];
 
     let text = messages.join(" ").to_lowercase();
@@ -222,10 +258,7 @@ fn extract_topics(messages: &[String]) -> Vec<String> {
     let mut topics: Vec<_> = word_count.into_iter().collect();
     topics.sort_by(|a, b| b.1.cmp(&a.1));
 
-    topics.into_iter()
-        .take(5)
-        .map(|(word, _)| word)
-        .collect()
+    topics.into_iter().take(5).map(|(word, _)| word).collect()
 }
 
 /// Suggest how to be useful based on analysis
@@ -235,19 +268,28 @@ fn suggest_value(analysis: &ContactAnalysis) -> String {
     let mut suggestions = Vec::new();
 
     // Check for specific topics and suggest accordingly
-    if all_text.contains("бот") || all_text.contains("телеграм") || all_text.contains("автоматизация") {
+    if all_text.contains("бот")
+        || all_text.contains("телеграм")
+        || all_text.contains("автоматизация")
+    {
         suggestions.push("Разработка Telegram-ботов и автоматизация");
     }
 
-    if all_text.contains("код") || all_text.contains("программ") || all_text.contains("разработ") {
+    if all_text.contains("код") || all_text.contains("программ") || all_text.contains("разработ")
+    {
         suggestions.push("Помощь с разработкой и программированием");
     }
 
-    if all_text.contains("ai") || all_text.contains("ии") || all_text.contains("нейросет") || all_text.contains("gpt") {
+    if all_text.contains("ai")
+        || all_text.contains("ии")
+        || all_text.contains("нейросет")
+        || all_text.contains("gpt")
+    {
         suggestions.push("Консультации по AI/LLM интеграциям");
     }
 
-    if all_text.contains("бизнес") || all_text.contains("продаж") || all_text.contains("клиент") {
+    if all_text.contains("бизнес") || all_text.contains("продаж") || all_text.contains("клиент")
+    {
         suggestions.push("Автоматизация продаж и CRM");
     }
 
@@ -255,7 +297,8 @@ fn suggest_value(analysis: &ContactAnalysis) -> String {
         suggestions.push("Разработка сайтов и лендингов");
     }
 
-    if all_text.contains("консульт") || all_text.contains("совет") || all_text.contains("помо") {
+    if all_text.contains("консульт") || all_text.contains("совет") || all_text.contains("помо")
+    {
         suggestions.push("Техническая консультация");
     }
 

@@ -171,30 +171,8 @@ impl LightRAGRetriever {
             return Ok(0);
         }
 
-        let chunks = self.chunker.chunk(text, source);
-        if chunks.is_empty() {
-            return Ok(0);
-        }
-
-        let embeddings = self
-            .backend
-            .embed(&chunks.iter().map(|c| c.text.clone()).collect::<Vec<_>>())
+        self.ingest_documents(&[(source.to_string(), text.to_string())])
             .await
-            .context("failed to embed chunks")?;
-
-        for (chunk, embedding) in chunks.into_iter().zip(embeddings) {
-            let (entities, relations) = self.extractor.extract(&chunk);
-            self.graph.add_entities(&entities);
-            self.graph.add_relations(&relations);
-
-            self.index.push(IndexedChunk {
-                chunk,
-                embedding,
-                entities,
-            });
-        }
-
-        Ok(self.index.len())
     }
 
     /// Retrieve relevant chunks with optional graph boost.
@@ -277,6 +255,58 @@ impl LightRAGRetriever {
         debug!("LightRAG returned {} results", scored.len());
 
         Ok(scored)
+    }
+
+    /// Ingest multiple documents in one batch to minimize embedding calls.
+    pub async fn ingest_documents(&mut self, docs: &[(String, String)]) -> Result<usize> {
+        if docs.is_empty() {
+            return Ok(0);
+        }
+
+        let mut chunk_entities = Vec::new();
+
+        for (source, text) in docs {
+            if text.trim().is_empty() {
+                continue;
+            }
+
+            let chunks = self.chunker.chunk(text, source.clone());
+            if chunks.is_empty() {
+                continue;
+            }
+
+            for chunk in chunks {
+                let (entities, relations) = self.extractor.extract(&chunk);
+                self.graph.add_entities(&entities);
+                self.graph.add_relations(&relations);
+                chunk_entities.push((chunk, entities));
+            }
+        }
+
+        if chunk_entities.is_empty() {
+            return Ok(0);
+        }
+
+        let embeddings = self
+            .backend
+            .embed(
+                &chunk_entities
+                    .iter()
+                    .map(|(chunk, _)| chunk.text.clone())
+                    .collect::<Vec<_>>(),
+            )
+            .await
+            .context("failed to embed chunks")?;
+
+        for ((chunk, entities), embedding) in chunk_entities.into_iter().zip(embeddings) {
+            self.index.push(IndexedChunk {
+                chunk,
+                embedding,
+                entities,
+            });
+        }
+
+        Ok(self.index.len())
     }
 }
 
