@@ -120,6 +120,59 @@ impl Default for EmbeddingService {
 mod tests {
     use super::*;
 
+    struct OpenAiKeyGuard {
+        original: Option<String>,
+    }
+
+    impl OpenAiKeyGuard {
+        fn set_dummy() -> Self {
+            let original = std::env::var("OPENAI_API_KEY").ok();
+            std::env::set_var("OPENAI_API_KEY", "test_key");
+            Self { original }
+        }
+    }
+
+    impl Drop for OpenAiKeyGuard {
+        fn drop(&mut self) {
+            if let Some(value) = &self.original {
+                std::env::set_var("OPENAI_API_KEY", value);
+            } else {
+                std::env::remove_var("OPENAI_API_KEY");
+            }
+        }
+    }
+
+    #[test]
+    fn dimension_returns_expected_values() {
+        let _guard = OpenAiKeyGuard::set_dummy();
+
+        let default = EmbeddingService::new().unwrap();
+        assert_eq!(default.dimension(), 1536);
+
+        let large = EmbeddingService::with_model("text-embedding-3-large").unwrap();
+        assert_eq!(large.dimension(), 3072);
+
+        let ada = EmbeddingService::with_model("text-embedding-ada-002").unwrap();
+        assert_eq!(ada.dimension(), 1536);
+
+        let custom = EmbeddingService::with_model("custom-model").unwrap();
+        assert_eq!(custom.dimension(), 1536);
+    }
+
+    #[tokio::test]
+    async fn embed_batch_short_circuits_on_empty_texts() {
+        let _guard = OpenAiKeyGuard::set_dummy();
+        let service = EmbeddingService::new().unwrap();
+
+        let embeddings = service
+            .embed_batch(&["   ".to_string(), "\n".to_string()])
+            .await
+            .unwrap();
+
+        assert_eq!(embeddings.len(), 2);
+        assert!(embeddings.iter().all(|e| e.is_empty()));
+    }
+
     #[tokio::test]
     #[ignore] // Requires API key
     async fn test_embed_single() {

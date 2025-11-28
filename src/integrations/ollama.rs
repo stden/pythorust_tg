@@ -258,6 +258,130 @@ struct PullRequest {
     name: String,
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use httpmock::prelude::*;
+    use serde_json::json;
+
+    fn client(server: &MockServer) -> OllamaClient {
+        OllamaClient::with_url(server.base_url())
+    }
+
+    #[tokio::test]
+    async fn list_models_returns_names() {
+        let server = MockServer::start_async().await;
+
+        let tags_mock = server.mock(|when, then| {
+            when.method(GET).path("/api/tags");
+            then.status(200).json_body(json!({
+                "models": [
+                    { "name": "llama3" },
+                    { "name": "mistral" }
+                ]
+            }));
+        });
+
+        let models = client(&server).list_models().await.unwrap();
+
+        assert_eq!(models, vec!["llama3".to_string(), "mistral".to_string()]);
+        tags_mock.assert_calls(1);
+    }
+
+    #[tokio::test]
+    async fn generate_reports_error_on_http_failure() {
+        let server = MockServer::start_async().await;
+
+        let gen_mock = server.mock(|when, then| {
+            when.method(POST).path("/api/generate");
+            then.status(500).body("boom");
+        });
+
+        let err = client(&server)
+            .generate("hi", "llama3", None, 0.2, 64)
+            .await
+            .unwrap_err();
+
+        let msg = format!("{err}");
+        assert!(msg.contains("Ollama error 500"));
+        assert!(msg.contains("boom"));
+        gen_mock.assert_calls(1);
+    }
+
+    #[tokio::test]
+    async fn chat_returns_assistant_message() {
+        let server = MockServer::start_async().await;
+
+        let chat_mock = server.mock(|when, then| {
+            when.method(POST).path("/api/chat");
+            then.status(200).json_body(json!({
+                "message": {
+                    "role": "assistant",
+                    "content": "Hello!"
+                }
+            }));
+        });
+
+        let reply = client(&server)
+            .chat(
+                vec![ChatMessage {
+                    role: "user".into(),
+                    content: "Hi".into(),
+                }],
+                "llama3",
+                0.3,
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(reply, "Hello!");
+        chat_mock.assert_calls(1);
+    }
+
+    #[tokio::test]
+    async fn sales_agent_response_passes_context_into_system_prompt() {
+        let server = MockServer::start_async().await;
+
+        let generate_mock = server.mock(|when, then| {
+            when.method(POST)
+                .path("/api/generate")
+                .matches(|req| {
+                    let body: serde_json::Value =
+                        serde_json::from_slice(req.body().as_ref()).unwrap();
+                    let system = body.get("system").and_then(|v| v.as_str()).unwrap_or("");
+                    system.contains("Контекст: early adopters") && system.contains("SPIN")
+                });
+            then.status(200).json_body(json!({ "response": "Offer" }));
+        });
+
+        let response = client(&server)
+            .sales_agent_response("Need info", "early adopters", "llama3")
+            .await
+            .unwrap();
+
+        assert_eq!(response, "Offer");
+        generate_mock.assert_calls(1);
+    }
+
+    #[tokio::test]
+    async fn is_running_respects_http_status() {
+        let healthy = MockServer::start_async().await;
+        healthy.mock(|when, then| {
+            when.method(GET).path("/api/tags");
+            then.status(200);
+        });
+
+        let failing = MockServer::start_async().await;
+        failing.mock(|when, then| {
+            when.method(GET).path("/api/tags");
+            then.status(503);
+        });
+
+        assert!(client(&healthy).is_running().await);
+        assert!(!client(&failing).is_running().await);
+    }
+}
+
 /// Recommended models.
 pub const RECOMMENDED_MODELS: &[(&str, &str)] = &[
     ("qwen2.5:3b", "1.5GB, быстрая"),

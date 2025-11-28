@@ -394,4 +394,66 @@ mod tests {
         assert_eq!(to_u32(Some(-1)), None);
         assert_eq!(to_u32(None), None);
     }
+
+    #[test]
+    fn converts_overflowing_i64_to_none() {
+        let overflow = i64::from(u32::MAX) + 1;
+        assert_eq!(to_u32(Some(overflow)), None);
+    }
+
+    fn sample_message(id: i64, sender: &str, text: &str) -> RagMessage {
+        RagMessage {
+            message_id: id,
+            chat_title: "Sample Chat".into(),
+            sender_name: Some(sender.into()),
+            message_text: text.into(),
+            date: NaiveDateTime::from_timestamp_opt(1_700_000_000 + id, 0).unwrap(),
+            reactions_count: None,
+            reactions_raw: None,
+            views: None,
+            forwards: None,
+            reply_to_msg_id: None,
+        }
+    }
+
+    #[tokio::test]
+    async fn build_retriever_indexes_messages_and_allows_retrieval() {
+        let messages = vec![
+            sample_message(
+                1,
+                "Alice",
+                "Alice builds Rust bots for Telegram and open source projects.",
+            ),
+            sample_message(
+                2,
+                "Bob",
+                "Bob enjoys gardening on weekends and writes Go code.",
+            ),
+        ];
+
+        let retriever = build_retriever(&messages, 1).await.unwrap();
+        assert!(retriever.len() >= 2);
+
+        let results = retriever
+            .retrieve("Rust bots", 2, RetrievalMode::VectorOnly)
+            .await
+            .unwrap();
+
+        assert!(!results.is_empty());
+        assert!(results
+            .iter()
+            .any(|r| r.chunk.source.contains("msg_id=1")));
+    }
+
+    #[tokio::test]
+    async fn build_retriever_returns_empty_for_no_messages() {
+        let retriever = build_retriever(&[], 4).await.unwrap();
+        assert_eq!(retriever.len(), 0);
+
+        let results = retriever
+            .retrieve("any query", 3, RetrievalMode::Hybrid)
+            .await
+            .unwrap();
+        assert!(results.is_empty());
+    }
 }
