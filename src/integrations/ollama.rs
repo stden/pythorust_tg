@@ -265,7 +265,8 @@ mod tests {
     use serde_json::json;
 
     fn client(server: &MockServer) -> OllamaClient {
-        OllamaClient::with_url(server.base_url())
+        let base = server.base_url();
+        OllamaClient::with_url(&base)
     }
 
     #[tokio::test]

@@ -455,7 +455,10 @@ mod tests {
         let string_value = QdrantValue {
             kind: Some(Kind::StringValue("hello".into())),
         };
-        assert_eq!(string_value.as_str(), Some("hello"));
+        assert_eq!(
+            string_value.as_str().map(String::as_str),
+            Some("hello")
+        );
         assert!(string_value.as_bool().is_none());
 
         let bool_value = QdrantValue {
@@ -483,7 +486,7 @@ mod tests {
         };
         let list = list_value.as_list().expect("list value");
         assert_eq!(list.len(), 2);
-        assert_eq!(list[0].as_str(), Some("a"));
+        assert_eq!(list[0].as_str().map(String::as_str), Some("a"));
         assert_eq!(list[1].as_integer(), Some(2));
     }
 }
