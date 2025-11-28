@@ -1,16 +1,17 @@
 # ENV Setup
 
-Шпаргалка по заполнению `.env` для основных скриптов. Начните с:
+Шпаргалка по заполнению `.env` для Rust CLI и Python-скриптов.
 
 ```bash
 cp .env.example .env
 ```
 
-Заполните обязательные переменные и только потом добавляйте нишевые интеграции.
-
 ## Базовые (Telegram)
 - `TELEGRAM_API_ID`, `TELEGRAM_API_HASH`, `TELEGRAM_PHONE`
-- `TELEGRAM_SESSION_NAME`, `TELEGRAM_SESSION_FILE` — имя файла сессии (используют все скрипты, включая `chat_analysis`)
+- `TELEGRAM_SESSION_NAME`, `TELEGRAM_SESSION_FILE` — имя файла сессии
+- `MY_ID` — ваш Telegram user ID (для фильтрации неинтересных сообщений)
+
+> **Важно:** Rust (`telegram_session.session`) и Python (`+79117117850.session`) используют разные файлы сессий!
 
 ## AI-провайдеры
 - `OPENAI_API_KEY` (обязательно для автоответчика/анализа), `OPENAI_MODEL` (по умолчанию: `gpt-4o-mini`)

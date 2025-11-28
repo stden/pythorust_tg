@@ -204,7 +204,9 @@ projects_tasks.md
 # Chat logs and exported chats (ALL .md chat exports)
 chats/
 analysis_results/
-s*/
+# Session folders but not Rust src
+session*/
+!src/
 /*.md
 /chats/*.md
 !README.md
@@ -221,3 +223,4 @@ send_message
 # VS Code
 .vscode/
 viral_questions.db
+client_secret_*.json
