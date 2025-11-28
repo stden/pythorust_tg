@@ -49,6 +49,10 @@ enum Commands {
         /// Number of chats to display
         #[arg(short, long, default_value = "20")]
         limit: usize,
+
+        /// Filter by chat type: all, users, groups, channels
+        #[arg(short, long, default_value = "all")]
+        filter: String,
     },
 
     /// Get most active chats
@@ -284,8 +288,14 @@ async fn main() -> anyhow::Result<()> {
         Commands::Tg { chat, limit } => {
             commands::tg::run(&chat, limit).await?;
         }
-        Commands::ListChats { limit } => {
-            commands::list_chats::run(limit).await?;
+        Commands::ListChats { limit, filter } => {
+            let chat_filter = match filter.to_lowercase().as_str() {
+                "users" | "user" => commands::list_chats::ChatFilter::Users,
+                "groups" | "group" => commands::list_chats::ChatFilter::Groups,
+                "channels" | "channel" => commands::list_chats::ChatFilter::Channels,
+                _ => commands::list_chats::ChatFilter::All,
+            };
+            commands::list_chats::run_with_filter(limit, chat_filter).await?;
         }
         Commands::ActiveChats { limit } => {
             commands::active_chats::run(limit).await?;

@@ -19,7 +19,21 @@ struct ChatInfo {
     chat_type: String,
 }
 
+/// Filter for chat types
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ChatFilter {
+    All,
+    Users,
+    Groups,
+    Channels,
+}
+
 pub async fn run(limit: usize) -> Result<()> {
+    run_with_filter(limit, ChatFilter::All).await
+}
+
+/// Run with specific chat type filter
+pub async fn run_with_filter(limit: usize, filter: ChatFilter) -> Result<()> {
     // Acquire session lock
     let _lock = SessionLock::acquire()?;
 
@@ -35,13 +49,29 @@ pub async fn run(limit: usize) -> Result<()> {
 
         // dialog.peer is the chat in grammers 0.8
         let chat = &dialog.peer;
-        let (is_channel, is_group) = match chat {
-            Peer::Channel(_) => (true, false),
-            Peer::Group(_) => (false, true),
-            Peer::User(_) => (false, false),
+        let (chat_type_str, include) = match chat {
+            Peer::Channel(_) => (
+                "channel",
+                filter == ChatFilter::All || filter == ChatFilter::Channels,
+            ),
+            Peer::Group(_) => (
+                "group",
+                filter == ChatFilter::All || filter == ChatFilter::Groups,
+            ),
+            Peer::User(u) => {
+                // Skip bots - check via User enum variant
+                let is_bot = match &u.raw {
+                    grammers_tl_types::enums::User::User(user) => user.bot,
+                    grammers_tl_types::enums::User::Empty(_) => false,
+                };
+                (
+                    if is_bot { "bot" } else { "user" },
+                    (filter == ChatFilter::All || filter == ChatFilter::Users) && !is_bot,
+                )
+            }
         };
 
-        if is_channel || is_group {
+        if include {
             // Get latest message date
             let mut messages = client.iter_messages(chat);
             if let Some(msg) = messages.next().await.transpose() {
@@ -70,17 +100,14 @@ pub async fn run(limit: usize) -> Result<()> {
                     id,
                     last_message: msg.date(),
                     unread: 0, // Would need dialog.unread_count
-                    chat_type: if is_channel {
-                        "channel".to_string()
-                    } else {
-                        "group".to_string()
-                    },
+                    chat_type: chat_type_str.to_string(),
                 });
             }
         }
 
         count += 1;
-        if count >= 50 {
+        if count >= 200 {
+            // Increased limit to get more chats
             break;
         }
     }
