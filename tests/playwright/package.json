@@ -1,0 +1,18 @@
+{
+  "name": "example-site-tests",
+  "version": "1.0.0",
+  "description": "Playwright tests for example site",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
+    "test:headed": "npx playwright test --headed",
+    "test:chromium": "npx playwright test --project=chromium",
+    "test:report": "npx playwright show-report"
+  },
+  "keywords": ["playwright", "testing", "example"],
+  "author": "Example Author",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.56.1"
+  }
+}
