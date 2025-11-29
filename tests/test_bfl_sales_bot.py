@@ -83,7 +83,7 @@ async def test_handle_start_saves_user_and_sends_onboarding(bot_with_mocks):
     assert event.respond.await_count == 3
     greeting_text = event.respond.await_args_list[0].args[0]
     assert user.first_name in greeting_text
-    assert greeting_text.startswith("Привет")
+    assert greeting_text.startswith("Здравствуйте")
 
 
 @pytest.mark.asyncio
