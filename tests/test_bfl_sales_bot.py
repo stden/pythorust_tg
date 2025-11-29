@@ -234,3 +234,45 @@ async def test_handle_message_uses_existing_session(bot_with_mocks):
     bot.db.create_session.assert_not_called()
     # Verify variant is assigned/retrieved for existing session ID
     bot.experiments.get_or_assign_variant.assert_called_once_with(11, 888)
+
+
+@pytest.mark.asyncio
+async def test_integration_openai_api_call(bot_with_mocks):
+    """Integration test simulating a real conversation flow with OpenAI response."""
+    bot, ai, _ = bot_with_mocks
+    
+    # Setup a realistic conversation history
+    bot.db.get_conversation_history.return_value = [
+        {"direction": "incoming", "message_text": "Сколько стоит банкротство?"},
+        {"direction": "outgoing", "message_text": "Стоимость зависит от суммы долга. Какая у вас общая сумма?"},
+    ]
+    
+    # Mock OpenAI response to simulate GPT-4o behavior
+    ai_response_text = "При долге 500 тысяч рублей процедура будет стоить около 120 тысяч. Есть ли у вас имущество?"
+    ai.chat_completion.return_value = SimpleNamespace(
+        choices=[SimpleNamespace(message=SimpleNamespace(content=ai_response_text))]
+    )
+
+    user = SimpleNamespace(id=500, first_name="TestUser", username="test", last_name="T", premium=False, bot=False)
+    event = MagicMock()
+    event.message = SimpleNamespace(id=99, text="Долг 500 тысяч, имущества нет")
+    event.get_sender = AsyncMock(return_value=user)
+    event.respond = AsyncMock(return_value=SimpleNamespace(id=100))
+
+    await bot.handle_message(event)
+
+    # Verify the prompt sent to OpenAI contains the conversation context
+    ai_call = ai.chat_completion.await_args
+    messages = ai_call.args[0]
+    
+    # System prompt
+    assert messages[0]["role"] == "system"
+    # History
+    assert messages[1]["content"] == "Сколько стоит банкротство?"
+    assert messages[2]["content"] == "Стоимость зависит от суммы долга. Какая у вас общая сумма?"
+    # Current message
+    assert messages[3]["content"] == "Долг 500 тысяч, имущества нет"
+
+    # Verify bot sends the AI response back to user
+    event.respond.assert_awaited_once_with(ai_response_text)
+
