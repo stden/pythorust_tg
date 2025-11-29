@@ -193,3 +193,44 @@ async def test_handle_message_uses_default_prompt_if_no_experiment(bot_with_mock
         ai_call = ai.chat_completion.await_args
         messages = ai_call.args[0]
         assert messages[0] == {"role": "system", "content": "DEFAULT_PROMPT"}
+
+
+@pytest.mark.asyncio
+async def test_handle_message_creates_new_session_if_none_active(bot_with_mocks):
+    """If no active session exists, create one."""
+    bot, _, _ = bot_with_mocks
+    bot.db.get_session.return_value = None
+    bot.db.create_session.return_value = 777
+
+    user = SimpleNamespace(id=10, first_name="Bob", username="bob", last_name="B", premium=False, bot=False)
+    event = MagicMock()
+    event.message = SimpleNamespace(id=1, text="Hi")
+    event.get_sender = AsyncMock(return_value=user)
+    event.respond = AsyncMock(return_value=SimpleNamespace(id=2))
+
+    await bot.handle_message(event)
+
+    bot.db.get_session.assert_called_once_with(10)
+    bot.db.create_session.assert_called_once_with(10)
+    # Verify variant is assigned to new session ID
+    bot.experiments.get_or_assign_variant.assert_called_once_with(10, 777)
+
+
+@pytest.mark.asyncio
+async def test_handle_message_uses_existing_session(bot_with_mocks):
+    """If active session exists, use it and do not create a new one."""
+    bot, _, _ = bot_with_mocks
+    bot.db.get_session.return_value = {"id": 888}
+
+    user = SimpleNamespace(id=11, first_name="Cat", username="cat", last_name="C", premium=False, bot=False)
+    event = MagicMock()
+    event.message = SimpleNamespace(id=1, text="Meow")
+    event.get_sender = AsyncMock(return_value=user)
+    event.respond = AsyncMock(return_value=SimpleNamespace(id=2))
+
+    await bot.handle_message(event)
+
+    bot.db.get_session.assert_called_once_with(11)
+    bot.db.create_session.assert_not_called()
+    # Verify variant is assigned/retrieved for existing session ID
+    bot.experiments.get_or_assign_variant.assert_called_once_with(11, 888)
