@@ -551,10 +551,7 @@ telegram:
         let temp_file = std::env::temp_dir().join("config_numeric_priority.yml");
         std::fs::write(&temp_file, yaml).unwrap();
 
-        let _guards = set_envs(&[
-            ("TELEGRAM_API_ID", "9999"),
-            ("TELEGRAM_PHONE", "+8888"),
-        ]);
+        let _guards = set_envs(&[("TELEGRAM_API_ID", "9999"), ("TELEGRAM_PHONE", "+8888")]);
 
         let config = Config::load_from_file(&temp_file).unwrap();
 

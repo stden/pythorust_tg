@@ -74,6 +74,21 @@ enum Commands {
         limit: usize,
     },
 
+    /// Get dialogs with metadata
+    Dialogs {
+        /// Maximum number of dialogs to fetch
+        #[arg(short, long, default_value = "50")]
+        limit: usize,
+
+        /// Output format: table | json | yaml
+        #[arg(long, default_value = "table")]
+        format: String,
+
+        /// Optional output file to save results
+        #[arg(short, long)]
+        output: Option<PathBuf>,
+    },
+
     /// Export a single chat by username
     Export {
         /// Username to export (without @)
@@ -378,6 +393,7 @@ impl Commands {
             Commands::Tg { .. } => "tg",
             Commands::ListChats { .. } => "list_chats",
             Commands::ActiveChats { .. } => "active_chats",
+            Commands::Dialogs { .. } => "dialogs",
             Commands::Export { .. } => "export",
             Commands::DeleteZoom { .. } => "delete_zoom",
             Commands::Analyze { .. } => "analyze",
@@ -454,6 +470,13 @@ async fn execute_command(command: Commands) -> anyhow::Result<()> {
         }
         Commands::ActiveChats { limit } => {
             commands::active_chats::run(limit).await?;
+        }
+        Commands::Dialogs {
+            limit,
+            format,
+            output,
+        } => {
+            commands::dialogs_run(limit, &format, output).await?;
         }
         Commands::Export {
             username,

@@ -106,6 +106,10 @@ name = "site_monitor"
 path = "src/bin/site_monitor.rs"
 
 [[bin]]
+name = "devops_bot_probe"
+path = "src/bin/devops_bot_probe.rs"
+
+[[bin]]
 name = "http_bench"
 path = "src/bin/http_bench.rs"
 
@@ -267,3 +271,7 @@ incremental = false
 [[bench]]
 name = "text_processing"
 harness = false
+
+[[bin]]
+name = "test_bot_dialogue"
+path = "src/bin/test_bot_dialogue.rs"

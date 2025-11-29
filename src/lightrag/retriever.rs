@@ -418,14 +418,8 @@ mod tests {
         assert_eq!(rag.len(), 3);
 
         let sources: Vec<String> = rag.index.iter().map(|c| c.chunk.source.clone()).collect();
-        assert_eq!(
-            sources.iter().filter(|s| s.as_str() == "doc1").count(),
-            2
-        );
-        assert_eq!(
-            sources.iter().filter(|s| s.as_str() == "doc2").count(),
-            1
-        );
+        assert_eq!(sources.iter().filter(|s| s.as_str() == "doc1").count(), 2);
+        assert_eq!(sources.iter().filter(|s| s.as_str() == "doc2").count(), 1);
     }
 
     #[tokio::test]
