@@ -227,3 +227,7 @@ client_secret_*.json
 telegram_session.session-journal
 telegram_session_py.session
 telegram_session_py.lock
+*.sql
+*.csv
+dasha*.md
+
