@@ -32,6 +32,85 @@ fn test_config_session_name() {
 }
 
 #[test]
+fn test_config_env_placeholders_resolved() {
+    let yaml = r#"
+telegram:
+  api_id: "${TELEGRAM_API_ID}"
+  api_hash: "${TELEGRAM_API_HASH}"
+  phone: "${TELEGRAM_PHONE}"
+"#;
+
+    let temp_file = std::env::temp_dir().join("test_config_env.yml");
+    std::fs::write(&temp_file, yaml).unwrap();
+
+    let original_api_id = std::env::var("TELEGRAM_API_ID").ok();
+    let original_api_hash = std::env::var("TELEGRAM_API_HASH").ok();
+    let original_phone = std::env::var("TELEGRAM_PHONE").ok();
+
+    std::env::set_var("TELEGRAM_API_ID", "777");
+    std::env::set_var("TELEGRAM_API_HASH", "from_env_hash");
+    std::env::set_var("TELEGRAM_PHONE", "+19998887766");
+
+    let config = Config::load_from_file(&temp_file).unwrap();
+
+    assert_eq!(config.api_id, 777);
+    assert_eq!(config.api_hash, "from_env_hash");
+    assert_eq!(config.phone, "+19998887766");
+
+    match original_api_id {
+        Some(val) => std::env::set_var("TELEGRAM_API_ID", val),
+        None => std::env::remove_var("TELEGRAM_API_ID"),
+    }
+    match original_api_hash {
+        Some(val) => std::env::set_var("TELEGRAM_API_HASH", val),
+        None => std::env::remove_var("TELEGRAM_API_HASH"),
+    }
+    match original_phone {
+        Some(val) => std::env::set_var("TELEGRAM_PHONE", val),
+        None => std::env::remove_var("TELEGRAM_PHONE"),
+    }
+
+    std::fs::remove_file(temp_file).ok();
+}
+
+#[test]
+fn test_config_parses_numeric_strings() {
+    let yaml = r#"
+telegram:
+  api_id: "123456"
+  api_hash: "hash"
+  phone: "+1111"
+user:
+  id: "999"
+  name: "Tester"
+"#;
+
+    let temp_file = std::env::temp_dir().join("test_config_numeric.yml");
+    std::fs::write(&temp_file, yaml).unwrap();
+
+    let original_api_id = std::env::var("TELEGRAM_API_ID").ok();
+    let original_user_id = std::env::var("USER_ID").ok();
+    std::env::remove_var("TELEGRAM_API_ID");
+    std::env::remove_var("USER_ID");
+
+    let config = Config::load_from_file(&temp_file).unwrap();
+
+    assert_eq!(config.api_id, 123456);
+    assert_eq!(config.my_user_id, 999);
+
+    match original_api_id {
+        Some(val) => std::env::set_var("TELEGRAM_API_ID", val),
+        None => std::env::remove_var("TELEGRAM_API_ID"),
+    }
+    match original_user_id {
+        Some(val) => std::env::set_var("USER_ID", val),
+        None => std::env::remove_var("USER_ID"),
+    }
+
+    std::fs::remove_file(temp_file).ok();
+}
+
+#[test]
 fn test_chat_entity_variants() {
     // Channel
     let channel = ChatEntity::channel(12345);
