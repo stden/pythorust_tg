@@ -137,3 +137,59 @@ async def test_handle_message_builds_ai_payload_and_logs(bot_with_mocks):
     assert bot.db.save_message.call_args_list[1].kwargs["direction"] == "outgoing"
     assert bot.db.save_message.call_args_list[1].kwargs["text"] == "AI reply text"
     event.respond.assert_awaited_once_with("AI reply text")
+
+
+@pytest.mark.asyncio
+async def test_handle_message_handles_ai_error(bot_with_mocks):
+    """If AI fails, bot should send an apology message."""
+    bot, ai, _ = bot_with_mocks
+
+    # Simulate AI exception
+    ai.chat_completion.side_effect = Exception("OpenAI Down")
+
+    user = SimpleNamespace(id=123, first_name="User")
+    event = MagicMock()
+    event.message = SimpleNamespace(id=111, text="Hello")
+    event.get_sender = AsyncMock(return_value=user)
+    event.respond = AsyncMock(return_value=SimpleNamespace(id=222))
+
+    await bot.handle_message(event)
+
+    # Verify fallback message
+    event.respond.assert_awaited_once_with("Извините, произошла ошибка. Попробуйте ещё раз.")
+    
+    # Verify it was logged to DB
+    bot.db.save_message.assert_called_with(
+        user_id=user.id,
+        message_id=222,
+        text="Извините, произошла ошибка. Попробуйте ещё раз.",
+        direction="outgoing"
+    )
+
+
+@pytest.mark.asyncio
+async def test_handle_message_uses_default_prompt_if_no_experiment(bot_with_mocks):
+    """If experiments manager is missing or returns None, use default prompt."""
+    bot, ai, _ = bot_with_mocks
+    
+    # Disable experiments
+    bot.experiments = None
+    
+    # Mock default prompt import
+    with patch("bfl_sales_bot.SALES_SYSTEM_PROMPT", "DEFAULT_PROMPT"):
+        ai.chat_completion.return_value = SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content="Default Reply"))]
+        )
+
+        user = SimpleNamespace(id=999, first_name="Test")
+        event = MagicMock()
+        event.message = SimpleNamespace(id=1, text="Hi")
+        event.get_sender = AsyncMock(return_value=user)
+        event.respond = AsyncMock(return_value=SimpleNamespace(id=2))
+
+        await bot.handle_message(event)
+
+        # Check that default prompt was used
+        ai_call = ai.chat_completion.await_args
+        messages = ai_call.args[0]
+        assert messages[0] == {"role": "system", "content": "DEFAULT_PROMPT"}
