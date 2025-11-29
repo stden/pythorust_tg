@@ -213,6 +213,7 @@ session*/
 !CLAUDE.md
 !AGENTS.md
 !ACTION_PLAN.md
+!CODEX.md
 !codev/**/*.md
 !rust_telegram/README.md
 !prompts/*.md
