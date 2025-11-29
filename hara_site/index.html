@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Хара — Центр Осознанности и Чудес</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F4E4BC;
+            --purple: #6B4E71;
+            --purple-dark: #4A3550;
+            --rose: #E8B4B8;
+            --cream: #FDF8F5;
+            --text: #2D2D2D;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--cream) 0%, #fff 50%, var(--gold-light) 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 80px 20px 60px;
+            background: linear-gradient(180deg, rgba(107,78,113,0.1) 0%, transparent 100%);
+        }
+
+        .hero h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 4rem;
+            font-weight: 600;
+            color: var(--purple-dark);
+            margin-bottom: 10px;
+            letter-spacing: 0.1em;
+        }
+
+        .hero .subtitle {
+            font-size: 1.2rem;
+            color: var(--gold);
+            font-weight: 500;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .hero .tagline {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-style: italic;
+            color: var(--purple);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .divider {
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 40px auto;
+        }
+
+        .intro {
+            max-width: 800px;
+            margin: 0 auto 60px;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .intro p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--purple-dark);
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            text-align: center;
+            color: var(--purple-dark);
+            margin-bottom: 50px;
+        }
+
+        .members {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 80px;
+        }
+
+        .member-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 40px rgba(107,78,113,0.1);
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 40px;
+            align-items: start;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .member-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(107,78,113,0.15);
+        }
+
+        .member-avatar {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple) 0%, var(--rose) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            box-shadow: 0 10px 30px rgba(107,78,113,0.2);
+        }
+
+        .member-content h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            color: var(--purple-dark);
+            margin-bottom: 5px;
+        }
+
+        .member-role {
+            color: var(--gold);
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 20px;
+        }
+
+        .member-description {
+            font-size: 1.05rem;
+            line-height: 1.9;
+            color: var(--text);
+            margin-bottom: 20px;
+        }
+
+        .member-traits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .trait {
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--cream) 100%);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--purple-dark);
+            border: 1px solid var(--gold);
+        }
+
+        .quote {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            color: var(--purple);
+            padding: 15px 0;
+            border-left: 3px solid var(--gold);
+            padding-left: 20px;
+            margin: 20px 0;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(180deg, transparent 0%, rgba(107,78,113,0.1) 100%);
+        }
+
+        .footer .mantra {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            color: var(--purple-dark);
+            margin-bottom: 20px;
+        }
+
+        .footer .hearts {
+            font-size: 2rem;
+            color: var(--rose);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .member-card {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .member-avatar {
+                margin: 0 auto;
+                width: 150px;
+                height: 150px;
+                font-size: 3rem;
+            }
+            .member-traits {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="hero">
+        <h1>ХАРА</h1>
+        <p class="subtitle">Центр Осознанности и Чудес</p>
+        <p class="tagline">Пространство, где души расцветают, сердца открываются, а чудеса становятся реальностью</p>
+    </header>
+
+    <div class="divider"></div>
+
+    <section class="intro">
+        <p>Хара — это не просто чат. Это живое сообщество прекрасных людей, объединённых стремлением к осознанности, духовному росту и взаимной поддержке. Каждый участник привносит свою уникальную энергию, создавая пространство любви и принятия.</p>
+    </section>
+
+    <section class="members">
+        <h2 class="section-title">Прекрасные Души Хары</h2>
+
+        <!-- Anna Mart DE -->
+        <article class="member-card">
+            <div class="member-avatar">👑</div>
+            <div class="member-content">
+                <h2>Anna Mart DE</h2>
+                <p class="member-role">Королева Восточных Танцев</p>
+                <p class="member-description">
+                    Анна — воплощение грации и женственности. Мастер восточных танцев, она умеет танцевать со стаканом воды и даже подсвечником на голове! Её мудрость о том, как корона выравнивает осанку и меняет мировосприятие, вдохновляет всех участниц чата. Анна — заботливая душа, которая всегда спрашивает, как у вас дела, и искренне радуется успехам других. Она благодарна за каждый момент и видит красоту даже в мелочах.
+                </p>
+                <blockquote class="quote">
+                    «Когда ставишь на голову корону, осанка автоматически выравнивается — тело реагирует, потому что надо держать голову так, чтобы корона не падала»
+                </blockquote>
+                <div class="member-traits">
+                    <span class="trait">🩰 Восточные танцы</span>
+                    <span class="trait">👑 Королева</span>
+                    <span class="trait">💖 Благодарность</span>
+                    <span class="trait">🪷 Грация</span>
+                    <span class="trait">💋 Женская поддержка</span>
+                </div>
+            </div>
+        </article>
+
+        <!-- Ирина Цветок Жизни -->
+        <article class="member-card">
+            <div class="member-avatar">🌸</div>
+            <div class="member-content">
+                <h2>Ирина Цветок Жизни</h2>
+                <p class="member-role">Хранительница Света и Тепла</p>
+                <p class="member-description">
+                    Ирина — настоящий цветок жизни, как и её имя. Каждое утро она приветствует чат тёплыми словами: «С добрым утром, моя прекрасная Хара!» Её искренняя забота о каждом участнике согревает сердца. Ирина умеет видеть прекрасное во всём и напоминает, что «мы на правильном пути». Она — луч света, который поддерживает друзей словами «мы справимся» и искренне радуется каждому успеху.
+                </p>
+                <blockquote class="quote">
+                    «Мы смотрим на прекрасное 🥰»
+                </blockquote>
+                <div class="member-traits">
+                    <span class="trait">☀️ Свет</span>
+                    <span class="trait">❤️ Забота</span>
+                    <span class="trait">🤗 Объятия</span>
+                    <span class="trait">🌺 Красота</span>
+                    <span class="trait">🙏 Поддержка</span>
+                </div>
+            </div>
+        </article>
+
+        <!-- Мила Lud Ucar -->
+        <article class="member-card">
+            <div class="member-avatar">🧡</div>
+            <div class="member-content">
+                <h2>Мила Lud Ucar</h2>
+                <p class="member-role">Душевная Хранительница Семьи</p>
+                <p class="member-description">
+                    Мила — это воплощение душевности и тепла. Она называет всех участников чата «мои Родные» и создаёт атмосферу настоящей семьи. Мила приветствует каждого нового участника в «духовную сказку» без сарказма, с искренним желанием подружиться. Она чувствует знаки вселенной — числа, символы — и делится своими наблюдениями. Каждый вечер Мила желает всем «Доброй и Спокойной Ночи» с любовью.
+                </p>
+                <blockquote class="quote">
+                    «Добрый вечер мои Родные 💜💋💜»
+                </blockquote>
+                <div class="member-traits">
+                    <span class="trait">💜 Душевность</span>
+                    <span class="trait">👨‍👩‍👧 Семья</span>
+                    <span class="trait">🌙 Ночные пожелания</span>
+                    <span class="trait">🔮 Знаки вселенной</span>
+                    <span class="trait">💋 Нежность</span>
+                </div>
+            </div>
+        </article>
+
+        <!-- Инна Косарева -->
+        <article class="member-card">
+            <div class="member-avatar">✨</div>
+            <div class="member-content">
+                <h2>Инна Косарева</h2>
+                <p class="member-role">Квантовая ПсихоАлхимия ✨</p>
+                <p class="member-description">
+                    Инна — мастер квантовой психоалхимии и проводник глубинных трансформаций. Её мудрость проявляется в советах: «Обними дерево, поговори с ним, попроси ответ и услышь его в сердце». Инна ценит искренность выше всего — «только живая частичка души греет». Семейное прозвище «кротик» отражает её уютную натуру. Она проводит практикумы и помогает людям обретать личную силу, сама проходя через те же уроки.
+                </p>
+                <blockquote class="quote">
+                    «Интересно наблюдать, как тема моих программ ярко проявляется в моей жизни в периоды их проведения. Если тема "личная сила", то жизнь обязательно покажет мне, какая я слабачка»
+                </blockquote>
+                <div class="member-traits">
+                    <span class="trait">✨ Алхимия</span>
+                    <span class="trait">🧠 Психология</span>
+                    <span class="trait">🌳 Связь с природой</span>
+                    <span class="trait">💫 Трансформация</span>
+                    <span class="trait">🐾 Кротик</span>
+                </div>
+            </div>
+        </article>
+
+        <!-- Jeka -->
+        <article class="member-card">
+            <div class="member-avatar">🔥</div>
+            <div class="member-content">
+                <h2>Jeka</h2>
+                <p class="member-role">Хранитель Пламени Хары</p>
+                <p class="member-description">
+                    Jeka — энергетический столп чата Хара. Каждое утро он первым зажигает огонь сообщества словами «Хара процветает!» Его постоянство и позитив создают ритм жизни чата. Jeka делится мудростью: «Самое маленькое проявление доброты ценнее, чем величайшее из намерений» (Оскар Уайльд). Он — ранняя пташка, которая встречает рассвет и заряжает всех энергией нового дня.
+                </p>
+                <blockquote class="quote">
+                    «Доброе утро 🙌❤️ ЧУДЕСного ЖИВОго дня 🙌❤️»
+                </blockquote>
+                <div class="member-traits">
+                    <span class="trait">🔥 Энергия</span>
+                    <span class="trait">🌅 Рассвет</span>
+                    <span class="trait">💪 Постоянство</span>
+                    <span class="trait">❤️ Доброта</span>
+                    <span class="trait">🙌 Поддержка</span>
+                </div>
+            </div>
+        </article>
+
+        <!-- Ruslan -->
+        <article class="member-card">
+            <div class="member-avatar">🕉</div>
+            <div class="member-content">
+                <h2>Ruslan Raduha</h2>
+                <p class="member-role">Философ и Искатель Истины</p>
+                <p class="member-description">
+                    Руслан — глубокий мыслитель и философ чата. Его метафоры и притчи заставляют задуматься о вечном. Он проводит чайные церемонии с «Мудрыми Беседами о Вечном», делится знаниями о древних практиках Школы Мастера Норбекова. Руслан говорит загадками: «Выхухоль не понимает, что она не выхухоль, а вхухоль... интроверт». Он ищет «того, кто спрятал и закрыл то, что всех объединяет» и верит в дорогих людей.
+                </p>
+                <blockquote class="quote">
+                    «ДОРОГОЕ НЕ ПРОДАЁТСЯ ДЕШЁВЫМ ЛЮДЯМ... Это касается и товаров, и Знаний; и за деньги, и за внимание или Любовь. Всегда Главное ИСКАТЬ ДОРОГИХ ЛЮДЕЙ»
+                </blockquote>
+                <div class="member-traits">
+                    <span class="trait">🕉 Философия</span>
+                    <span class="trait">🍵 Чайные церемонии</span>
+                    <span class="trait">📚 Мудрость</span>
+                    <span class="trait">🚀 Инвестиции</span>
+                    <span class="trait">😁 Юмор</span>
+                </div>
+            </div>
+        </article>
+
+        <!-- Alexander -->
+        <article class="member-card">
+            <div class="member-avatar">🙏</div>
+            <div class="member-content">
+                <h2>Alexander Vradij</h2>
+                <p class="member-role">Странник и Мудрец</p>
+                <p class="member-description">
+                    Александр — странствующий мудрец, чья душа зовёт его всё дальше. Он делится историями с внуком на высоких горах, благодарит Бога за мудрость принять то, что нельзя изменить, и мужество изменить то, что можно. Александр верит в матриархат и любовь как основу мира. Его истории о жизни — как притчи: случайная отмена поездки в Турцию, разговоры с гневными друзьями — всё становится уроком.
+                </p>
+                <blockquote class="quote">
+                    «Благодарю тебя Господи за Умение принять то, что я не в силах изменить, Мужество изменить то, что я могу, И мудрость увидеть разницу между ними»
+                </blockquote>
+                <div class="member-traits">
+                    <span class="trait">🙏 Благодарность</span>
+                    <span class="trait">🏔 Путешествия</span>
+                    <span class="trait">👴 Мудрость</span>
+                    <span class="trait">❤️ Любовь</span>
+                    <span class="trait">🌍 Философия</span>
+                </div>
+            </div>
+        </article>
+
+    </section>
+
+    <footer class="footer">
+        <p class="mantra">Хара Процветает</p>
+        <p class="hearts">❤️‍🔥 🙌 ❤️‍🔥</p>
+        <div class="divider"></div>
+        <p style="color: var(--purple); font-size: 0.9rem;">Создано с любовью и восхищением</p>
+    </footer>
+</body>
+</html>

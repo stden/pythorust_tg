@@ -1,0 +1,37 @@
+bot:
+  token: ${DEVOPS_BOT_TOKEN}
+  allowed_users: []  # Telegram user_id list; empty means open access
+
+monitor:
+  enabled: true
+  interval_seconds: 300
+  cooldown_seconds: 300
+  alert_chat_id: ${DEVOPS_ALERT_CHAT_ID}
+
+services:
+  n8n:
+    kind: http
+    url: ${N8N_URL}
+    expected_status: 200
+    timeout: 10
+    restart_command: "systemctl restart n8n"
+    log_command: "journalctl -u n8n -n 100 --no-pager"
+
+  megacascade:
+    kind: http
+    url: ${MEGACASCADE_URL}
+    expected_status: 200
+    log_command: "journalctl -u megacascade -n 80 --no-pager"
+
+  whatsapp:
+    kind: http
+    url: ${WHATSAPP_URL}
+    timeout: 8
+    restart_command: "systemctl restart whatsapp-service"
+    log_command: "journalctl -u whatsapp-service -n 80 --no-pager"
+
+  caddy:
+    kind: systemd
+    service_name: caddy
+    status_command: "systemctl is-active caddy"
+    log_command: "journalctl -u caddy -n 80 --no-pager"
