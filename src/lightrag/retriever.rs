@@ -397,4 +397,45 @@ mod tests {
         assert!(!results.is_empty());
         assert_eq!(results[0].chunk.source, "doc1");
     }
+
+    #[tokio::test]
+    async fn ingest_documents_skips_empty_and_counts_chunks() {
+        let mut rag = LightRAGRetriever::with_local(LightRAGConfig {
+            chunk_size: 2,
+            chunk_overlap: 0,
+            ..Default::default()
+        });
+
+        let docs = vec![
+            ("doc1".to_string(), "one two three four".to_string()),
+            ("blank".to_string(), "   ".to_string()),
+            ("doc2".to_string(), "five six".to_string()),
+        ];
+
+        let indexed = rag.ingest_documents(&docs).await.unwrap();
+
+        assert_eq!(indexed, 3);
+        assert_eq!(rag.len(), 3);
+
+        let sources: Vec<String> = rag.index.iter().map(|c| c.chunk.source.clone()).collect();
+        assert_eq!(
+            sources.iter().filter(|s| s.as_str() == "doc1").count(),
+            2
+        );
+        assert_eq!(
+            sources.iter().filter(|s| s.as_str() == "doc2").count(),
+            1
+        );
+    }
+
+    #[tokio::test]
+    async fn ingest_ignores_whitespace_only_texts() {
+        let mut rag = LightRAGRetriever::with_local(LightRAGConfig::default());
+        let initial_len = rag.len();
+
+        let added = rag.ingest("src", "   ").await.unwrap();
+
+        assert_eq!(added, 0);
+        assert_eq!(rag.len(), initial_len);
+    }
 }

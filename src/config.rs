@@ -380,6 +380,35 @@ impl Config {
 mod tests {
     use super::*;
 
+    struct EnvGuard {
+        key: String,
+        original: Option<String>,
+    }
+
+    impl EnvGuard {
+        fn set(key: &str, value: &str) -> Self {
+            let original = std::env::var(key).ok();
+            std::env::set_var(key, value);
+            Self {
+                key: key.to_string(),
+                original,
+            }
+        }
+    }
+
+    impl Drop for EnvGuard {
+        fn drop(&mut self) {
+            match &self.original {
+                Some(value) => std::env::set_var(&self.key, value),
+                None => std::env::remove_var(&self.key),
+            }
+        }
+    }
+
+    fn set_envs(vars: &[(&str, &str)]) -> Vec<EnvGuard> {
+        vars.iter().map(|(k, v)| EnvGuard::set(k, v)).collect()
+    }
+
     #[test]
     fn test_config_default() {
         let config = Config::default();
@@ -477,6 +506,91 @@ telegram:
         // This test just verifies the parsing doesn't fail
         let result = Config::load_from_file(&temp_file);
         assert!(result.is_ok());
+
+        std::fs::remove_file(temp_file).ok();
+    }
+
+    #[test]
+    fn env_placeholders_are_resolved_from_environment() {
+        let yaml = r#"
+telegram:
+  api_id: "${TELEGRAM_API_ID}"
+  api_hash: "${TELEGRAM_API_HASH}"
+  phone: "+should_be_overridden"
+user:
+  id: "${USER_ID}"
+  name: "Ignored"
+"#;
+        let temp_file = std::env::temp_dir().join("config_env_override.yml");
+        std::fs::write(&temp_file, yaml).unwrap();
+
+        let _guards = set_envs(&[
+            ("TELEGRAM_API_ID", "4242"),
+            ("TELEGRAM_API_HASH", "hash_from_env"),
+            ("TELEGRAM_PHONE", "+1999"),
+            ("USER_ID", "777"),
+        ]);
+
+        let config = Config::load_from_file(&temp_file).unwrap();
+
+        assert_eq!(config.api_id, 4242);
+        assert_eq!(config.api_hash, "hash_from_env");
+        assert_eq!(config.phone, "+1999");
+        assert_eq!(config.my_user_id, 777);
+
+        std::fs::remove_file(temp_file).ok();
+    }
+
+    #[test]
+    fn env_does_not_override_numeric_yaml_values() {
+        let yaml = r#"
+telegram:
+  api_id: 321
+  phone: "from_yaml"
+"#;
+        let temp_file = std::env::temp_dir().join("config_numeric_priority.yml");
+        std::fs::write(&temp_file, yaml).unwrap();
+
+        let _guards = set_envs(&[
+            ("TELEGRAM_API_ID", "9999"),
+            ("TELEGRAM_PHONE", "+8888"),
+        ]);
+
+        let config = Config::load_from_file(&temp_file).unwrap();
+
+        // Explicit numeric values from YAML take precedence over env vars,
+        // while string values still get overridden by the environment.
+        assert_eq!(config.api_id, 321);
+        assert_eq!(config.phone, "+8888");
+
+        std::fs::remove_file(temp_file).ok();
+    }
+
+    #[test]
+    fn skips_invalid_chat_definitions() {
+        let yaml = r#"
+telegram:
+  api_id: 0
+  api_hash: "hash"
+chats:
+  valid_channel:
+    type: channel
+    id: 123
+  missing_id:
+    type: channel
+  missing_username:
+    type: username
+  unknown_type:
+    type: random
+    id: 999
+"#;
+        let temp_file = std::env::temp_dir().join("config_invalid_chats.yml");
+        std::fs::write(&temp_file, yaml).unwrap();
+
+        let config = Config::load_from_file(&temp_file).unwrap();
+
+        assert!(config.chats.contains_key("valid_channel"));
+        assert_eq!(config.chats.len(), 1);
 
         std::fs::remove_file(temp_file).ok();
     }
