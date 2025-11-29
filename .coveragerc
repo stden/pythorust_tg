@@ -1,0 +1,52 @@
+[run]
+branch = True
+source = .
+omit = 
+    */tests/*
+    */test_*
+    */__pycache__/*
+    */venv/*
+    */env/*
+    */.venv/*
+    */node_modules/*
+    */htmlcov/*
+    */migrations/*
+    setup.py
+    run_coverage.py
+    conftest.py
+    
+[report]
+precision = 2
+show_missing = True
+skip_covered = False
+sort = Cover
+
+exclude_lines =
+    # Standard pragma
+    pragma: no cover
+    
+    # Don't complain about missing debug code
+    def __repr__
+    if self\.debug
+    
+    # Don't complain if tests don't hit defensive assertion code
+    raise AssertionError
+    raise NotImplementedError
+    
+    # Don't complain if non-runnable code isn't run
+    if 0:
+    if __name__ == .__main__.:
+    
+    # Type checking
+    if TYPE_CHECKING:
+    
+    # Abstract methods
+    @abstract
+    @abstractmethod
+
+[html]
+directory = htmlcov
+title = PyThoRust TG Coverage Report
+
+[xml]
+output = coverage.xml
