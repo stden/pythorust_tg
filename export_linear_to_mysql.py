@@ -4,13 +4,14 @@ Export Linear tasks to MySQL database.
 """
 
 import os
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 import pymysql
 import requests
-from datetime import datetime
-from typing import Dict, Any, List, Optional
 from dotenv import load_dotenv
 
-load_dotenv('/srv/pythorust_tg/.env')
+load_dotenv("/srv/pythorust_tg/.env")
 
 LINEAR_API_URL = "https://api.linear.app/graphql"
 
@@ -21,21 +22,22 @@ def parse_iso_datetime(iso_str: Optional[str]) -> Optional[datetime]:
         return None
     try:
         # Remove 'Z' suffix and parse
-        if iso_str.endswith('Z'):
-            iso_str = iso_str[:-1] + '+00:00'
-        return datetime.fromisoformat(iso_str.replace('Z', '+00:00'))
+        if iso_str.endswith("Z"):
+            iso_str = iso_str[:-1] + "+00:00"
+        return datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
     except (ValueError, AttributeError):
         return None
 
+
 # MySQL config
 MYSQL_CONFIG = {
-    'host': os.getenv('MYSQL_HOST', 'localhost'),
-    'port': int(os.getenv('MYSQL_PORT', 3306)),
-    'database': os.getenv('MYSQL_DATABASE', 'pythorust_tg'),
-    'user': os.getenv('MYSQL_USER', 'pythorust_tg'),
-    'password': os.getenv('MYSQL_PASSWORD'),
-    'charset': 'utf8mb4',
-    'cursorclass': pymysql.cursors.DictCursor
+    "host": os.getenv("MYSQL_HOST", "localhost"),
+    "port": int(os.getenv("MYSQL_PORT", 3306)),
+    "database": os.getenv("MYSQL_DATABASE", "pythorust_tg"),
+    "user": os.getenv("MYSQL_USER", "pythorust_tg"),
+    "password": os.getenv("MYSQL_PASSWORD"),
+    "charset": "utf8mb4",
+    "cursorclass": pymysql.cursors.DictCursor,
 }
 
 
@@ -48,10 +50,12 @@ class LinearReader:
             raise ValueError("LINEAR_API_KEY not set")
 
         self.session = requests.Session()
-        self.session.headers.update({
-            "Authorization": self.api_key,
-            "Content-Type": "application/json",
-        })
+        self.session.headers.update(
+            {
+                "Authorization": self.api_key,
+                "Content-Type": "application/json",
+            }
+        )
 
     def _request(self, query: str, variables: Dict[str, Any] = None) -> Dict[str, Any]:
         response = self.session.post(
@@ -268,19 +272,17 @@ def create_tables(conn):
 def insert_team(conn, team: Dict[str, Any]):
     """Insert or update a team."""
     cursor = conn.cursor()
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO linear_teams (id, name, key_name, description)
         VALUES (%s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
             name = VALUES(name),
             key_name = VALUES(key_name),
             description = VALUES(description)
-    """, (
-        team['id'],
-        team['name'],
-        team.get('key'),
-        team.get('description')
-    ))
+    """,
+        (team["id"], team["name"], team.get("key"), team.get("description")),
+    )
     conn.commit()
 
 
@@ -289,10 +291,11 @@ def insert_project(conn, project: Dict[str, Any]):
     cursor = conn.cursor()
 
     # Get first team from teams list
-    teams = project.get('teams', {}).get('nodes', [])
+    teams = project.get("teams", {}).get("nodes", [])
     team = teams[0] if teams else {}
 
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO linear_projects (id, name, description, state, start_date, target_date, progress, team_id)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         ON DUPLICATE KEY UPDATE
@@ -303,16 +306,18 @@ def insert_project(conn, project: Dict[str, Any]):
             target_date = VALUES(target_date),
             progress = VALUES(progress),
             team_id = VALUES(team_id)
-    """, (
-        project['id'],
-        project['name'],
-        project.get('description'),
-        project.get('state'),
-        project.get('startDate'),
-        project.get('targetDate'),
-        project.get('progress'),
-        team.get('id')
-    ))
+    """,
+        (
+            project["id"],
+            project["name"],
+            project.get("description"),
+            project.get("state"),
+            project.get("startDate"),
+            project.get("targetDate"),
+            project.get("progress"),
+            team.get("id"),
+        ),
+    )
     conn.commit()
 
 
@@ -320,21 +325,19 @@ def insert_issue(conn, issue: Dict[str, Any]):
     """Insert or update an issue."""
     cursor = conn.cursor()
 
-    state = issue.get('state') or {}
-    team = issue.get('team') or {}
-    project = issue.get('project') or {}
-    assignee = issue.get('assignee') or {}
-    creator = issue.get('creator') or {}
-    labels = issue.get('labels', {}).get('nodes', [])
+    state = issue.get("state") or {}
+    team = issue.get("team") or {}
+    project = issue.get("project") or {}
+    assignee = issue.get("assignee") or {}
+    creator = issue.get("creator") or {}
+    labels = issue.get("labels", {}).get("nodes", [])
 
     import json
-    labels_json = json.dumps([{
-        'id': l['id'],
-        'name': l['name'],
-        'color': l.get('color')
-    } for l in labels])
 
-    cursor.execute("""
+    labels_json = json.dumps([{"id": l["id"], "name": l["name"], "color": l.get("color")} for l in labels])
+
+    cursor.execute(
+        """
         INSERT INTO linear_issues (
             id, identifier, title, description, priority, priority_label,
             state_id, state_name, state_type,
@@ -365,34 +368,36 @@ def insert_issue(conn, issue: Dict[str, Any]):
             completed_at = VALUES(completed_at),
             canceled_at = VALUES(canceled_at),
             started_at = VALUES(started_at)
-    """, (
-        issue['id'],
-        issue['identifier'],
-        issue['title'],
-        issue.get('description'),
-        issue.get('priority'),
-        issue.get('priorityLabel'),
-        state.get('id'),
-        state.get('name'),
-        state.get('type'),
-        team.get('id'),
-        team.get('name'),
-        project.get('id'),
-        project.get('name'),
-        assignee.get('id'),
-        assignee.get('name'),
-        creator.get('id'),
-        creator.get('name'),
-        labels_json,
-        issue.get('dueDate'),
-        issue.get('estimate'),
-        issue.get('url'),
-        parse_iso_datetime(issue.get('createdAt')),
-        parse_iso_datetime(issue.get('updatedAt')),
-        parse_iso_datetime(issue.get('completedAt')),
-        parse_iso_datetime(issue.get('canceledAt')),
-        parse_iso_datetime(issue.get('startedAt'))
-    ))
+    """,
+        (
+            issue["id"],
+            issue["identifier"],
+            issue["title"],
+            issue.get("description"),
+            issue.get("priority"),
+            issue.get("priorityLabel"),
+            state.get("id"),
+            state.get("name"),
+            state.get("type"),
+            team.get("id"),
+            team.get("name"),
+            project.get("id"),
+            project.get("name"),
+            assignee.get("id"),
+            assignee.get("name"),
+            creator.get("id"),
+            creator.get("name"),
+            labels_json,
+            issue.get("dueDate"),
+            issue.get("estimate"),
+            issue.get("url"),
+            parse_iso_datetime(issue.get("createdAt")),
+            parse_iso_datetime(issue.get("updatedAt")),
+            parse_iso_datetime(issue.get("completedAt")),
+            parse_iso_datetime(issue.get("canceledAt")),
+            parse_iso_datetime(issue.get("startedAt")),
+        ),
+    )
     conn.commit()
 
 
@@ -427,7 +432,7 @@ def main():
     issues = linear.get_all_issues()
     for issue in issues:
         insert_issue(conn, issue)
-        state_name = issue.get('state', {}).get('name', 'Unknown')
+        state_name = issue.get("state", {}).get("name", "Unknown")
         print(f"  [{state_name}] {issue['identifier']}: {issue['title'][:50]}...")
     print(f"\nExported {len(issues)} issues")
 
@@ -449,5 +454,5 @@ def main():
     print("\nDone!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

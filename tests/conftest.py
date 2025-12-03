@@ -1,6 +1,5 @@
 """Shared test fixtures and configuration."""
 
-import os
 import sys
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -167,11 +166,7 @@ def sample_telegram_message():
     message.forwards = 10
     message.reactions = None
     message.chat_id = 1234567890
-    message.get_sender = AsyncMock(return_value=MagicMock(
-        first_name="Test",
-        last_name="User",
-        username="testuser"
-    ))
+    message.get_sender = AsyncMock(return_value=MagicMock(first_name="Test", last_name="User", username="testuser"))
     return message
 
 
@@ -206,12 +201,8 @@ def mock_openai_client():
         client.chat.completions.create = MagicMock(return_value=response)
 
         # Mock audio
-        client.audio.transcriptions.create = MagicMock(
-            return_value=MagicMock(text="Transcribed text")
-        )
-        client.audio.speech.create = MagicMock(
-            return_value=MagicMock(stream_to_file=MagicMock())
-        )
+        client.audio.transcriptions.create = MagicMock(return_value=MagicMock(text="Transcribed text"))
+        client.audio.speech.create = MagicMock(return_value=MagicMock(stream_to_file=MagicMock()))
 
         yield client
 
@@ -239,6 +230,7 @@ def mock_boto3():
     """Mock boto3 for AWS tests."""
     with patch.dict("sys.modules", {"boto3": MagicMock(), "botocore": MagicMock()}):
         import boto3
+
         session = MagicMock()
         boto3.Session = MagicMock(return_value=session)
         yield session

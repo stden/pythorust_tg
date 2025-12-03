@@ -1,15 +1,15 @@
 """LLM-based chat analyzer using OpenAI, Claude, or Gemini."""
 
-import os
 import json
-from typing import Dict, Any, List, Optional
+import os
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
 
 from .config import AnalyzerConfig
-from .models import ChatAnalysisResult, Topic, ActivityMetrics, Discussion
+from .models import ActivityMetrics, ChatAnalysisResult, Discussion, Topic
 
 load_dotenv()
 
@@ -30,23 +30,22 @@ class LLMAnalyzer:
         """Setup LLM client based on provider."""
         if self.config.llm_provider == "openai":
             import openai
+
             self.client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         elif self.config.llm_provider == "claude":
             import anthropic
+
             self.client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
         elif self.config.llm_provider == "gemini":
             import google.generativeai as genai
+
             genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
             self.client = genai.GenerativeModel(self.config.model)
         else:
             raise ValueError(f"Unsupported LLM provider: {self.config.llm_provider}")
 
     def analyze(
-        self,
-        messages_text: str,
-        metadata: Dict[str, Any],
-        chat_name: str,
-        prompt_template: Optional[str] = None
+        self, messages_text: str, metadata: Dict[str, Any], chat_name: str, prompt_template: Optional[str] = None
     ) -> ChatAnalysisResult:
         """Analyze chat messages using LLM.
 
@@ -132,13 +131,7 @@ Your analysis must be in JSON format with the following structure:
 
 Analyze the messages and provide your response in this exact JSON format."""
 
-    def _build_prompt(
-        self,
-        template: str,
-        messages_text: str,
-        metadata: Dict[str, Any],
-        chat_name: str
-    ) -> str:
+    def _build_prompt(self, template: str, messages_text: str, metadata: Dict[str, Any], chat_name: str) -> str:
         """Build complete prompt with messages and metadata.
 
         Args:
@@ -180,11 +173,14 @@ Provide your analysis in JSON format as specified above."""
             response = self.client.chat.completions.create(
                 model=self.config.model,
                 messages=[
-                    {"role": "system", "content": "You are an expert chat analyzer. Always respond in valid JSON format."},
-                    {"role": "user", "content": prompt}
+                    {
+                        "role": "system",
+                        "content": "You are an expert chat analyzer. Always respond in valid JSON format.",
+                    },
+                    {"role": "user", "content": prompt},
                 ],
                 temperature=self.config.temperature,
-                max_tokens=self.config.max_tokens
+                max_tokens=self.config.max_tokens,
             )
             return response.choices[0].message.content
 
@@ -193,19 +189,14 @@ Provide your analysis in JSON format as specified above."""
                 model=self.config.model,
                 max_tokens=self.config.max_tokens,
                 temperature=self.config.temperature,
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
+                messages=[{"role": "user", "content": prompt}],
             )
             return response.content[0].text
 
         elif self.config.llm_provider == "gemini":
             response = self.client.generate_content(
                 prompt,
-                generation_config={
-                    "temperature": self.config.temperature,
-                    "max_output_tokens": self.config.max_tokens
-                }
+                generation_config={"temperature": self.config.temperature, "max_output_tokens": self.config.max_tokens},
             )
             return response.text
 
@@ -255,14 +246,11 @@ Provide your analysis in JSON format as specified above."""
                 "key_participants": [],
                 "summary": "Failed to parse analysis",
                 "insights": [],
-                "recommendations": []
+                "recommendations": [],
             }
 
     def _create_result(
-        self,
-        analysis_data: Dict[str, Any],
-        chat_name: str,
-        metadata: Dict[str, Any]
+        self, analysis_data: Dict[str, Any], chat_name: str, metadata: Dict[str, Any]
     ) -> ChatAnalysisResult:
         """Create ChatAnalysisResult from parsed data.
 
@@ -281,7 +269,7 @@ Provide your analysis in JSON format as specified above."""
                 name=topic_data.get("name", "Unknown"),
                 mentions=topic_data.get("mentions", 0),
                 sentiment=topic_data.get("sentiment", "neutral"),
-                key_message_ids=topic_data.get("key_message_ids", [])
+                key_message_ids=topic_data.get("key_message_ids", []),
             )
             topics.append(topic)
 
@@ -299,7 +287,7 @@ Provide your analysis in JSON format as specified above."""
                 date=date,
                 participants=disc_data.get("participants", []),
                 messages_count=disc_data.get("messages_count", 0),
-                summary=disc_data.get("summary", "")
+                summary=disc_data.get("summary", ""),
             )
             discussions.append(discussion)
 
@@ -338,7 +326,7 @@ Provide your analysis in JSON format as specified above."""
             messages_per_day=messages_per_day,
             avg_message_length=0.0,  # Would need to calculate from messages
             media_percentage=0.0,  # Would need to calculate from messages
-            reactions_count=total_reactions
+            reactions_count=total_reactions,
         )
 
         # Create result
@@ -358,7 +346,7 @@ Provide your analysis in JSON format as specified above."""
             date_range_end=date_range_end,
             summary=analysis_data.get("summary", ""),
             insights=analysis_data.get("insights", []),
-            recommendations=analysis_data.get("recommendations", [])
+            recommendations=analysis_data.get("recommendations", []),
         )
 
         return result

@@ -1,15 +1,16 @@
 """Data models for chat analysis."""
 
-from dataclasses import dataclass, asdict, field
-from typing import List, Optional, Dict, Any
+import json
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
-import json
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
 class Topic:
     """Discussion topic."""
+
     name: str
     mentions: int
     sentiment: str
@@ -19,6 +20,7 @@ class Topic:
 @dataclass
 class Discussion:
     """Important discussion."""
+
     title: str
     date: datetime
     participants: List[str]
@@ -29,6 +31,7 @@ class Discussion:
 @dataclass
 class ActivityMetrics:
     """Activity metrics for a chat."""
+
     total_messages: int
     active_users: int
     messages_per_day: float
@@ -94,12 +97,13 @@ class ChatAnalysisResult:
     def save_json(self, path: Path):
         """Save to JSON file."""
         path.parent.mkdir(parents=True, exist_ok=True)
-        with open(path, 'w', encoding='utf-8') as f:
+        with open(path, "w", encoding="utf-8") as f:
             f.write(self.to_json())
 
     def save_markdown(self, path: Path):
         """Save to Markdown file with formatted report."""
         from .utils import ensure_dir
+
         ensure_dir(path)
 
         lines = []
@@ -114,8 +118,8 @@ class ChatAnalysisResult:
         lines.extend(self._format_insights())
         lines.extend(self._format_recommendations())
 
-        with open(path, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(lines))
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("\n".join(lines))
 
     def _format_header(self) -> List[str]:
         """Format markdown header section."""
@@ -180,14 +184,16 @@ class ChatAnalysisResult:
 
         lines = ["## 💬 Topics", ""]
         for i, topic in enumerate(self.topics, 1):
-            lines.extend([
-                f"### {i}. {topic.name}",
-                "",
-                f"- **Mentions:** {topic.mentions}",
-                f"- **Sentiment:** {topic.sentiment}",
-            ])
+            lines.extend(
+                [
+                    f"### {i}. {topic.name}",
+                    "",
+                    f"- **Mentions:** {topic.mentions}",
+                    f"- **Sentiment:** {topic.sentiment}",
+                ]
+            )
             if topic.key_message_ids:
-                msg_ids = ', '.join(map(str, topic.key_message_ids[:5]))
+                msg_ids = ", ".join(map(str, topic.key_message_ids[:5]))
                 lines.append(f"- **Key Messages:** {msg_ids}")
             lines.append("")
         return lines
@@ -199,20 +205,24 @@ class ChatAnalysisResult:
 
         lines = ["## 🗣️ Key Discussions", ""]
         for i, disc in enumerate(self.discussions, 1):
-            lines.extend([
-                f"### {i}. {disc.title}",
-                "",
-                f"- **Date:** {disc.date.strftime('%Y-%m-%d')}",
-                f"- **Participants:** {', '.join(disc.participants[:10])}",
-            ])
+            lines.extend(
+                [
+                    f"### {i}. {disc.title}",
+                    "",
+                    f"- **Date:** {disc.date.strftime('%Y-%m-%d')}",
+                    f"- **Participants:** {', '.join(disc.participants[:10])}",
+                ]
+            )
             if len(disc.participants) > 10:
                 lines.append(f"  and {len(disc.participants) - 10} more...")
-            lines.extend([
-                f"- **Messages:** {disc.messages_count}",
-                "",
-                disc.summary,
-                "",
-            ])
+            lines.extend(
+                [
+                    f"- **Messages:** {disc.messages_count}",
+                    "",
+                    disc.summary,
+                    "",
+                ]
+            )
         return lines
 
     def _format_participants(self) -> List[str]:

@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import AsyncMock
 
-from behave import given, when, then
+from behave import given, then, when
 
 # Безопасные значения окружения до импорта модуля
 os.environ.setdefault("N8N_URL", "https://example.com")
@@ -46,14 +46,14 @@ def step_backup_dir_temp(context):
     context.backup_dir = n8n_backup.BACKUP_DIR
 
 
-@given('политика хранения: {retention:d} дней и максимум {max_count:d} бэкапов')
+@given("политика хранения: {retention:d} дней и максимум {max_count:d} бэкапов")
 def step_set_policy(context, retention, max_count):
     """Настраиваем сроки хранения и лимиты."""
     n8n_backup.RETENTION_DAYS = retention
     n8n_backup.MAX_BACKUPS = max_count
 
 
-@given('API отдаёт {wf_count:d} воркфлоу и {cred_count:d} credential')
+@given("API отдаёт {wf_count:d} воркфлоу и {cred_count:d} credential")
 def step_mock_api_data(context, wf_count, cred_count):
     """Мокаем ответы API, чтобы не ходить в сеть."""
     workflows = [{"id": i} for i in range(wf_count)]
@@ -96,9 +96,7 @@ def step_restore_backup(context, filename):
     context.backup = getattr(context, "backup", N8NBackup())
     target_file = context.backup_dir / filename
     loop = _get_loop()
-    context.restore_result = loop.run_until_complete(
-        context.backup.restore_backup(target_file)
-    )
+    context.restore_result = loop.run_until_complete(context.backup.restore_backup(target_file))
 
 
 @then("создан архив бэкапа")
@@ -107,16 +105,14 @@ def step_archive_created(context):
     assert context.archive_path.exists(), "Архив бэкапа не создан"
 
 
-@then('архив содержит информацию о {wf_count:d} воркфлоу и {cred_count:d} credential')
+@then("архив содержит информацию о {wf_count:d} воркфлоу и {cred_count:d} credential")
 def step_archive_contents(context, wf_count, cred_count):
     """Читаем файлы внутри архива и проверяем метаданные."""
     with tarfile.open(context.archive_path, "r:gz") as tar:
         members = tar.getnames()
         info_member = next(m for m in members if m.endswith("backup_info.json"))
         workflows_member = next(m for m in members if m.endswith("workflows.json"))
-        credentials_member = next(
-            (m for m in members if m.endswith("credentials_meta.json")), None
-        )
+        credentials_member = next((m for m in members if m.endswith("credentials_meta.json")), None)
 
         info_data = json.load(tar.extractfile(info_member))
         wf_data = json.load(tar.extractfile(workflows_member))
@@ -138,8 +134,7 @@ def step_count_backups(context, count):
 @then('архив "{filename}" удалён')
 def step_backup_removed(context, filename):
     """Убеждаемся, что старый архив удалён."""
-    assert not (context.backup_dir / filename).exists(), \
-        f"Архив {filename} не был удалён"
+    assert not (context.backup_dir / filename).exists(), f"Архив {filename} не был удалён"
 
 
 @then("восстановление неуспешно")

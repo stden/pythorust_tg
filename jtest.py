@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-import asyncio, os
-from telethon import TelegramClient
+import asyncio
+import os
+
 from dotenv import load_dotenv
+from telethon import TelegramClient
 
 load_dotenv("/srv/pythorust_tg/.env")
 API_ID = int(os.getenv("TELEGRAM_API_ID"))
 API_HASH = os.getenv("TELEGRAM_API_HASH")
 SESSION = "/srv/pythorust_tg/telegram_session"
 BOT_ID = 8022688437
+
 
 async def test():
     client = TelegramClient(SESSION, API_ID, API_HASH)
@@ -30,5 +33,6 @@ async def test():
             break
 
     await client.disconnect()
+
 
 asyncio.run(test())

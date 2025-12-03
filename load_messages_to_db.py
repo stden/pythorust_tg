@@ -9,11 +9,11 @@
     python load_messages_to_db.py --days 7         # только сообщения за последние 7 дней
 """
 
+import argparse
 import asyncio
 import json
 import os
 import sys
-import argparse
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -23,8 +23,8 @@ from mysql.connector import Error as MySQLError
 # Добавляем путь к проекту
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from telegram_session import get_client, known_senders, SessionLock
-from chat_export_utils import resolve_sender_name, collect_reactions_summary
+from chat_export_utils import collect_reactions_summary, resolve_sender_name
+from telegram_session import SessionLock, get_client, known_senders
 
 
 def get_mysql_connection():
@@ -149,7 +149,9 @@ async def load_messages_from_chat(
             "message_text": m.text[:65535] if m.text else None,
             "date": m.date.replace(tzinfo=None),
             "reply_to_msg_id": m.reply_to_msg_id if hasattr(m, "reply_to_msg_id") else None,
-            "forward_from_id": m.forward.from_id.user_id if m.forward and hasattr(m.forward.from_id, "user_id") else None,
+            "forward_from_id": m.forward.from_id.user_id
+            if m.forward and hasattr(m.forward.from_id, "user_id")
+            else None,
             "views": m.views,
             "forwards": m.forwards,
             "reactions_count": reactions_count if isinstance(reactions_count, int) else 0,
@@ -238,6 +240,7 @@ async def main():
 
 if __name__ == "__main__":
     from dotenv import load_dotenv
+
     load_dotenv()
 
     asyncio.run(main())

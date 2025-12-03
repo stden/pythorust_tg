@@ -7,7 +7,8 @@ Kurigram is a fork of Pyrogram: https://docs.kurigram.live/
 """
 
 import os
-from typing import Optional, AsyncIterator, List
+from typing import AsyncIterator, List, Optional
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,8 +16,9 @@ load_dotenv()
 # Kurigram imports
 try:
     from kurigram import Client, filters
-    from kurigram.types import Message, Chat, User
     from kurigram.errors import SessionPasswordNeeded
+    from kurigram.types import Chat, Message, User
+
     KURIGRAM_AVAILABLE = True
 except ImportError:
     KURIGRAM_AVAILABLE = False
@@ -123,7 +125,7 @@ class KurigramClient:
     ) -> str:
         """Export chat messages to markdown format."""
         chat = await self.get_chat(chat_id)
-        chat_name = getattr(chat, 'title', None) or getattr(chat, 'first_name', 'chat')
+        chat_name = getattr(chat, "title", None) or getattr(chat, "first_name", "chat")
 
         lines = [f"# {chat_name}\n"]
 
@@ -171,10 +173,11 @@ async def main():
         dialogs = await client.get_dialogs(limit=10)
         print(f"\nTop {len(dialogs)} chats:")
         for chat in dialogs:
-            name = getattr(chat, 'title', None) or getattr(chat, 'first_name', 'Unknown')
+            name = getattr(chat, "title", None) or getattr(chat, "first_name", "Unknown")
             print(f"  - {name} (ID: {chat.id})")
 
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main())

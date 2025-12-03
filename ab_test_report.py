@@ -7,6 +7,7 @@ Report helper for A/B тестирования промптов.
 - число конверсий и конверсию
 - причины конверсий (детектированы/заданы кодом)
 """
+
 import argparse
 import os
 from collections import defaultdict
@@ -80,9 +81,7 @@ def fetch_metrics(
         conversions = row["conversions"] or 0
         row["conversion_rate"] = round((conversions / sessions) * 100, 2)
         if row["conversions_with_value"]:
-            row["avg_conversion_value"] = round(
-                (row["conversion_value_sum"] or 0) / row["conversions_with_value"], 2
-            )
+            row["avg_conversion_value"] = round((row["conversion_value_sum"] or 0) / row["conversions_with_value"], 2)
         else:
             row["avg_conversion_value"] = None
     return rows
@@ -100,7 +99,7 @@ def print_report(rows: List[Dict], bot_name: str, experiment: str, days: Optiona
 
     print(f"{'Variant':22} {'Sessions':8} {'Conv':6} {'Rate %':7} {'Avg value':10}")
     for row in rows:
-        avg_val = row['avg_conversion_value']
+        avg_val = row["avg_conversion_value"]
         avg_text = f"{avg_val:.2f}" if avg_val is not None else "-"
         print(
             f"{row['variant'][:22]:22} "
@@ -110,9 +109,7 @@ def print_report(rows: List[Dict], bot_name: str, experiment: str, days: Optiona
             f"{avg_text:10}"
         )
         if row["reason_breakdown"]:
-            reasons = ", ".join(
-                f"{reason}:{count}" for reason, count in row["reason_breakdown"].items()
-            )
+            reasons = ", ".join(f"{reason}:{count}" for reason, count in row["reason_breakdown"].items())
             print(f"  reasons: {reasons}")
 
 

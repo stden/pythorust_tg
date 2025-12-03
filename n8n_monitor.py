@@ -5,12 +5,12 @@ N8N Service Monitor with Auto-Restart
 """
 
 import asyncio
-import aiohttp
 import logging
-from datetime import datetime
-from typing import Optional
-import sys
 import os
+import sys
+from datetime import datetime
+
+import aiohttp
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -28,10 +28,7 @@ TIMEOUT = int(os.getenv("TIMEOUT"))
 API_ID = int(os.getenv("TELEGRAM_API_ID"))
 API_HASH = os.getenv("TELEGRAM_API_HASH")
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -45,7 +42,8 @@ class N8NMonitor:
 
         if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
             from telethon import TelegramClient
-            self.telegram_client = TelegramClient('n8n_monitor', API_ID, API_HASH)
+
+            self.telegram_client = TelegramClient("n8n_monitor", API_ID, API_HASH)
 
     async def send_telegram_alert(self, message: str):
         """Send alert to Telegram."""
@@ -60,7 +58,7 @@ class N8NMonitor:
 
             await self.telegram_client.send_message(
                 int(TELEGRAM_CHAT_ID),
-                f"🚨 N8N Monitor Alert\n\n{message}\n\nTime: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                f"🚨 N8N Monitor Alert\n\n{message}\n\nTime: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
             )
             logger.info(f"Telegram alert sent: {message}")
         except Exception as e:
@@ -74,13 +72,13 @@ class N8NMonitor:
             async with aiohttp.ClientSession() as session:
                 headers = {}
                 if N8N_API_KEY:
-                    headers['X-N8N-API-KEY'] = N8N_API_KEY
+                    headers["X-N8N-API-KEY"] = N8N_API_KEY
 
                 async with session.get(
                     f"{N8N_URL}/healthz",
                     headers=headers,
                     timeout=aiohttp.ClientTimeout(total=TIMEOUT),
-                    ssl=False  # Для self-signed сертификатов
+                    ssl=False,  # Для self-signed сертификатов
                 ) as response:
                     if response.status == 200:
                         logger.info("✅ N8N is healthy")
@@ -112,9 +110,7 @@ class N8NMonitor:
         try:
             # Выполняем команду перезапуска
             process = await asyncio.create_subprocess_shell(
-                RESTART_COMMAND,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                RESTART_COMMAND, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
             stdout, stderr = await process.communicate()
 

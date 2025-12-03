@@ -6,9 +6,10 @@ AI Project Consultant with RAG
 
 import asyncio
 import os
-from pathlib import Path
-from typing import List, Dict, Optional
 import sys
+from pathlib import Path
+from typing import Dict, List, Optional
+
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -17,9 +18,9 @@ load_dotenv()
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from integrations.openai_client import chat_completion
-from integrations.prompts import load_prompt, Prompt
 import logging
+
+from integrations.openai_client import chat_completion
 
 # Configuration from .env
 API_ID = int(os.getenv("TELEGRAM_API_ID"))
@@ -42,7 +43,7 @@ class AIProjectConsultant:
         self,
         model: Optional[str] = None,
         knowledge_base_path: Optional[Path] = None,
-        system_prompt: Optional[str] = None
+        system_prompt: Optional[str] = None,
     ):
         self.model = model or DEFAULT_MODEL
         self.knowledge_base = knowledge_base_path or Path(KNOWLEDGE_BASE_PATH)
@@ -85,11 +86,13 @@ class AIProjectConsultant:
         documents = []
         for md_file in self.knowledge_base.rglob("*.md"):
             try:
-                content = md_file.read_text(encoding='utf-8')
-                documents.append({
-                    "file": str(md_file.relative_to(self.knowledge_base)),
-                    "content": content[:2000]  # First 2000 chars
-                })
+                content = md_file.read_text(encoding="utf-8")
+                documents.append(
+                    {
+                        "file": str(md_file.relative_to(self.knowledge_base)),
+                        "content": content[:2000],  # First 2000 chars
+                    }
+                )
             except Exception as e:
                 logger.error(f"Error reading {md_file}: {e}")
 
@@ -140,14 +143,10 @@ class AIProjectConsultant:
 
         # Добавляем найденные документы как контекст
         if context_docs:
-            context_text = "\n\n---\n\n".join([
-                f"Релевантная информация из базы знаний:\n{doc}"
-                for doc in context_docs
-            ])
-            messages.append({
-                "role": "system",
-                "content": f"Используй эту информацию для ответа:\n\n{context_text}"
-            })
+            context_text = "\n\n---\n\n".join(
+                [f"Релевантная информация из базы знаний:\n{doc}" for doc in context_docs]
+            )
+            messages.append({"role": "system", "content": f"Используй эту информацию для ответа:\n\n{context_text}"})
 
         # Добавляем историю разговора
         messages.extend(self.conversation_history[-10:])  # Last 10 messages
@@ -160,7 +159,7 @@ class AIProjectConsultant:
             response = await chat_completion(
                 messages=messages,
                 model=self.model,
-                temperature=0.3  # Более детерминированные ответы
+                temperature=0.3,  # Более детерминированные ответы
             )
 
             # Сохраняем в историю
@@ -234,13 +233,13 @@ async def telegram_bot_mode():
         print("❌ Установите переменную AI_CONSULTANT_BOT_TOKEN")
         return
 
-    client = TelegramClient('ai_consultant_bot', API_ID, API_HASH)
-    consultant = AIProjectConsultant()
+    client = TelegramClient("ai_consultant_bot", API_ID, API_HASH)
+    AIProjectConsultant()
 
     # User sessions
     user_sessions: Dict[int, AIProjectConsultant] = {}
 
-    @client.on(events.NewMessage(pattern='/start'))
+    @client.on(events.NewMessage(pattern="/start"))
     async def start_handler(event):
         await event.respond(
             "🤖 **ИИ-консультант по проектам**\n\n"
@@ -255,14 +254,14 @@ async def telegram_bot_mode():
             "/help - помощь"
         )
 
-    @client.on(events.NewMessage(pattern='/clear'))
+    @client.on(events.NewMessage(pattern="/clear"))
     async def clear_handler(event):
         user_id = event.sender_id
         if user_id in user_sessions:
             await user_sessions[user_id].clear_history()
         await event.respond("✅ История диалога очищена")
 
-    @client.on(events.NewMessage(pattern='/help'))
+    @client.on(events.NewMessage(pattern="/help"))
     async def help_handler(event):
         await event.respond(
             "📚 **Как пользоваться:**\n\n"
@@ -278,7 +277,7 @@ async def telegram_bot_mode():
 
     @client.on(events.NewMessage)
     async def message_handler(event):
-        if event.message.text.startswith('/'):
+        if event.message.text.startswith("/"):
             return  # Skip commands
 
         user_id = event.sender_id
@@ -290,7 +289,7 @@ async def telegram_bot_mode():
         consultant = user_sessions[user_id]
 
         # Show typing indicator
-        async with client.action(event.chat_id, 'typing'):
+        async with client.action(event.chat_id, "typing"):
             response = await consultant.consult(event.message.text)
 
         await event.respond(response)
@@ -309,7 +308,7 @@ async def main():
         "--mode",
         choices=["interactive", "telegram"],
         default="interactive",
-        help="Run mode: interactive console or Telegram bot"
+        help="Run mode: interactive console or Telegram bot",
     )
 
     args = parser.parse_args()

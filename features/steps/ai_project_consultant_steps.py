@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List
 from unittest.mock import AsyncMock, patch
 
-from behave import given, when, then
+from behave import given, then, when
 
 # Задаём безопасные значения окружения до импорта модуля
 os.environ.setdefault("TELEGRAM_API_ID", "1")
@@ -55,18 +55,14 @@ def step_create_kb_file(context, filename):
 @when("я создаю консультанта с этой базой")
 def step_create_consultant(context):
     """Инициализируем AI консультанта."""
-    context.consultant = AIProjectConsultant(
-        knowledge_base_path=context.kb_path
-    )
+    context.consultant = AIProjectConsultant(knowledge_base_path=context.kb_path)
 
 
 @when("я индексирую базу знаний")
 def step_index_kb(context):
     """Запускаем индексацию базы знаний."""
     loop = _get_loop()
-    context.index_result = loop.run_until_complete(
-        context.consultant.index_knowledge_base()
-    )
+    context.index_result = loop.run_until_complete(context.consultant.index_knowledge_base())
 
 
 @when('я выполняю консультацию по запросу "{query}" с RAG')
@@ -79,15 +75,11 @@ def step_consult_with_rag(context, query):
         return "Рекомендация: храните бэкапы и проверяйте доступность."
 
     # Гарантируем наличие контекста RAG без зависимости от простого поиска
-    context.consultant.search_knowledge_base = AsyncMock(
-        return_value=["Контекст про бэкапы в MinIO"]
-    )
+    context.consultant.search_knowledge_base = AsyncMock(return_value=["Контекст про бэкапы в MinIO"])
 
     loop = _get_loop()
     with patch("ai_project_consultant.chat_completion", side_effect=fake_chat_completion):
-        context.response_text = loop.run_until_complete(
-            context.consultant.consult(query, use_rag=True)
-        )
+        context.response_text = loop.run_until_complete(context.consultant.consult(query, use_rag=True))
     context.sent_messages = sent_messages
 
 
@@ -101,24 +93,21 @@ def step_clear_history(context):
 @then("найдено не менее {count:d} документов")
 def step_found_docs(context, count):
     """Проверяем количество документов после индексации."""
-    assert len(context.index_result) >= count, \
-        f"Ожидалось >= {count}, получено {len(context.index_result)}"
+    assert len(context.index_result) >= count, f"Ожидалось >= {count}, получено {len(context.index_result)}"
 
 
 @then("в сообщения передан контекст из базы знаний")
 def step_messages_have_context(context):
     """Проверяем, что контекст из базы знаний попадает в сообщения."""
     assert any(
-        msg["role"] == "system" and "Релевантная информация" in msg["content"]
-        for msg in context.sent_messages
+        msg["role"] == "system" and "Релевантная информация" in msg["content"] for msg in context.sent_messages
     ), "Контекст из базы знаний не найден в сообщениях"
 
 
 @then('ответ содержит "{text}"')
 def step_response_contains(context, text):
     """Проверяем текст ответа."""
-    assert text.lower() in context.response_text.lower(), \
-        f"'{text}' не найден в ответе: {context.response_text}"
+    assert text.lower() in context.response_text.lower(), f"'{text}' не найден в ответе: {context.response_text}"
 
 
 @then("история диалога пустая")

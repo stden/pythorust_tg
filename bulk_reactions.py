@@ -93,8 +93,7 @@ async def main():
     parser = argparse.ArgumentParser(description="Send reactions to many messages.")
     parser.add_argument(
         "--chat",
-        help="Chat alias from config.yml, @username or numeric id "
-        "(fallback: BULK_REACTIONS_CHAT or LIKE_CHAT_ID env).",
+        help="Chat alias from config.yml, @username or numeric id (fallback: BULK_REACTIONS_CHAT or LIKE_CHAT_ID env).",
     )
     parser.add_argument(
         "--emoji",

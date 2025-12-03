@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 """Шаги для тестирования системы промптов."""
 
-from behave import given, when, then
-from pathlib import Path
 import sys
+from pathlib import Path
+
+from behave import given, then, when
 
 # Добавляем корень проекта в путь
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from integrations.prompts import load_prompt, list_prompts, Prompt
+from integrations.prompts import Prompt, list_prompts, load_prompt
 
 
 @given('существует файл промпта "{filename}"')
@@ -36,7 +37,7 @@ def step_load_prompt(context, prompt_name):
         context.load_error = e
 
 
-@when('я запрашиваю список промптов')
+@when("я запрашиваю список промптов")
 def step_list_prompts(context):
     """Получаем список всех промптов."""
     context.prompts_list = list_prompts()
@@ -46,18 +47,16 @@ def step_list_prompts(context):
 def step_prompt_contains(context, text):
     """Проверяем, что промпт содержит указанный текст."""
     assert context.prompt_content is not None, "Промпт не загружен"
-    assert text.lower() in context.prompt_content.lower(), \
-        f"Текст '{text}' не найден в промпте"
+    assert text.lower() in context.prompt_content.lower(), f"Текст '{text}' не найден в промпте"
 
 
-@then('список содержит не менее {count:d} промптов')
+@then("список содержит не менее {count:d} промптов")
 def step_prompts_count(context, count):
     """Проверяем количество промптов."""
-    assert len(context.prompts_list) >= count, \
-        f"Найдено {len(context.prompts_list)} промптов, ожидалось >= {count}"
+    assert len(context.prompts_list) >= count, f"Найдено {len(context.prompts_list)} промптов, ожидалось >= {count}"
 
 
-@then('возникает ошибка загрузки')
+@then("возникает ошибка загрузки")
 def step_load_error(context):
     """Проверяем, что произошла ошибка загрузки."""
     assert context.load_error is not None, "Ожидалась ошибка загрузки"

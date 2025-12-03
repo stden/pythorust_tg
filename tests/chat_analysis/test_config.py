@@ -1,7 +1,5 @@
 """Tests for chat analysis configuration."""
 
-import pytest
-import os
 from pathlib import Path
 
 from chat_analysis.config import AnalyzerConfig
@@ -25,13 +23,7 @@ def test_default_config():
 
 def test_custom_config():
     """Test custom configuration values."""
-    config = AnalyzerConfig(
-        message_limit=500,
-        days_back=7,
-        llm_provider="claude",
-        temperature=0.5,
-        verbose=False
-    )
+    config = AnalyzerConfig(message_limit=500, days_back=7, llm_provider="claude", temperature=0.5, verbose=False)
 
     assert config.message_limit == 500
     assert config.days_back == 7

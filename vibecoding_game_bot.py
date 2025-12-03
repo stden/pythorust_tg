@@ -22,9 +22,7 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv("VIBECODING_BOT_TOKEN")
 BOT_NAME = "VibeCoderzBot"
-ALLOWED_USERS = [
-    int(x) for x in os.getenv("VIBECODING_ALLOWED_USERS", "").split(",") if x.strip()
-]
+ALLOWED_USERS = [int(x) for x in os.getenv("VIBECODING_ALLOWED_USERS", "").split(",") if x.strip()]
 
 ROUND_DURATION = int(os.getenv("VIBE_ROUND_DURATION", "90"))
 VOTE_DURATION = int(os.getenv("VIBE_VOTE_DURATION", "45"))
@@ -53,11 +51,12 @@ PROMPTS: List[str] = [
     "Напиши ритуал деплоя в стиле хайку: причина, действие, откат.",
     "Подготовь вайб-карту спринта: риск, яркое событие и скрытый баг.",
     "Сделай MIDI-настроение: темп, инструмент, первая нота — всё в тексте.",
-    "Опиши \"идеальный вечер кодера\" в формате JSON из 3 ключей.",
+    'Опиши "идеальный вечер кодера" в формате JSON из 3 ключей.',
     "Сборка команды мечты: роли трёх коев и их короткие суперсилы.",
     "Спринт без дедлайнов: как понять, что ты в потоке? Дай чеклист.",
     "Набросай эмодзи-протокол стендапа: статус, блокер, хайлайт.",
 ]
+
 
 class MySQLLogger:
     """Запись пользователей и сообщений бота в MySQL."""
@@ -139,9 +138,7 @@ class MySQLLogger:
                 )
             self.conn.commit()
         except Exception:
-            logger.exception(
-                "Failed to save %s message for user %s", direction, user_id
-            )
+            logger.exception("Failed to save %s message for user %s", direction, user_id)
 
 
 @dataclass
@@ -186,24 +183,12 @@ class VibeCodingGameBot(TelegramBotBase):
         self.chat_locks: Dict[int, asyncio.Lock] = defaultdict(asyncio.Lock)
 
     async def setup_handlers(self):
-        self.client.add_event_handler(
-            self._start_help, events.NewMessage(pattern=r"^/(start|help)(@[\w_]+)?$")
-        )
-        self.client.add_event_handler(
-            self._start_game, events.NewMessage(pattern=r"^/vibe_game(@[\w_]+)?$")
-        )
-        self.client.add_event_handler(
-            self._join_game, events.NewMessage(pattern=r"^/vibe_join(@[\w_]+)?$")
-        )
-        self.client.add_event_handler(
-            self._start_round, events.NewMessage(pattern=r"^/vibe_round(@[\w_]+)?$")
-        )
-        self.client.add_event_handler(
-            self._stop_game, events.NewMessage(pattern=r"^/vibe_stop(@[\w_]+)?$")
-        )
-        self.client.add_event_handler(
-            self._show_scores, events.NewMessage(pattern=r"^/vibe_score(@[\w_]+)?$")
-        )
+        self.client.add_event_handler(self._start_help, events.NewMessage(pattern=r"^/(start|help)(@[\w_]+)?$"))
+        self.client.add_event_handler(self._start_game, events.NewMessage(pattern=r"^/vibe_game(@[\w_]+)?$"))
+        self.client.add_event_handler(self._join_game, events.NewMessage(pattern=r"^/vibe_join(@[\w_]+)?$"))
+        self.client.add_event_handler(self._start_round, events.NewMessage(pattern=r"^/vibe_round(@[\w_]+)?$"))
+        self.client.add_event_handler(self._stop_game, events.NewMessage(pattern=r"^/vibe_stop(@[\w_]+)?$"))
+        self.client.add_event_handler(self._show_scores, events.NewMessage(pattern=r"^/vibe_score(@[\w_]+)?$"))
         self.client.add_event_handler(
             self._submit_vibe,
             events.NewMessage(pattern=r"^/vibe(@[\w_]+)?\s+(.+)$"),
@@ -212,9 +197,7 @@ class VibeCodingGameBot(TelegramBotBase):
             self._submit_vibe,
             events.NewMessage(pattern=r"^>vibe\s+(.+)$"),
         )
-        self.client.add_event_handler(
-            self._handle_vote, events.CallbackQuery(pattern=b"^vote\\|")
-        )
+        self.client.add_event_handler(self._handle_vote, events.CallbackQuery(pattern=b"^vote\\|"))
 
     async def on_start(self):
         try:
@@ -237,7 +220,11 @@ class VibeCodingGameBot(TelegramBotBase):
                 user_id = event.sender_id or event.chat_id
 
             msg = event.message
-            text = text_override if text_override is not None else getattr(msg, "message", None) or getattr(event, "raw_text", "") or ""
+            text = (
+                text_override
+                if text_override is not None
+                else getattr(msg, "message", None) or getattr(event, "raw_text", "") or ""
+            )
             self.db.save_message(
                 user_id=user_id,
                 message_id=msg.id,
@@ -371,9 +358,7 @@ class VibeCodingGameBot(TelegramBotBase):
             self._cancel_task(state.vote_task)
 
             state.round = VibeRound(round_id=round_id, prompt=prompt)
-            state.round_task = asyncio.create_task(
-                self._close_round_after(chat_id, round_id, ROUND_DURATION)
-            )
+            state.round_task = asyncio.create_task(self._close_round_after(chat_id, round_id, ROUND_DURATION))
 
         await event.respond(
             f"🎯 Новый раунд!\n"
@@ -457,12 +442,7 @@ class VibeCodingGameBot(TelegramBotBase):
         async with self.chat_locks[chat_id]:
             state = self.games.get(chat_id)
             round_state = state.round if state else None
-            if (
-                not state
-                or not round_state
-                or round_state.round_id != round_id
-                or round_state.status != "voting"
-            ):
+            if not state or not round_state or round_state.round_id != round_id or round_state.status != "voting":
                 await event.answer("Раунд уже закрыт.")
                 return
 
@@ -500,21 +480,14 @@ class VibeCodingGameBot(TelegramBotBase):
         msg = await self.client.send_message(chat_id, vote_text, buttons=buttons, link_preview=False)
         round_state.vote_message_id = msg.id
 
-        state.vote_task = asyncio.create_task(
-            self._close_vote_after(chat_id, round_state.round_id, VOTE_DURATION)
-        )
+        state.vote_task = asyncio.create_task(self._close_vote_after(chat_id, round_state.round_id, VOTE_DURATION))
 
     async def _close_vote_after(self, chat_id: int, round_id: str, delay: int):
         await asyncio.sleep(delay)
         async with self.chat_locks[chat_id]:
             state = self.games.get(chat_id)
             round_state = state.round if state else None
-            if (
-                not state
-                or not round_state
-                or round_state.round_id != round_id
-                or round_state.status != "voting"
-            ):
+            if not state or not round_state or round_state.round_id != round_id or round_state.status != "voting":
                 return
 
             round_state.status = "closed"
@@ -608,7 +581,7 @@ class VibeCodingGameBot(TelegramBotBase):
             buttons.append(Button.inline(text, data=f"vote|{round_state.round_id}|{user_id}".encode()))
 
         # по две кнопки в ряд
-        rows = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
+        rows = [buttons[i : i + 2] for i in range(0, len(buttons), 2)]
         return rows
 
     def _vote_message_text(self, state: GameState) -> str:
@@ -616,12 +589,7 @@ class VibeCodingGameBot(TelegramBotBase):
         if not round_state:
             return "Раунд закрыт."
 
-        lines = [
-            "🗳 Голосование за лучший вайб",
-            f"Промпт: {round_state.prompt}",
-            "",
-            "Участники:"
-        ]
+        lines = ["🗳 Голосование за лучший вайб", f"Промпт: {round_state.prompt}", "", "Участники:"]
 
         for user_id, submission in round_state.submissions.items():
             name = state.players.get(user_id, f"ID {user_id}")

@@ -5,31 +5,28 @@ Export Telegram chats list to MySQL database.
 
 import asyncio
 import os
-import pymysql
-from datetime import datetime
-from telethon import TelegramClient
-from telethon.tl.types import (
-    User, Chat, Channel,
-    InputPeerUser, InputPeerChat, InputPeerChannel
-)
-from dotenv import load_dotenv
 
-load_dotenv('/srv/pythorust_tg/.env')
+import pymysql
+from dotenv import load_dotenv
+from telethon import TelegramClient
+from telethon.tl.types import Channel, Chat, User
+
+load_dotenv("/srv/pythorust_tg/.env")
 
 # Telegram credentials
-API_ID = int(os.getenv('TELEGRAM_API_ID'))
-API_HASH = os.getenv('TELEGRAM_API_HASH')
-SESSION_FILE = '/srv/pythorust_tg/telegram_session'
+API_ID = int(os.getenv("TELEGRAM_API_ID"))
+API_HASH = os.getenv("TELEGRAM_API_HASH")
+SESSION_FILE = "/srv/pythorust_tg/telegram_session"
 
 # MySQL credentials
 MYSQL_CONFIG = {
-    'host': os.getenv('MYSQL_HOST', 'localhost'),
-    'port': int(os.getenv('MYSQL_PORT', 3306)),
-    'database': os.getenv('MYSQL_DATABASE', 'pythorust_tg'),
-    'user': os.getenv('MYSQL_USER', 'pythorust_tg'),
-    'password': os.getenv('MYSQL_PASSWORD'),
-    'charset': 'utf8mb4',
-    'cursorclass': pymysql.cursors.DictCursor
+    "host": os.getenv("MYSQL_HOST", "localhost"),
+    "port": int(os.getenv("MYSQL_PORT", 3306)),
+    "database": os.getenv("MYSQL_DATABASE", "pythorust_tg"),
+    "user": os.getenv("MYSQL_USER", "pythorust_tg"),
+    "password": os.getenv("MYSQL_PASSWORD"),
+    "charset": "utf8mb4",
+    "cursorclass": pymysql.cursors.DictCursor,
 }
 
 
@@ -37,15 +34,15 @@ def get_chat_type(entity) -> str:
     """Determine chat type from entity."""
     if isinstance(entity, User):
         if entity.bot:
-            return 'bot'
-        return 'user'
+            return "bot"
+        return "user"
     elif isinstance(entity, Chat):
-        return 'group'
+        return "group"
     elif isinstance(entity, Channel):
         if entity.megagroup:
-            return 'supergroup'
-        return 'channel'
-    return 'user'
+            return "supergroup"
+        return "channel"
+    return "user"
 
 
 def get_mysql_connection():
@@ -55,7 +52,7 @@ def get_mysql_connection():
 
 async def export_chats():
     """Export all chats to MySQL."""
-    phone = os.getenv('TELEGRAM_PHONE')
+    os.getenv("TELEGRAM_PHONE")
     client = TelegramClient(SESSION_FILE, API_ID, API_HASH)
 
     # Connect without starting auth flow - use existing session
@@ -103,12 +100,12 @@ async def export_chats():
             entity = dialog.entity
             chat_id = dialog.id
             title = dialog.title or dialog.name or "Unknown"
-            username = getattr(entity, 'username', None)
+            username = getattr(entity, "username", None)
             chat_type = get_chat_type(entity)
 
             # Get members count
             members_count = None
-            if hasattr(entity, 'participants_count'):
+            if hasattr(entity, "participants_count"):
                 members_count = entity.participants_count
 
             # Get unread count
@@ -120,17 +117,28 @@ async def export_chats():
                 last_message_date = dialog.message.date
 
             # Get flags
-            is_verified = getattr(entity, 'verified', False)
-            is_restricted = getattr(entity, 'restricted', False)
-            is_creator = getattr(entity, 'creator', False)
-            is_admin = getattr(entity, 'admin_rights', None) is not None
+            is_verified = getattr(entity, "verified", False)
+            is_restricted = getattr(entity, "restricted", False)
+            is_creator = getattr(entity, "creator", False)
+            is_admin = getattr(entity, "admin_rights", None) is not None
 
             # Insert or update
-            cursor.execute(insert_query, (
-                chat_id, title, username, chat_type, members_count,
-                unread_count, last_message_date, is_verified, is_restricted,
-                is_creator, is_admin
-            ))
+            cursor.execute(
+                insert_query,
+                (
+                    chat_id,
+                    title,
+                    username,
+                    chat_type,
+                    members_count,
+                    unread_count,
+                    last_message_date,
+                    is_verified,
+                    is_restricted,
+                    is_creator,
+                    is_admin,
+                ),
+            )
 
             if cursor.rowcount == 1:
                 inserted += 1
@@ -149,13 +157,13 @@ async def export_chats():
 
     await client.disconnect()
 
-    print(f"\n{'='*50}")
-    print(f"Export complete!")
+    print(f"\n{'=' * 50}")
+    print("Export complete!")
     print(f"  Inserted: {inserted}")
     print(f"  Updated:  {updated}")
     print(f"  Errors:   {errors}")
     print(f"  Total:    {len(dialogs)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(export_chats())

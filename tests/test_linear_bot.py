@@ -2,7 +2,7 @@
 
 import sys
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -23,10 +23,7 @@ def mock_linear_bot_deps(mock_env, tmp_path):
 
     mock_linear = MagicMock()
 
-    with patch.dict("sys.modules", {
-        "telegram_session": mock_session,
-        "linear_client": mock_linear
-    }):
+    with patch.dict("sys.modules", {"telegram_session": mock_session, "linear_client": mock_linear}):
         yield {"session": mock_session, "linear": mock_linear}
 
 
@@ -75,6 +72,7 @@ class TestLinearBotMessageParsing:
 
     def test_extract_task_from_message(self):
         """Test extracting task title from message."""
+
         def extract_task_title(message):
             # Simple extraction logic
             lines = message.strip().split("\n")
@@ -88,6 +86,7 @@ class TestLinearBotMessageParsing:
 
     def test_extract_task_from_empty_message(self):
         """Test extracting task from empty message."""
+
         def extract_task_title(message):
             lines = message.strip().split("\n")
             if lines and lines[0]:
@@ -100,6 +99,7 @@ class TestLinearBotMessageParsing:
 
     def test_extract_task_truncates_long_title(self):
         """Test that long titles are truncated."""
+
         def extract_task_title(message, max_len=100):
             lines = message.strip().split("\n")
             if lines and lines[0]:
@@ -117,20 +117,17 @@ class TestLinearBotEventHandler:
     @pytest.mark.asyncio
     async def test_handler_creates_task(self, mock_linear_bot_deps):
         """Test that handler creates a Linear task."""
+
         async def create_task_from_message(message, linear_client, team_key):
             title = message.strip().split("\n")[0][:100]
-            result = linear_client.create_issue(
-                team_key=team_key,
-                title=title,
-                description=message
-            )
+            result = linear_client.create_issue(team_key=team_key, title=title, description=message)
             return result
 
         mock_linear = MagicMock()
         mock_linear.create_issue.return_value = {
             "id": "issue-123",
             "identifier": "TEST-1",
-            "url": "https://linear.app/..."
+            "url": "https://linear.app/...",
         }
 
         result = await create_task_from_message("Fix bug", mock_linear, "TEST")
@@ -141,13 +138,11 @@ class TestLinearBotEventHandler:
     @pytest.mark.asyncio
     async def test_handler_handles_linear_error(self, mock_linear_bot_deps):
         """Test that handler handles Linear errors gracefully."""
+
         async def create_task_safe(message, linear_client, team_key):
             try:
                 title = message.strip().split("\n")[0][:100]
-                return linear_client.create_issue(
-                    team_key=team_key,
-                    title=title
-                )
+                return linear_client.create_issue(team_key=team_key, title=title)
             except Exception as e:
                 return {"error": str(e)}
 

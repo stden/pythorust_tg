@@ -1,28 +1,24 @@
 """Tests for Linear API client."""
 
-import pytest
-import os
-from unittest.mock import MagicMock, patch, AsyncMock
-import json
 from datetime import datetime, timezone
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from linear_client import (
+    Comment,
+    Issue,
     LinearClient,
     LinearConfig,
     LinearError,
-    Issue,
-    Project,
     Team,
     User,
-    Label,
-    WorkflowState,
-    Comment,
+    add_comment,
     create_client,
     create_issue,
     get_issue,
-    update_issue,
     list_issues,
-    add_comment,
+    update_issue,
 )
 
 
@@ -33,9 +29,9 @@ class TestLinearConfig:
         """Test loading config from environment."""
         monkeypatch.setenv("LINEAR_API_KEY", "test_api_key")
         monkeypatch.setenv("LINEAR_API_URL", "https://api.linear.app/custom")
-        
+
         config = LinearConfig.from_env()
-        
+
         assert config.api_key == "test_api_key"
         assert config.api_url == "https://api.linear.app/custom"
 
@@ -43,15 +39,15 @@ class TestLinearConfig:
         """Test loading config with defaults."""
         monkeypatch.setenv("LINEAR_API_KEY", "test_key")
         monkeypatch.delenv("LINEAR_API_URL", raising=False)
-        
+
         config = LinearConfig.from_env()
-        
+
         assert config.api_url == "https://api.linear.app/graphql"
 
     def test_from_env_missing_key(self, monkeypatch):
         """Test error when API key is missing."""
         monkeypatch.delenv("LINEAR_API_KEY", raising=False)
-        
+
         with pytest.raises(ValueError, match="LINEAR_API_KEY"):
             LinearConfig.from_env()
 
@@ -84,9 +80,7 @@ class TestLinearClient:
         """Test GraphQL query execution."""
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {
-            "data": {"viewer": {"id": "user123", "name": "Test User"}}
-        }
+        mock_response.json.return_value = {"data": {"viewer": {"id": "user123", "name": "Test User"}}}
         mock_httpx_client.post.return_value = mock_response
 
         query = """
@@ -97,14 +91,12 @@ class TestLinearClient:
             }
         }
         """
-        
+
         result = await client.query(query)
-        
+
         assert result["viewer"]["id"] == "user123"
         mock_httpx_client.post.assert_called_once_with(
-            client.config.api_url,
-            json={"query": query, "variables": {}},
-            headers={"Authorization": "test_api_key"}
+            client.config.api_url, json={"query": query, "variables": {}}, headers={"Authorization": "test_api_key"}
         )
 
     @pytest.mark.asyncio
@@ -117,11 +109,11 @@ class TestLinearClient:
 
         query = "query($id: String!) { issue(id: $id) { id } }"
         variables = {"id": "123"}
-        
+
         result = await client.query(query, variables)
-        
+
         assert result["issue"]["id"] == "123"
-        
+
         call_json = mock_httpx_client.post.call_args[1]["json"]
         assert call_json["variables"] == variables
 
@@ -130,9 +122,7 @@ class TestLinearClient:
         """Test handling GraphQL errors."""
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {
-            "errors": [{"message": "Field not found"}]
-        }
+        mock_response.json.return_value = {"errors": [{"message": "Field not found"}]}
         mock_httpx_client.post.return_value = mock_response
 
         with pytest.raises(LinearError, match="Field not found"):
@@ -153,8 +143,8 @@ class TestLinearClient:
                         "description": "Test description",
                         "identifier": "TEST-1",
                         "url": "https://linear.app/test/issue/TEST-1",
-                        "createdAt": "2025-01-01T00:00:00Z"
-                    }
+                        "createdAt": "2025-01-01T00:00:00Z",
+                    },
                 }
             }
         }
@@ -166,7 +156,7 @@ class TestLinearClient:
             description="Test description",
             assignee_id="user123",
             priority=2,
-            labels=["bug", "urgent"]
+            labels=["bug", "urgent"],
         )
 
         assert isinstance(issue, Issue)
@@ -185,7 +175,7 @@ class TestLinearClient:
                     "id": "issue123",
                     "title": "Test Issue",
                     "state": {"name": "In Progress"},
-                    "assignee": {"name": "John Doe"}
+                    "assignee": {"name": "John Doe"},
                 }
             }
         }
@@ -202,23 +192,11 @@ class TestLinearClient:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "data": {
-                "issueUpdate": {
-                    "success": True,
-                    "issue": {
-                        "id": "issue123",
-                        "title": "Updated Title"
-                    }
-                }
-            }
+            "data": {"issueUpdate": {"success": True, "issue": {"id": "issue123", "title": "Updated Title"}}}
         }
         mock_httpx_client.post.return_value = mock_response
 
-        result = await client.update_issue(
-            issue_id="issue123",
-            title="Updated Title",
-            state_id="done"
-        )
+        result = await client.update_issue(issue_id="issue123", title="Updated Title", state_id="done")
 
         assert result["success"] is True
         assert result["issue"]["title"] == "Updated Title"
@@ -231,24 +209,14 @@ class TestLinearClient:
         mock_response.json.return_value = {
             "data": {
                 "issues": {
-                    "nodes": [
-                        {"id": "1", "title": "Issue 1"},
-                        {"id": "2", "title": "Issue 2"}
-                    ],
-                    "pageInfo": {
-                        "hasNextPage": False,
-                        "endCursor": None
-                    }
+                    "nodes": [{"id": "1", "title": "Issue 1"}, {"id": "2", "title": "Issue 2"}],
+                    "pageInfo": {"hasNextPage": False, "endCursor": None},
                 }
             }
         }
         mock_httpx_client.post.return_value = mock_response
 
-        issues = await client.list_issues(
-            team_id="team123",
-            state_name="In Progress",
-            assignee_id="user123"
-        )
+        issues = await client.list_issues(team_id="team123", state_name="In Progress", assignee_id="user123")
 
         assert len(issues) == 2
         assert issues[0]["title"] == "Issue 1"
@@ -262,20 +230,13 @@ class TestLinearClient:
             "data": {
                 "commentCreate": {
                     "success": True,
-                    "comment": {
-                        "id": "comment123",
-                        "body": "Test comment",
-                        "createdAt": "2025-01-01T00:00:00Z"
-                    }
+                    "comment": {"id": "comment123", "body": "Test comment", "createdAt": "2025-01-01T00:00:00Z"},
                 }
             }
         }
         mock_httpx_client.post.return_value = mock_response
 
-        comment = await client.add_comment(
-            issue_id="issue123",
-            body="Test comment"
-        )
+        comment = await client.add_comment(issue_id="issue123", body="Test comment")
 
         assert isinstance(comment, Comment)
         assert comment.id == "comment123"
@@ -291,7 +252,7 @@ class TestLinearClient:
                 "teams": {
                     "nodes": [
                         {"id": "team1", "name": "Engineering", "key": "ENG"},
-                        {"id": "team2", "name": "Design", "key": "DES"}
+                        {"id": "team2", "name": "Design", "key": "DES"},
                     ]
                 }
             }
@@ -313,7 +274,7 @@ class TestLinearClient:
                 "users": {
                     "nodes": [
                         {"id": "user1", "name": "John Doe", "email": "john@example.com"},
-                        {"id": "user2", "name": "Jane Smith", "email": "jane@example.com"}
+                        {"id": "user2", "name": "Jane Smith", "email": "jane@example.com"},
                     ]
                 }
             }
@@ -335,7 +296,7 @@ class TestLinearClient:
                 "issueLabels": {
                     "nodes": [
                         {"id": "label1", "name": "bug", "color": "#FF0000"},
-                        {"id": "label2", "name": "feature", "color": "#00FF00"}
+                        {"id": "label2", "name": "feature", "color": "#00FF00"},
                     ]
                 }
             }
@@ -355,12 +316,7 @@ class TestLinearClient:
         mock_response.status_code = 200
         mock_response.json.return_value = {
             "data": {
-                "issueSearch": {
-                    "nodes": [
-                        {"id": "1", "title": "Bug in login"},
-                        {"id": "2", "title": "Bug in signup"}
-                    ]
-                }
+                "issueSearch": {"nodes": [{"id": "1", "title": "Bug in login"}, {"id": "2", "title": "Bug in signup"}]}
             }
         }
         mock_httpx_client.post.return_value = mock_response
@@ -393,33 +349,25 @@ class TestDataClasses:
             description="Description",
             identifier="TEST-1",
             url="https://linear.app/test/issue/TEST-1",
-            created_at=datetime.now(timezone.utc)
+            created_at=datetime.now(timezone.utc),
         )
-        
+
         assert issue.id == "123"
         assert issue.identifier == "TEST-1"
 
     def test_team_creation(self):
         """Test Team dataclass."""
-        team = Team(
-            id="team123",
-            name="Engineering",
-            key="ENG",
-            description="Engineering team"
-        )
-        
+        team = Team(id="team123", name="Engineering", key="ENG", description="Engineering team")
+
         assert team.name == "Engineering"
         assert team.key == "ENG"
 
     def test_user_creation(self):
         """Test User dataclass."""
         user = User(
-            id="user123",
-            name="John Doe",
-            email="john@example.com",
-            avatar_url="https://example.com/avatar.jpg"
+            id="user123", name="John Doe", email="john@example.com", avatar_url="https://example.com/avatar.jpg"
         )
-        
+
         assert user.name == "John Doe"
         assert user.email == "john@example.com"
 
@@ -430,8 +378,8 @@ class TestModuleFunctions:
     @patch("linear_client.LinearClient")
     def test_create_client_function(self, mock_client_class, mock_env):
         """Test create_client function."""
-        client = create_client()
-        
+        create_client()
+
         mock_client_class.assert_called_once()
 
     @patch("linear_client.LinearClient")
@@ -441,19 +389,11 @@ class TestModuleFunctions:
         mock_client = AsyncMock()
         mock_client_class.return_value = mock_client
         mock_client.create_issue.return_value = Issue(
-            id="123",
-            title="Test",
-            identifier="TEST-1",
-            url="https://linear.app",
-            created_at=datetime.now(timezone.utc)
+            id="123", title="Test", identifier="TEST-1", url="https://linear.app", created_at=datetime.now(timezone.utc)
         )
-        
-        issue = await create_issue(
-            title="Test",
-            team_id="team123",
-            api_key="test_key"
-        )
-        
+
+        issue = await create_issue(title="Test", team_id="team123", api_key="test_key")
+
         assert issue.id == "123"
 
     @patch("linear_client.LinearClient")
@@ -463,9 +403,9 @@ class TestModuleFunctions:
         mock_client = AsyncMock()
         mock_client_class.return_value = mock_client
         mock_client.get_issue.return_value = {"id": "123", "title": "Test"}
-        
+
         issue = await get_issue("123", api_key="test_key")
-        
+
         assert issue["title"] == "Test"
 
     @patch("linear_client.LinearClient")
@@ -475,13 +415,9 @@ class TestModuleFunctions:
         mock_client = AsyncMock()
         mock_client_class.return_value = mock_client
         mock_client.update_issue.return_value = {"success": True}
-        
-        result = await update_issue(
-            issue_id="123",
-            title="Updated",
-            api_key="test_key"
-        )
-        
+
+        result = await update_issue(issue_id="123", title="Updated", api_key="test_key")
+
         assert result["success"] is True
 
     @patch("linear_client.LinearClient")
@@ -490,13 +426,10 @@ class TestModuleFunctions:
         """Test list_issues convenience function."""
         mock_client = AsyncMock()
         mock_client_class.return_value = mock_client
-        mock_client.list_issues.return_value = [
-            {"id": "1", "title": "Issue 1"},
-            {"id": "2", "title": "Issue 2"}
-        ]
-        
+        mock_client.list_issues.return_value = [{"id": "1", "title": "Issue 1"}, {"id": "2", "title": "Issue 2"}]
+
         issues = await list_issues(api_key="test_key")
-        
+
         assert len(issues) == 2
 
     @patch("linear_client.LinearClient")
@@ -506,15 +439,9 @@ class TestModuleFunctions:
         mock_client = AsyncMock()
         mock_client_class.return_value = mock_client
         mock_client.add_comment.return_value = Comment(
-            id="comment123",
-            body="Test comment",
-            created_at=datetime.now(timezone.utc)
+            id="comment123", body="Test comment", created_at=datetime.now(timezone.utc)
         )
-        
-        comment = await add_comment(
-            issue_id="123",
-            body="Test comment",
-            api_key="test_key"
-        )
-        
+
+        comment = await add_comment(issue_id="123", body="Test comment", api_key="test_key")
+
         assert comment.body == "Test comment"

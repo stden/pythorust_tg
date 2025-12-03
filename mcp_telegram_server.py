@@ -23,6 +23,7 @@ from typing import Any
 import yaml
 from dotenv import load_dotenv
 from mcp.server.fastmcp import Context, FastMCP
+
 from chat_export_utils import collect_reaction_breakdown, load_chats_from_config, resolve_sender_name
 from telegram_session import LOCK_FILE, get_client, known_senders
 
@@ -145,7 +146,9 @@ async def telegram_client():
         try:
             client = get_client()
         except SystemExit as exc:
-            raise RuntimeError("Telegram session is missing. Run `cargo run -- init-session` locally to create it.") from exc
+            raise RuntimeError(
+                "Telegram session is missing. Run `cargo run -- init-session` locally to create it."
+            ) from exc
 
         async with client:
             if not await client.is_user_authorized():
@@ -222,8 +225,7 @@ async def fetch_recent_messages(chat: str, limit: int = DEFAULT_LIMIT, ctx: Cont
 
 
 @server.tool(
-    description="Send a text message to a configured chat. "
-    "Supports reply_to message id and silent flag.",
+    description="Send a text message to a configured chat. Supports reply_to message id and silent flag.",
 )
 async def send_message(chat: str, text: str, reply_to: int | None = None, silent: bool = False) -> dict[str, Any]:
     if not text or not text.strip():

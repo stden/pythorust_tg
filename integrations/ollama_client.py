@@ -2,9 +2,11 @@
 Ollama Client for local LLM inference.
 Позволяет использовать локальные модели вместо OpenAI API.
 """
-import requests
+
 import json
 from typing import Generator, Optional
+
+import requests
 
 OLLAMA_URL = "http://localhost:11434"
 
@@ -32,7 +34,7 @@ def generate(
     system: Optional[str] = None,
     temperature: float = 0.7,
     max_tokens: int = 500,
-    stream: bool = False
+    stream: bool = False,
 ) -> str | Generator[str, None, None]:
     """
     Generate text using Ollama.
@@ -55,7 +57,7 @@ def generate(
         "options": {
             "temperature": temperature,
             "num_predict": max_tokens,
-        }
+        },
     }
 
     if system:
@@ -64,23 +66,14 @@ def generate(
     if stream:
         return _generate_stream(data)
     else:
-        response = requests.post(
-            f"{OLLAMA_URL}/api/generate",
-            json=data,
-            timeout=120
-        )
+        response = requests.post(f"{OLLAMA_URL}/api/generate", json=data, timeout=120)
         response.raise_for_status()
         return response.json()["response"]
 
 
 def _generate_stream(data: dict) -> Generator[str, None, None]:
     """Stream generation response."""
-    response = requests.post(
-        f"{OLLAMA_URL}/api/generate",
-        json=data,
-        stream=True,
-        timeout=120
-    )
+    response = requests.post(f"{OLLAMA_URL}/api/generate", json=data, stream=True, timeout=120)
     response.raise_for_status()
 
     for line in response.iter_lines():
@@ -108,23 +101,14 @@ def chat(
     """
     response = requests.post(
         f"{OLLAMA_URL}/api/chat",
-        json={
-            "model": model,
-            "messages": messages,
-            "stream": False,
-            "options": {"temperature": temperature}
-        },
-        timeout=120
+        json={"model": model, "messages": messages, "stream": False, "options": {"temperature": temperature}},
+        timeout=120,
     )
     response.raise_for_status()
     return response.json()["message"]["content"]
 
 
-def sales_agent_response(
-    user_message: str,
-    context: str = "",
-    model: str = "qwen2.5:3b"
-) -> str:
+def sales_agent_response(user_message: str, context: str = "", model: str = "qwen2.5:3b") -> str:
     """
     Generate sales agent response (local alternative to OpenAI).
 
@@ -146,12 +130,7 @@ def sales_agent_response(
     if context:
         system_prompt += f"\n\nКонтекст: {context}"
 
-    return generate(
-        prompt=user_message,
-        model=model,
-        system=system_prompt,
-        temperature=0.8
-    )
+    return generate(prompt=user_message, model=model, system=system_prompt, temperature=0.8)
 
 
 def pull_model(model: str) -> bool:
@@ -169,7 +148,7 @@ def pull_model(model: str) -> bool:
         f"{OLLAMA_URL}/api/pull",
         json={"name": model},
         stream=True,
-        timeout=3600  # 1 hour for large models
+        timeout=3600,  # 1 hour for large models
     )
 
     for line in response.iter_lines():
@@ -209,17 +188,12 @@ if __name__ == "__main__":
         model = models[0]
         print(f"\nТест модели {model}...")
 
-        response = generate(
-            "Привет! Скажи одним словом что работаешь.",
-            model=model
-        )
+        response = generate("Привет! Скажи одним словом что работаешь.", model=model)
         print(f"Ответ: {response}")
 
         # Test sales agent
         print("\nТест продавца...")
         sales_response = sales_agent_response(
-            "Мне это дорого",
-            context="Курс программирования за 50,000 руб",
-            model=model
+            "Мне это дорого", context="Курс программирования за 50,000 руб", model=model
         )
         print(f"Продавец: {sales_response}")

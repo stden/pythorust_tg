@@ -1,20 +1,18 @@
 """Tests for Kurigram client integration."""
 
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-import asyncio
-import json
-from unittest.mock import MagicMock, AsyncMock, patch
-from typing import List, Dict
 
 from integrations.kurigram_client import (
+    Entity,
+    GraphData,
     KurigramClient,
     KurigramConfig,
     KurigramError,
-    GraphData,
-    Entity,
-    Relationship,
     Query,
     QueryResult,
+    Relationship,
 )
 
 
@@ -25,9 +23,9 @@ class TestKurigramConfig:
         """Test loading config from environment."""
         monkeypatch.setenv("KURIGRAM_API_URL", "https://test.kurigram.com")
         monkeypatch.setenv("KURIGRAM_API_KEY", "test_api_key")
-        
+
         config = KurigramConfig.from_env()
-        
+
         assert config.api_url == "https://test.kurigram.com"
         assert config.api_key == "test_api_key"
 
@@ -35,34 +33,28 @@ class TestKurigramConfig:
         """Test loading config with default values."""
         monkeypatch.delenv("KURIGRAM_API_URL", raising=False)
         monkeypatch.setenv("KURIGRAM_API_KEY", "test_key")
-        
+
         config = KurigramConfig.from_env()
-        
+
         assert config.api_url == "http://localhost:8000"
         assert config.api_key == "test_key"
 
     def test_validate_valid_config(self):
         """Test validation of valid config."""
-        config = KurigramConfig(
-            api_url="https://api.kurigram.com",
-            api_key="valid_key"
-        )
+        config = KurigramConfig(api_url="https://api.kurigram.com", api_key="valid_key")
         config.validate()  # Should not raise
 
     def test_validate_missing_api_key(self):
         """Test validation with missing API key."""
         config = KurigramConfig(api_url="https://api.kurigram.com")
-        
+
         with pytest.raises(ValueError, match="API key is required"):
             config.validate()
 
     def test_validate_invalid_url(self):
         """Test validation with invalid URL."""
-        config = KurigramConfig(
-            api_url="not-a-url",
-            api_key="test_key"
-        )
-        
+        config = KurigramConfig(api_url="not-a-url", api_key="test_key")
+
         with pytest.raises(ValueError, match="Invalid API URL"):
             config.validate()
 
@@ -73,10 +65,7 @@ class TestKurigramClient:
     @pytest.fixture
     def config(self):
         """Create test config."""
-        return KurigramConfig(
-            api_url="https://test.kurigram.com",
-            api_key="test_api_key"
-        )
+        return KurigramConfig(api_url="https://test.kurigram.com", api_key="test_api_key")
 
     @pytest.fixture
     def client(self, config):
@@ -103,23 +92,20 @@ class TestKurigramClient:
             "name": "Test Graph",
             "description": "Test description",
             "entity_count": 0,
-            "relationship_count": 0
+            "relationship_count": 0,
         }
         mock_httpx_client.post.return_value = mock_response
 
-        graph = await client.create_graph(
-            name="Test Graph",
-            description="Test description"
-        )
+        graph = await client.create_graph(name="Test Graph", description="Test description")
 
         assert isinstance(graph, GraphData)
         assert graph.id == "graph123"
         assert graph.name == "Test Graph"
-        
+
         mock_httpx_client.post.assert_called_once_with(
             "https://test.kurigram.com/graphs",
             json={"name": "Test Graph", "description": "Test description"},
-            headers={"Authorization": "Bearer test_api_key"}
+            headers={"Authorization": "Bearer test_api_key"},
         )
 
     @pytest.mark.asyncio
@@ -131,7 +117,7 @@ class TestKurigramClient:
             "id": "graph123",
             "name": "Test Graph",
             "entity_count": 10,
-            "relationship_count": 15
+            "relationship_count": 15,
         }
         mock_httpx_client.get.return_value = mock_response
 
@@ -149,14 +135,12 @@ class TestKurigramClient:
         mock_response.json.return_value = {
             "id": "entity123",
             "type": "Person",
-            "properties": {"name": "John", "age": 30}
+            "properties": {"name": "John", "age": 30},
         }
         mock_httpx_client.post.return_value = mock_response
 
         entity = await client.add_entity(
-            graph_id="graph123",
-            entity_type="Person",
-            properties={"name": "John", "age": 30}
+            graph_id="graph123", entity_type="Person", properties={"name": "John", "age": 30}
         )
 
         assert isinstance(entity, Entity)
@@ -172,7 +156,7 @@ class TestKurigramClient:
         mock_response.json.return_value = {
             "entities": [
                 {"id": "e1", "type": "Person", "properties": {"name": "Alice"}},
-                {"id": "e2", "type": "Person", "properties": {"name": "Bob"}}
+                {"id": "e2", "type": "Person", "properties": {"name": "Bob"}},
             ]
         }
         mock_httpx_client.post.return_value = mock_response
@@ -181,8 +165,8 @@ class TestKurigramClient:
             graph_id="graph123",
             entities=[
                 {"type": "Person", "properties": {"name": "Alice"}},
-                {"type": "Person", "properties": {"name": "Bob"}}
-            ]
+                {"type": "Person", "properties": {"name": "Bob"}},
+            ],
         )
 
         assert len(entities) == 2
@@ -199,16 +183,12 @@ class TestKurigramClient:
             "type": "KNOWS",
             "source_id": "e1",
             "target_id": "e2",
-            "properties": {"since": "2020"}
+            "properties": {"since": "2020"},
         }
         mock_httpx_client.post.return_value = mock_response
 
         relationship = await client.add_relationship(
-            graph_id="graph123",
-            source_id="e1",
-            target_id="e2",
-            relationship_type="KNOWS",
-            properties={"since": "2020"}
+            graph_id="graph123", source_id="e1", target_id="e2", relationship_type="KNOWS", properties={"since": "2020"}
         )
 
         assert isinstance(relationship, Relationship)
@@ -223,27 +203,17 @@ class TestKurigramClient:
         mock_response.json.return_value = {
             "results": [
                 {
-                    "entities": [
-                        {"id": "e1", "type": "Person", "properties": {"name": "John"}}
-                    ],
-                    "relationships": [
-                        {"id": "r1", "type": "KNOWS", "source_id": "e1", "target_id": "e2"}
-                    ]
+                    "entities": [{"id": "e1", "type": "Person", "properties": {"name": "John"}}],
+                    "relationships": [{"id": "r1", "type": "KNOWS", "source_id": "e1", "target_id": "e2"}],
                 }
             ],
-            "total": 1
+            "total": 1,
         }
         mock_httpx_client.post.return_value = mock_response
 
-        query = Query(
-            match_pattern="(p:Person {name: 'John'})",
-            return_fields=["p"]
-        )
-        
-        result = await client.query(
-            graph_id="graph123",
-            query=query
-        )
+        query = Query(match_pattern="(p:Person {name: 'John'})", return_fields=["p"])
+
+        result = await client.query(graph_id="graph123", query=query)
 
         assert isinstance(result, QueryResult)
         assert result.total == 1
@@ -256,22 +226,11 @@ class TestKurigramClient:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {
-            "paths": [
-                {
-                    "entities": ["e1", "e2", "e3"],
-                    "relationships": ["r1", "r2"],
-                    "length": 2
-                }
-            ]
+            "paths": [{"entities": ["e1", "e2", "e3"], "relationships": ["r1", "r2"], "length": 2}]
         }
         mock_httpx_client.post.return_value = mock_response
 
-        paths = await client.find_paths(
-            graph_id="graph123",
-            start_id="e1",
-            end_id="e3",
-            max_depth=3
-        )
+        paths = await client.find_paths(graph_id="graph123", start_id="e1", end_id="e3", max_depth=3)
 
         assert len(paths) == 1
         assert paths[0]["length"] == 2
@@ -285,19 +244,14 @@ class TestKurigramClient:
         mock_response.json.return_value = {
             "neighbors": [
                 {"id": "e2", "type": "Person", "properties": {"name": "Alice"}},
-                {"id": "e3", "type": "Person", "properties": {"name": "Bob"}}
+                {"id": "e3", "type": "Person", "properties": {"name": "Bob"}},
             ],
-            "relationships": [
-                {"id": "r1", "type": "KNOWS"},
-                {"id": "r2", "type": "WORKS_WITH"}
-            ]
+            "relationships": [{"id": "r1", "type": "KNOWS"}, {"id": "r2", "type": "WORKS_WITH"}],
         }
         mock_httpx_client.get.return_value = mock_response
 
         result = await client.get_neighbors(
-            graph_id="graph123",
-            entity_id="e1",
-            relationship_types=["KNOWS", "WORKS_WITH"]
+            graph_id="graph123", entity_id="e1", relationship_types=["KNOWS", "WORKS_WITH"]
         )
 
         assert len(result["neighbors"]) == 2
@@ -314,7 +268,7 @@ class TestKurigramClient:
 
         mock_httpx_client.delete.assert_called_once_with(
             "https://test.kurigram.com/graphs/graph123/entities/entity123",
-            headers={"Authorization": "Bearer test_api_key"}
+            headers={"Authorization": "Bearer test_api_key"},
         )
 
     @pytest.mark.asyncio
@@ -335,17 +289,11 @@ class TestKurigramClient:
         mock_response.status_code = 200
         mock_response.json.return_value = {
             "format": "json",
-            "data": {
-                "entities": [{"id": "e1", "type": "Person"}],
-                "relationships": [{"id": "r1", "type": "KNOWS"}]
-            }
+            "data": {"entities": [{"id": "e1", "type": "Person"}], "relationships": [{"id": "r1", "type": "KNOWS"}]},
         }
         mock_httpx_client.get.return_value = mock_response
 
-        export_data = await client.export_graph(
-            graph_id="graph123",
-            format="json"
-        )
+        export_data = await client.export_graph(graph_id="graph123", format="json")
 
         assert export_data["format"] == "json"
         assert "entities" in export_data["data"]
@@ -355,24 +303,12 @@ class TestKurigramClient:
         """Test importing graph data."""
         mock_response = MagicMock()
         mock_response.status_code = 201
-        mock_response.json.return_value = {
-            "graph_id": "new_graph",
-            "imported": {
-                "entities": 10,
-                "relationships": 15
-            }
-        }
+        mock_response.json.return_value = {"graph_id": "new_graph", "imported": {"entities": 10, "relationships": 15}}
         mock_httpx_client.post.return_value = mock_response
 
-        import_data = {
-            "entities": [{"type": "Person", "properties": {"name": "Test"}}],
-            "relationships": []
-        }
+        import_data = {"entities": [{"type": "Person", "properties": {"name": "Test"}}], "relationships": []}
 
-        result = await client.import_graph(
-            name="Imported Graph",
-            data=import_data
-        )
+        result = await client.import_graph(name="Imported Graph", data=import_data)
 
         assert result["graph_id"] == "new_graph"
         assert result["imported"]["entities"] == 10
@@ -392,15 +328,15 @@ class TestKurigramClient:
     async def test_retry_on_timeout(self, client, mock_httpx_client):
         """Test retry logic on timeout."""
         import httpx
-        
+
         # First call times out, second succeeds
         mock_httpx_client.get.side_effect = [
             httpx.TimeoutException("Timeout"),
-            MagicMock(status_code=200, json=MagicMock(return_value={"id": "test"}))
+            MagicMock(status_code=200, json=MagicMock(return_value={"id": "test"})),
         ]
 
         result = await client.get_graph("test")
-        
+
         assert result["id"] == "test"
         assert mock_httpx_client.get.call_count == 2
 
@@ -410,26 +346,16 @@ class TestDataClasses:
 
     def test_entity_creation(self):
         """Test Entity creation."""
-        entity = Entity(
-            id="e1",
-            type="Person",
-            properties={"name": "John", "age": 30}
-        )
-        
+        entity = Entity(id="e1", type="Person", properties={"name": "John", "age": 30})
+
         assert entity.id == "e1"
         assert entity.type == "Person"
         assert entity.properties["name"] == "John"
 
     def test_relationship_creation(self):
         """Test Relationship creation."""
-        rel = Relationship(
-            id="r1",
-            type="KNOWS",
-            source_id="e1",
-            target_id="e2",
-            properties={"since": "2020"}
-        )
-        
+        rel = Relationship(id="r1", type="KNOWS", source_id="e1", target_id="e2", properties={"since": "2020"})
+
         assert rel.type == "KNOWS"
         assert rel.source_id == "e1"
         assert rel.properties["since"] == "2020"
@@ -437,24 +363,15 @@ class TestDataClasses:
     def test_query_creation(self):
         """Test Query creation."""
         query = Query(
-            match_pattern="(p:Person)",
-            where_clause="p.age > 25",
-            return_fields=["p.name", "p.age"],
-            limit=10
+            match_pattern="(p:Person)", where_clause="p.age > 25", return_fields=["p.name", "p.age"], limit=10
         )
-        
+
         assert query.match_pattern == "(p:Person)"
         assert query.limit == 10
 
     def test_graph_data_creation(self):
         """Test GraphData creation."""
-        graph = GraphData(
-            id="g1",
-            name="Test Graph",
-            description="Test",
-            entity_count=100,
-            relationship_count=200
-        )
-        
+        graph = GraphData(id="g1", name="Test Graph", description="Test", entity_count=100, relationship_count=200)
+
         assert graph.name == "Test Graph"
         assert graph.entity_count == 100

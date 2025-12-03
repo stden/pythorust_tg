@@ -1,22 +1,18 @@
 """Tests for chat analysis data models."""
 
-import pytest
-from datetime import datetime
-from pathlib import Path
 import json
 import tempfile
+from datetime import datetime
+from pathlib import Path
 
-from chat_analysis.models import Topic, Discussion, ActivityMetrics, ChatAnalysisResult
+import pytest
+
+from chat_analysis.models import ActivityMetrics, ChatAnalysisResult, Discussion, Topic
 
 
 def test_topic_creation():
     """Test Topic dataclass creation."""
-    topic = Topic(
-        name="AI/ML",
-        mentions=25,
-        sentiment="positive",
-        key_message_ids=[123, 456, 789]
-    )
+    topic = Topic(name="AI/ML", mentions=25, sentiment="positive", key_message_ids=[123, 456, 789])
 
     assert topic.name == "AI/ML"
     assert topic.mentions == 25
@@ -31,7 +27,7 @@ def test_discussion_creation():
         date=datetime(2025, 11, 24),
         participants=["User1", "User2"],
         messages_count=15,
-        summary="Discussion about Factory AI and Droids"
+        summary="Discussion about Factory AI and Droids",
     )
 
     assert discussion.title == "Factory AI Discussion"
@@ -47,7 +43,7 @@ def test_activity_metrics_creation():
         messages_per_day=33.3,
         avg_message_length=85.5,
         media_percentage=15.2,
-        reactions_count=250
+        reactions_count=250,
     )
 
     assert metrics.total_messages == 1000
@@ -65,9 +61,7 @@ def test_chat_analysis_result_to_dict():
         sentiment="positive",
         activity_level="high",
         professionalism="professional",
-        topics=[
-            Topic("AI", 10, "positive", [1, 2, 3])
-        ],
+        topics=[Topic("AI", 10, "positive", [1, 2, 3])],
         discussions=[],
         key_participants=[],
         activity_metrics=ActivityMetrics(
@@ -76,13 +70,13 @@ def test_chat_analysis_result_to_dict():
             messages_per_day=10.0,
             avg_message_length=50.0,
             media_percentage=5.0,
-            reactions_count=20
+            reactions_count=20,
         ),
         date_range_start=datetime(2025, 11, 1),
         date_range_end=datetime(2025, 11, 24),
         summary="Test chat",
         insights=["Insight 1"],
-        recommendations=["Rec 1"]
+        recommendations=["Rec 1"],
     )
 
     data = result.to_dict()
@@ -111,7 +105,7 @@ def test_chat_analysis_result_to_json():
         date_range_end=None,
         summary="Test",
         insights=[],
-        recommendations=[]
+        recommendations=[],
     )
 
     json_str = result.to_json()
@@ -140,7 +134,7 @@ def test_chat_analysis_result_save_json():
         date_range_end=None,
         summary="Test summary",
         insights=[],
-        recommendations=[]
+        recommendations=[],
     )
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -167,9 +161,7 @@ def test_chat_analysis_result_save_markdown():
         sentiment="positive",
         activity_level="high",
         professionalism="professional",
-        topics=[
-            Topic("AI", 10, "positive", [1, 2, 3])
-        ],
+        topics=[Topic("AI", 10, "positive", [1, 2, 3])],
         discussions=[],
         key_participants=[{"name": "User1", "message_count": 50, "engagement_score": 8.0}],
         activity_metrics=ActivityMetrics(100, 10, 10.0, 50.0, 5.0, 20),
@@ -177,7 +169,7 @@ def test_chat_analysis_result_save_markdown():
         date_range_end=datetime(2025, 11, 24),
         summary="High-quality IT community focused on AI/ML",
         insights=["Very active community", "High engagement"],
-        recommendations=["Continue current trajectory"]
+        recommendations=["Continue current trajectory"],
     )
 
     with tempfile.TemporaryDirectory() as tmpdir:

@@ -8,10 +8,11 @@ import os
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, List, Dict
+from typing import Any, Dict, List
 
 import yaml
 from dotenv import load_dotenv
+
 from chat_export_utils import collect_reaction_breakdown, load_chats_from_config, resolve_sender_name
 from telegram_session import LOCK_FILE, get_client, known_senders
 
@@ -134,7 +135,9 @@ class TelegramService:
             try:
                 client = get_client()
             except SystemExit as exc:
-                raise RuntimeError("Telegram session is missing. Run `cargo run -- init-session` locally to create it.") from exc
+                raise RuntimeError(
+                    "Telegram session is missing. Run `cargo run -- init-session` locally to create it."
+                ) from exc
 
             async with client:
                 if not await client.is_user_authorized():
@@ -170,7 +173,9 @@ class TelegramService:
                 )
             return result
 
-    async def send_message(self, chat: str, text: str, reply_to: int | None = None, silent: bool = False) -> Dict[str, Any]:
+    async def send_message(
+        self, chat: str, text: str, reply_to: int | None = None, silent: bool = False
+    ) -> Dict[str, Any]:
         if not text or not text.strip():
             raise ValueError("Text message cannot be empty.")
 

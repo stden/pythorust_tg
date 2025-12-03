@@ -29,7 +29,7 @@ def before_scenario(context, scenario):
 def after_scenario(context, scenario):
     """Выполняется после каждого сценария."""
     # Восстанавливаем переменные окружения
-    if hasattr(context, 'original_env') and context.original_env:
+    if hasattr(context, "original_env") and context.original_env:
         for var_name, value in context.original_env.items():
             if value is None:
                 os.environ.pop(var_name, None)

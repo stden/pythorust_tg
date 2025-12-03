@@ -1,14 +1,13 @@
 """Message fetcher for Telegram chats."""
 
 import os
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
-from telethon import TelegramClient
-from telethon.tl.types import Message, User, Channel, Chat
 from dotenv import load_dotenv
+from telethon import TelegramClient
+from telethon.tl.types import Channel, Chat, Message, User
 
 from .config import AnalyzerConfig
 
@@ -87,10 +86,7 @@ class MessageFetcher:
         # Fetch messages
         messages = []
         async for message in self.client.iter_messages(
-            entity,
-            limit=self.config.message_limit,
-            offset_date=offset_date,
-            reverse=False
+            entity, limit=self.config.message_limit, offset_date=offset_date, reverse=False
         ):
             if await self._should_include(message):
                 formatted = await self._format_message(message)
@@ -170,7 +166,7 @@ class MessageFetcher:
             text=message.message,
             message_id=message.id,
             reactions_count=reactions_count,
-            has_media=has_media
+            has_media=has_media,
         )
 
     async def _get_sender_name(self, message: Message) -> str:
@@ -245,7 +241,7 @@ class MessageFetcher:
                 "date_range": None,
                 "unique_senders": 0,
                 "has_media": False,
-                "total_reactions": 0
+                "total_reactions": 0,
             }
 
         # Calculate metrics
@@ -255,15 +251,12 @@ class MessageFetcher:
 
         # Date range
         dates = [msg.date for msg in messages]
-        date_range = {
-            "start": min(dates).isoformat(),
-            "end": max(dates).isoformat()
-        }
+        date_range = {"start": min(dates).isoformat(), "end": max(dates).isoformat()}
 
         return {
             "total_messages": len(messages),
             "date_range": date_range,
             "unique_senders": unique_senders,
             "has_media": has_media,
-            "total_reactions": total_reactions
+            "total_reactions": total_reactions,
         }

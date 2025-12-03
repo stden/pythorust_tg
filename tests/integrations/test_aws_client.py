@@ -1,21 +1,14 @@
 """Tests for AWS client integration."""
 
-import pytest
+from datetime import date
 from unittest.mock import MagicMock, patch
-import os
-from datetime import date, timedelta
+
+import pytest
 
 from integrations.aws_client import (
-    AWSConfig,
-    AWSClient,
-    EC2Instance,
-    S3Bucket,
-    LambdaFunction,
-    DynamoDBTable,
-    RDSDatabase,
-    IAMUser,
-    IAMRole,
     AWS_AVAILABLE,
+    AWSClient,
+    AWSConfig,
 )
 
 
@@ -62,11 +55,7 @@ class TestAWSClient:
     @pytest.fixture
     def aws_client(self):
         """Create AWS client instance."""
-        config = AWSConfig(
-            access_key_id="test_key",
-            secret_access_key="test_secret",
-            region="us-east-1"
-        )
+        config = AWSConfig(access_key_id="test_key", secret_access_key="test_secret", region="us-east-1")
         return AWSClient(config)
 
     def test_init(self, aws_client):
@@ -80,7 +69,7 @@ class TestAWSClient:
         # First access should create session
         session1 = aws_client.session
         assert session1 is not None
-        
+
         # Second access should return same session
         session2 = aws_client.session
         assert session2 is session1
@@ -249,9 +238,7 @@ class TestAWSClient:
                 }
             ]
         }
-        iam_client.list_access_keys.return_value = {
-            "AccessKeyMetadata": [{"AccessKeyId": "AKIAIOSFODNN7EXAMPLE"}]
-        }
+        iam_client.list_access_keys.return_value = {"AccessKeyMetadata": [{"AccessKeyId": "AKIAIOSFODNN7EXAMPLE"}]}
         iam_client.list_attached_user_policies.return_value = {
             "AttachedPolicies": [{"PolicyName": "AdministratorAccess"}]
         }
@@ -283,9 +270,7 @@ class TestAWSClient:
                 }
             ]
         }
-        iam_client.list_attached_role_policies.return_value = {
-            "AttachedPolicies": [{"PolicyName": "PowerUserAccess"}]
-        }
+        iam_client.list_attached_role_policies.return_value = {"AttachedPolicies": [{"PolicyName": "PowerUserAccess"}]}
 
         roles = aws_client.list_iam_roles()
 
@@ -299,11 +284,11 @@ class TestAWSClient:
         # Mock EC2 client with error
         ec2_client = MagicMock()
         mock_boto_session.client.return_value = ec2_client
-        
+
         from botocore.exceptions import ClientError
+
         ec2_client.describe_instances.side_effect = ClientError(
-            {"Error": {"Code": "UnauthorizedOperation", "Message": "Not authorized"}},
-            "DescribeInstances"
+            {"Error": {"Code": "UnauthorizedOperation", "Message": "Not authorized"}}, "DescribeInstances"
         )
 
         with pytest.raises(ClientError):
@@ -312,6 +297,7 @@ class TestAWSClient:
     def test_no_credentials_error(self, aws_client, mock_boto_session):
         """Test handling when no credentials are available."""
         from botocore.exceptions import NoCredentialsError
+
         mock_boto_session.client.side_effect = NoCredentialsError()
 
         with pytest.raises(NoCredentialsError):
@@ -324,10 +310,7 @@ class TestAWSClientWithoutSDK:
     @patch("integrations.aws_client.AWS_AVAILABLE", False)
     def test_init_without_sdk(self):
         """Test that client cannot be initialized without SDK."""
-        config = AWSConfig(
-            access_key_id="test",
-            secret_access_key="test"
-        )
-        
+        config = AWSConfig(access_key_id="test", secret_access_key="test")
+
         with pytest.raises(ImportError):
             AWSClient(config)

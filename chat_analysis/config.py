@@ -1,8 +1,8 @@
 """Configuration for chat analyzer."""
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
-import os
 
 
 @dataclass
@@ -41,9 +41,7 @@ class AnalyzerConfig:
         # Output directory - prioritize ANALYSIS_RESULTS_DIR from .env
         if self.output_dir is None:
             output_dir = (
-                os.getenv("ANALYSIS_RESULTS_DIR") or
-                os.getenv("CHAT_ANALYZER_OUTPUT_DIR") or
-                "./analysis_results"
+                os.getenv("ANALYSIS_RESULTS_DIR") or os.getenv("CHAT_ANALYZER_OUTPUT_DIR") or "./analysis_results"
             )
             self.output_dir = Path(output_dir)
 
@@ -53,9 +51,5 @@ class AnalyzerConfig:
 
     def _default_model(self) -> str:
         """Get default model for provider."""
-        defaults = {
-            "openai": "gpt-4o-mini",
-            "claude": "claude-sonnet-4-5-20250929",
-            "gemini": "gemini-2.0-flash-exp"
-        }
+        defaults = {"openai": "gpt-4o-mini", "claude": "claude-sonnet-4-5-20250929", "gemini": "gemini-2.0-flash-exp"}
         return defaults.get(self.llm_provider, "gpt-4o-mini")

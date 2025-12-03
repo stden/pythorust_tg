@@ -5,15 +5,14 @@ Task Assistant Telegram Bot
 """
 
 import asyncio
-import os
 import logging
+import os
+import sys
 from datetime import datetime
 from pathlib import Path
-from telethon import TelegramClient, events, Button
-from telethon.tl.custom import Message
-import subprocess
-import sys
+
 from dotenv import load_dotenv
+from telethon import Button, TelegramClient, events
 
 # Load environment variables
 load_dotenv()
@@ -30,10 +29,7 @@ BOT_TOKEN = os.getenv("TASK_ASSISTANT_BOT_TOKEN")
 ALLOWED_USERS = [int(x) for x in os.getenv("ALLOWED_USERS", "").split(",") if x] if os.getenv("ALLOWED_USERS") else []
 OPENAI_MODEL = os.getenv("OPENAI_MODEL")
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -41,7 +37,7 @@ class TaskAssistantBot:
     """Task assistant bot for automation."""
 
     def __init__(self):
-        self.client = TelegramClient('task_assistant_bot', API_ID, API_HASH)
+        self.client = TelegramClient("task_assistant_bot", API_ID, API_HASH)
         self.pending_commands = {}
 
     async def check_access(self, user_id: int) -> bool:
@@ -73,23 +69,19 @@ class TaskAssistantBot:
             "• ИИ-консультации по проектам\n"
             "• Проверка статуса серверов\n\n"
             "Выбери действие:",
-            buttons=buttons
+            buttons=buttons,
         )
 
     async def check_n8n_health(self) -> dict:
         """Check N8N health."""
         try:
             import aiohttp
+
             async with aiohttp.ClientSession() as session:
                 async with session.get(
-                    "https://n8n.vier-pfoten.club/healthz",
-                    timeout=aiohttp.ClientTimeout(total=10),
-                    ssl=False
+                    "https://n8n.vier-pfoten.club/healthz", timeout=aiohttp.ClientTimeout(total=10), ssl=False
                 ) as response:
-                    return {
-                        "status": "✅ Работает" if response.status == 200 else "❌ Ошибка",
-                        "code": response.status
-                    }
+                    return {"status": "✅ Работает" if response.status == 200 else "❌ Ошибка", "code": response.status}
         except Exception as e:
             return {"status": "❌ Недоступен", "error": str(e)}
 
@@ -97,9 +89,7 @@ class TaskAssistantBot:
         """Restart N8N service."""
         try:
             process = await asyncio.create_subprocess_shell(
-                "systemctl restart n8n",
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                "systemctl restart n8n", stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
             )
             stdout, stderr = await process.communicate()
 
@@ -107,15 +97,9 @@ class TaskAssistantBot:
                 # Wait and check
                 await asyncio.sleep(5)
                 health = await self.check_n8n_health()
-                return {
-                    "success": True,
-                    "health": health
-                }
+                return {"success": True, "health": health}
             else:
-                return {
-                    "success": False,
-                    "error": stderr.decode()
-                }
+                return {"success": False, "error": stderr.decode()}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -127,7 +111,7 @@ class TaskAssistantBot:
             process = await asyncio.create_subprocess_shell(
                 f"cd {project_root} && .venv/bin/python n8n_backup.py backup",
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
             stdout, stderr = await process.communicate()
 
@@ -145,22 +129,14 @@ class TaskAssistantBot:
             if not backup_dir.exists():
                 return []
 
-            backups = sorted(
-                backup_dir.glob("n8n_backup_*.tar.gz"),
-                key=lambda p: p.stat().st_mtime,
-                reverse=True
-            )
+            backups = sorted(backup_dir.glob("n8n_backup_*.tar.gz"), key=lambda p: p.stat().st_mtime, reverse=True)
 
             result = []
             for backup in backups[:10]:  # Last 10
                 stat = backup.stat()
                 size_mb = stat.st_size / (1024 * 1024)
                 mtime = datetime.fromtimestamp(stat.st_mtime)
-                result.append({
-                    "name": backup.name,
-                    "size_mb": size_mb,
-                    "date": mtime.strftime("%d.%m.%Y %H:%M")
-                })
+                result.append({"name": backup.name, "size_mb": size_mb, "date": mtime.strftime("%d.%m.%Y %H:%M")})
 
             return result
         except Exception as e:
@@ -172,36 +148,23 @@ class TaskAssistantBot:
         try:
             # CPU usage
             cpu_cmd = "top -bn1 | grep 'Cpu(s)' | sed 's/.*, *\\([0-9.]*\\)%* id.*/\\1/' | awk '{print 100 - $1}'"
-            cpu_process = await asyncio.create_subprocess_shell(
-                cpu_cmd,
-                stdout=asyncio.subprocess.PIPE
-            )
+            cpu_process = await asyncio.create_subprocess_shell(cpu_cmd, stdout=asyncio.subprocess.PIPE)
             cpu_out, _ = await cpu_process.communicate()
             cpu_usage = float(cpu_out.decode().strip())
 
             # Memory usage
             mem_cmd = "free | grep Mem | awk '{print ($3/$2) * 100.0}'"
-            mem_process = await asyncio.create_subprocess_shell(
-                mem_cmd,
-                stdout=asyncio.subprocess.PIPE
-            )
+            mem_process = await asyncio.create_subprocess_shell(mem_cmd, stdout=asyncio.subprocess.PIPE)
             mem_out, _ = await mem_process.communicate()
             mem_usage = float(mem_out.decode().strip())
 
             # Disk usage
             disk_cmd = "df -h / | tail -1 | awk '{print $5}' | sed 's/%//'"
-            disk_process = await asyncio.create_subprocess_shell(
-                disk_cmd,
-                stdout=asyncio.subprocess.PIPE
-            )
+            disk_process = await asyncio.create_subprocess_shell(disk_cmd, stdout=asyncio.subprocess.PIPE)
             disk_out, _ = await disk_process.communicate()
             disk_usage = float(disk_out.decode().strip())
 
-            return {
-                "cpu": cpu_usage,
-                "memory": mem_usage,
-                "disk": disk_usage
-            }
+            return {"cpu": cpu_usage, "memory": mem_usage, "disk": disk_usage}
         except Exception as e:
             logger.error(f"Error getting server status: {e}")
             return {"error": str(e)}
@@ -224,15 +187,9 @@ class TaskAssistantBot:
             await event.answer("Перезапускаю N8N...")
             result = await self.restart_n8n_service()
             if result["success"]:
-                await event.respond(
-                    f"✅ **N8N перезапущен**\n\n"
-                    f"Статус: {result['health']['status']}"
-                )
+                await event.respond(f"✅ **N8N перезапущен**\n\nСтатус: {result['health']['status']}")
             else:
-                await event.respond(
-                    f"❌ **Ошибка перезапуска**\n\n"
-                    f"Ошибка: {result['error']}"
-                )
+                await event.respond(f"❌ **Ошибка перезапуска**\n\nОшибка: {result['error']}")
 
         elif data == "create_backup":
             await event.answer("Создаю бэкап...")
@@ -283,7 +240,7 @@ class TaskAssistantBot:
 
     async def message_handler(self, event):
         """Handle regular messages."""
-        if event.message.text.startswith('/'):
+        if event.message.text.startswith("/"):
             return  # Skip commands
 
         if not await self.check_access(event.sender_id):
@@ -299,12 +256,12 @@ class TaskAssistantBot:
                 messages=[
                     {
                         "role": "system",
-                        "content": "Ты - технический помощник. Помогаешь с вопросами по N8N, серверам, автоматизации. Отвечай кратко и по делу, с примерами если нужно."
+                        "content": "Ты - технический помощник. Помогаешь с вопросами по N8N, серверам, автоматизации. Отвечай кратко и по делу, с примерами если нужно.",
                     },
-                    {"role": "user", "content": message_text}
+                    {"role": "user", "content": message_text},
                 ],
                 model=OPENAI_MODEL,
-                temperature=0.3
+                temperature=0.3,
             )
 
             await event.respond(response)
@@ -319,18 +276,9 @@ class TaskAssistantBot:
         logger.info("✅ Task Assistant Bot started")
 
         # Register handlers
-        self.client.add_event_handler(
-            self.start_handler,
-            events.NewMessage(pattern='/start')
-        )
-        self.client.add_event_handler(
-            self.callback_handler,
-            events.CallbackQuery
-        )
-        self.client.add_event_handler(
-            self.message_handler,
-            events.NewMessage
-        )
+        self.client.add_event_handler(self.start_handler, events.NewMessage(pattern="/start"))
+        self.client.add_event_handler(self.callback_handler, events.CallbackQuery)
+        self.client.add_event_handler(self.message_handler, events.NewMessage)
 
         logger.info("📱 Bot is running...")
         await self.client.run_until_disconnected()

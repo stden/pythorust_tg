@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 """Шаги для тестирования интеграции с OpenAI."""
 
-from behave import given, when, then
-from pathlib import Path
-from unittest.mock import Mock, patch
 import sys
+from pathlib import Path
+from unittest.mock import Mock
+
+from behave import given, then, when
 
 # Добавляем корень проекта в путь
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
-@given('у меня есть API ключ OpenAI')
+@given("у меня есть API ключ OpenAI")
 def step_have_openai_key(context):
     """Устанавливаем тестовый API ключ."""
     context.openai_api_key = "test-api-key-12345"
 
 
-@given('API ключ OpenAI отсутствует')
+@given("API ключ OpenAI отсутствует")
 def step_no_openai_key(context):
     """API ключ не установлен."""
     context.openai_api_key = None
@@ -28,11 +29,10 @@ def step_set_system_prompt(context, prompt):
     context.system_prompt = prompt
 
 
-@when('я создаю клиент OpenAI')
+@when("я создаю клиент OpenAI")
 def step_create_openai_client(context):
     """Создаём клиент OpenAI."""
     try:
-        from integrations.openai_client import chat_completion
         context.openai_client = Mock()
         context.openai_client.model = "gpt-5.1-mini"
         context.client_created = True
@@ -42,7 +42,7 @@ def step_create_openai_client(context):
         context.client_error = e
 
 
-@when('я создаю клиент OpenAI без ключа')
+@when("я создаю клиент OpenAI без ключа")
 def step_create_openai_client_no_key(context):
     """Пытаемся создать клиент без API ключа."""
     context.client_created = False
@@ -56,29 +56,28 @@ def step_send_message(context, message):
     context.ai_response = "Привет! Чем могу помочь?"
 
 
-@then('клиент успешно создан')
+@then("клиент успешно создан")
 def step_client_created(context):
     """Проверяем, что клиент создан."""
-    assert context.client_created, \
-        f"Клиент не создан: {context.client_error}"
+    assert context.client_created, f"Клиент не создан: {context.client_error}"
 
 
 @then('возникает ошибка "{error_message}"')
 def step_check_error(context, error_message):
     """Проверяем сообщение об ошибке."""
     assert context.client_error is not None, "Ожидалась ошибка"
-    assert error_message in str(context.client_error), \
+    assert error_message in str(context.client_error), (
         f"Ожидалась ошибка '{error_message}', получено '{context.client_error}'"
+    )
 
 
 @then('модель по умолчанию равна "{model}"')
 def step_check_default_model(context, model):
     """Проверяем модель по умолчанию."""
-    assert context.openai_client.model == model, \
-        f"Модель {context.openai_client.model}, ожидалось {model}"
+    assert context.openai_client.model == model, f"Модель {context.openai_client.model}, ожидалось {model}"
 
 
-@then('ответ содержит текст')
+@then("ответ содержит текст")
 def step_response_has_text(context):
     """Проверяем, что ответ содержит текст."""
     assert context.ai_response is not None, "Ответ отсутствует"

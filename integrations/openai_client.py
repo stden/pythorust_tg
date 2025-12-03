@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from openai import AsyncOpenAI, OpenAI
 
 # Load environment once so local `.env` values are available
-load_dotenv('/srv/pythorust_tg/.env')
+load_dotenv("/srv/pythorust_tg/.env")
 
 DEFAULT_MODEL = os.getenv("OPENAI_MODEL") or os.getenv("AI_CONSULTANT_MODEL") or "gpt-4o-mini"
 DEFAULT_TEMPERATURE = float(os.getenv("OPENAI_TEMPERATURE", "0.7"))

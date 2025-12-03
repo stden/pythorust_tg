@@ -5,14 +5,15 @@ N8N Configuration Backup Script
 """
 
 import asyncio
-import aiohttp
 import json
 import logging
-from datetime import datetime
-from pathlib import Path
-import tarfile
 import os
 import sys
+import tarfile
+from datetime import datetime
+from pathlib import Path
+
+import aiohttp
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -24,10 +25,7 @@ BACKUP_DIR = Path(os.getenv("BACKUP_DIR"))
 RETENTION_DAYS = int(os.getenv("RETENTION_DAYS"))
 MAX_BACKUPS = int(os.getenv("MAX_BACKUPS"))
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -44,16 +42,12 @@ class N8NBackup:
             async with aiohttp.ClientSession() as session:
                 headers = {}
                 if N8N_API_KEY:
-                    headers['X-N8N-API-KEY'] = N8N_API_KEY
+                    headers["X-N8N-API-KEY"] = N8N_API_KEY
 
-                async with session.get(
-                    f"{N8N_URL}/api/v1/workflows",
-                    headers=headers,
-                    ssl=False
-                ) as response:
+                async with session.get(f"{N8N_URL}/api/v1/workflows", headers=headers, ssl=False) as response:
                     if response.status == 200:
                         data = await response.json()
-                        workflows = data.get('data', [])
+                        workflows = data.get("data", [])
                         logger.info(f"✅ Retrieved {len(workflows)} workflows")
                         return workflows
                     else:
@@ -69,16 +63,12 @@ class N8NBackup:
             async with aiohttp.ClientSession() as session:
                 headers = {}
                 if N8N_API_KEY:
-                    headers['X-N8N-API-KEY'] = N8N_API_KEY
+                    headers["X-N8N-API-KEY"] = N8N_API_KEY
 
-                async with session.get(
-                    f"{N8N_URL}/api/v1/credentials",
-                    headers=headers,
-                    ssl=False
-                ) as response:
+                async with session.get(f"{N8N_URL}/api/v1/credentials", headers=headers, ssl=False) as response:
                     if response.status == 200:
                         data = await response.json()
-                        credentials = data.get('data', [])
+                        credentials = data.get("data", [])
                         logger.info(f"✅ Retrieved {len(credentials)} credentials (metadata only)")
                         return credentials
                     else:
@@ -101,7 +91,7 @@ class N8NBackup:
         workflows = await self.get_workflows()
         if workflows:
             workflows_file = backup_path / "workflows.json"
-            with open(workflows_file, 'w', encoding='utf-8') as f:
+            with open(workflows_file, "w", encoding="utf-8") as f:
                 json.dump(workflows, f, indent=2, ensure_ascii=False)
             logger.info(f"✅ Saved {len(workflows)} workflows")
 
@@ -109,7 +99,7 @@ class N8NBackup:
         credentials = await self.get_credentials()
         if credentials:
             credentials_file = backup_path / "credentials_meta.json"
-            with open(credentials_file, 'w', encoding='utf-8') as f:
+            with open(credentials_file, "w", encoding="utf-8") as f:
                 json.dump(credentials, f, indent=2, ensure_ascii=False)
             logger.info(f"✅ Saved {len(credentials)} credentials metadata")
 
@@ -119,10 +109,10 @@ class N8NBackup:
             "datetime": datetime.now().isoformat(),
             "n8n_url": N8N_URL,
             "workflows_count": len(workflows),
-            "credentials_count": len(credentials)
+            "credentials_count": len(credentials),
         }
         info_file = backup_path / "backup_info.json"
-        with open(info_file, 'w', encoding='utf-8') as f:
+        with open(info_file, "w", encoding="utf-8") as f:
             json.dump(backup_info, f, indent=2)
 
         # 4. Create tar.gz archive
@@ -134,6 +124,7 @@ class N8NBackup:
 
         # 5. Cleanup temporary directory
         import shutil
+
         shutil.rmtree(backup_path)
 
         return archive_path
@@ -194,7 +185,7 @@ class N8NBackup:
             # Restore workflows
             workflows_file = backup_data_dir / "workflows.json"
             if workflows_file.exists():
-                with open(workflows_file, 'r', encoding='utf-8') as f:
+                with open(workflows_file, "r", encoding="utf-8") as f:
                     workflows = json.load(f)
 
                 logger.info(f"🔄 Restoring {len(workflows)} workflows...")
@@ -213,16 +204,13 @@ class N8NBackup:
         finally:
             # Cleanup temp directory
             import shutil
+
             if temp_dir.exists():
                 shutil.rmtree(temp_dir)
 
     async def list_backups(self):
         """List all available backups."""
-        backups = sorted(
-            self.backup_dir.glob("n8n_backup_*.tar.gz"),
-            key=lambda p: p.stat().st_mtime,
-            reverse=True
-        )
+        backups = sorted(self.backup_dir.glob("n8n_backup_*.tar.gz"), key=lambda p: p.stat().st_mtime, reverse=True)
 
         if not backups:
             logger.info("📦 No backups found")
@@ -242,16 +230,8 @@ async def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="N8N Backup Manager")
-    parser.add_argument(
-        "action",
-        choices=["backup", "restore", "list", "cleanup"],
-        help="Action to perform"
-    )
-    parser.add_argument(
-        "--file",
-        type=Path,
-        help="Backup file for restore action"
-    )
+    parser.add_argument("action", choices=["backup", "restore", "list", "cleanup"], help="Action to perform")
+    parser.add_argument("--file", type=Path, help="Backup file for restore action")
 
     args = parser.parse_args()
 

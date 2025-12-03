@@ -67,9 +67,7 @@ class SessionStats:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Bot analytics dashboard: conversions, funnel, retention"
-    )
+    parser = argparse.ArgumentParser(description="Bot analytics dashboard: conversions, funnel, retention")
     parser.add_argument(
         "--bots",
         nargs="+",
@@ -181,9 +179,7 @@ def contains_phone(text: Optional[str]) -> bool:
 
 def sessions_lookup(sessions: List[dict]) -> Dict[str, Dict[int, List[SessionStats]]]:
     """Group sessions by bot and user for quick lookup."""
-    lookup: Dict[str, Dict[int, List[SessionStats]]] = defaultdict(
-        lambda: defaultdict(list)
-    )
+    lookup: Dict[str, Dict[int, List[SessionStats]]] = defaultdict(lambda: defaultdict(list))
     for row in sessions:
         stat = SessionStats(
             id=row["id"],
@@ -210,9 +206,7 @@ def attach_messages_to_sessions(
     Update SessionStats in-place and return messages grouped by bot/user
     (for retention calculations).
     """
-    messages_by_bot_user: Dict[str, Dict[int, List[dict]]] = defaultdict(
-        lambda: defaultdict(list)
-    )
+    messages_by_bot_user: Dict[str, Dict[int, List[dict]]] = defaultdict(lambda: defaultdict(list))
 
     for msg in messages:
         bot = msg["bot_name"]
@@ -333,9 +327,7 @@ def build_metrics(
     }
 
 
-def render_markdown(
-    metrics: Dict[str, dict], days: int, window_start: datetime, output_path: Path
-) -> None:
+def render_markdown(metrics: Dict[str, dict], days: int, window_start: datetime, output_path: Path) -> None:
     lines: List[str] = []
     lines.append(f"# Bot Analytics Dashboard (last {days} days)")
     lines.append("")
@@ -355,10 +347,7 @@ def render_markdown(
             f"({data['engaged_rate']:.1f}%) | Multi-turn: {data['multi_turn']} "
             f"({data['multi_rate']:.1f}% от engaged)"
         )
-        lines.append(
-            f"- Conversions (phone shared): {data['converted']} "
-            f"({data['conversion_rate']:.1f}% of sessions)"
-        )
+        lines.append(f"- Conversions (phone shared): {data['converted']} ({data['conversion_rate']:.1f}% of sessions)")
         lines.append(
             f"- Users: new {data['new_users']}, active {data['active_users']}, "
             f"avg user msgs/session {data['avg_user_messages']:.1f}, "
@@ -367,25 +356,16 @@ def render_markdown(
 
         d1_base, d1_ret, d1_rate = data["retention"]["d1"]
         d7_base, d7_ret, d7_rate = data["retention"]["d7"]
-        lines.append(
-            f"- Retention: D1 {d1_rate:.1f}% ({d1_ret}/{d1_base}), "
-            f"D7 {d7_rate:.1f}% ({d7_ret}/{d7_base})"
-        )
+        lines.append(f"- Retention: D1 {d1_rate:.1f}% ({d1_ret}/{d1_base}), D7 {d7_rate:.1f}% ({d7_ret}/{d7_base})")
         lines.append("")
 
         lines.append("**Funnel**")
         lines.append("| Stage | Sessions | Rate |")
         lines.append("| --- | --- | --- |")
         lines.append(f"| Start | {data['sessions']} | 100% |")
-        lines.append(
-            f"| Engaged | {data['engaged']} | {data['engaged_rate']:.1f}% |"
-        )
-        lines.append(
-            f"| Multi-turn | {data['multi_turn']} | {data['multi_rate']:.1f}% of engaged |"
-        )
-        lines.append(
-            f"| Phone shared | {data['converted']} | {data['conversion_rate']:.1f}% |"
-        )
+        lines.append(f"| Engaged | {data['engaged']} | {data['engaged_rate']:.1f}% |")
+        lines.append(f"| Multi-turn | {data['multi_turn']} | {data['multi_rate']:.1f}% of engaged |")
+        lines.append(f"| Phone shared | {data['converted']} | {data['conversion_rate']:.1f}% |")
         lines.append("")
 
         if data["daily"]:
@@ -394,9 +374,7 @@ def render_markdown(
             lines.append("| --- | --- | --- | --- |")
             for day, sessions, conv in data["daily"]:
                 rate = safe_div(conv, sessions)
-                lines.append(
-                    f"| {day.isoformat()} | {sessions} | {conv} | {rate:.1f}% |"
-                )
+                lines.append(f"| {day.isoformat()} | {sessions} | {conv} | {rate:.1f}% |")
             lines.append("")
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -421,9 +399,7 @@ def main():
 
     metrics: Dict[str, dict] = {}
     for bot in bots:
-        bot_sessions = [
-            s for user_sessions in lookup.get(bot, {}).values() for s in user_sessions
-        ]
+        bot_sessions = [s for user_sessions in lookup.get(bot, {}).values() for s in user_sessions]
         metrics[bot] = build_metrics(
             bot_sessions,
             messages_by_bot_user.get(bot, {}),
@@ -432,11 +408,7 @@ def main():
         )
 
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-    output_path = (
-        Path(args.output)
-        if args.output
-        else Path("analysis_results") / f"bot_analytics_{timestamp}.md"
-    )
+    output_path = Path(args.output) if args.output else Path("analysis_results") / f"bot_analytics_{timestamp}.md"
     render_markdown(metrics, args.days, window_start, output_path)
 
 

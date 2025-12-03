@@ -1,4 +1,5 @@
 """Shared helpers for exporting Telegram chats."""
+
 from __future__ import annotations
 
 import re
@@ -84,7 +85,9 @@ def build_message_text(message) -> str:
     return text
 
 
-async def build_markdown_entry(message, cache: Dict[int, str], timestamp_fmt: str = DEFAULT_TIMESTAMP_FMT) -> Optional[str]:
+async def build_markdown_entry(
+    message, cache: Dict[int, str], timestamp_fmt: str = DEFAULT_TIMESTAMP_FMT
+) -> Optional[str]:
     """Render a single message as markdown or None when there's nothing to write."""
     text = build_message_text(message)
     if not text.strip():
@@ -111,7 +114,9 @@ def _to_entity(cfg: dict[str, Any]) -> Any:
     raise ValueError(f"Unknown chat type: {ctype}")
 
 
-def load_chats_from_config(config_path: str = "config.yml", *, silent_missing: bool = False, skip_invalid: bool = False) -> dict[str, Any]:
+def load_chats_from_config(
+    config_path: str = "config.yml", *, silent_missing: bool = False, skip_invalid: bool = False
+) -> dict[str, Any]:
     """
     Load chat aliases from config.yml into telethon entities or raw IDs/usernames.
     Falls back to a config next to this module if the given path does not exist.

@@ -63,10 +63,7 @@ class ClaudeClient:
 
     def __post_init__(self):
         if not self.api_key:
-            raise ValueError(
-                "ANTHROPIC_API_KEY не установлен. "
-                "Получите ключ на https://console.anthropic.com/"
-            )
+            raise ValueError("ANTHROPIC_API_KEY не установлен. Получите ключ на https://console.anthropic.com/")
 
     def _get_headers(self) -> dict:
         """Заголовки для API запросов."""

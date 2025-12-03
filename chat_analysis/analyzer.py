@@ -27,11 +27,7 @@ class ChatAnalyzer:
         # Initialize LLM analyzer
         self.llm_analyzer = LLMAnalyzer(self.config)
 
-    async def analyze_chat(
-        self,
-        chat_identifier: str,
-        prompt_template: Optional[str] = None
-    ) -> ChatAnalysisResult:
+    async def analyze_chat(self, chat_identifier: str, prompt_template: Optional[str] = None) -> ChatAnalysisResult:
         """Analyze a Telegram chat.
 
         Args:
@@ -43,7 +39,7 @@ class ChatAnalyzer:
         """
         if self.config.verbose:
             print(f"Starting analysis of chat: {chat_identifier}")
-            print(f"Configuration:")
+            print("Configuration:")
             print(f"  - LLM Provider: {self.config.llm_provider}")
             print(f"  - Model: {self.config.model}")
             print(f"  - Message Limit: {self.config.message_limit}")
@@ -75,10 +71,7 @@ class ChatAnalyzer:
             print("Analyzing with LLM...")
 
         result = self.llm_analyzer.analyze(
-            messages_text=messages_text,
-            metadata=metadata,
-            chat_name=chat_identifier,
-            prompt_template=prompt_template
+            messages_text=messages_text, metadata=metadata, chat_name=chat_identifier, prompt_template=prompt_template
         )
 
         if self.config.verbose:
@@ -121,85 +114,40 @@ def run_cli():
     """Run ChatAnalyzer from command line."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Analyze Telegram chat using AI"
-    )
+    parser = argparse.ArgumentParser(description="Analyze Telegram chat using AI")
+
+    parser.add_argument("chat", help="Chat username, ID, or URL (e.g., @channel_name)")
 
     parser.add_argument(
-        "chat",
-        help="Chat username, ID, or URL (e.g., @channel_name)"
+        "--provider", choices=["openai", "claude", "gemini"], default="openai", help="LLM provider (default: openai)"
     )
 
-    parser.add_argument(
-        "--provider",
-        choices=["openai", "claude", "gemini"],
-        default="openai",
-        help="LLM provider (default: openai)"
-    )
+    parser.add_argument("--model", help="Model name (default: auto-detect based on provider)")
+
+    parser.add_argument("--limit", type=int, default=1000, help="Maximum number of messages to analyze (default: 1000)")
+
+    parser.add_argument("--days", type=int, default=30, help="How many days back to fetch messages (default: 30)")
 
     parser.add_argument(
-        "--model",
-        help="Model name (default: auto-detect based on provider)"
-    )
-
-    parser.add_argument(
-        "--limit",
-        type=int,
-        default=1000,
-        help="Maximum number of messages to analyze (default: 1000)"
-    )
-
-    parser.add_argument(
-        "--days",
-        type=int,
-        default=30,
-        help="How many days back to fetch messages (default: 30)"
-    )
-
-    parser.add_argument(
-        "--output-format",
-        choices=["json", "markdown", "both"],
-        default="both",
-        help="Output format (default: both)"
+        "--output-format", choices=["json", "markdown", "both"], default="both", help="Output format (default: both)"
     )
 
     parser.add_argument(
         "--output-dir",
         type=Path,
         default=Path("./analysis_results"),
-        help="Output directory (default: ./analysis_results)"
+        help="Output directory (default: ./analysis_results)",
     )
 
-    parser.add_argument(
-        "--prompt",
-        type=Path,
-        help="Path to custom prompt template"
-    )
+    parser.add_argument("--prompt", type=Path, help="Path to custom prompt template")
 
-    parser.add_argument(
-        "--quiet",
-        action="store_true",
-        help="Suppress verbose output"
-    )
+    parser.add_argument("--quiet", action="store_true", help="Suppress verbose output")
 
-    parser.add_argument(
-        "--include-media",
-        action="store_true",
-        help="Include media messages in analysis"
-    )
+    parser.add_argument("--include-media", action="store_true", help="Include media messages in analysis")
 
-    parser.add_argument(
-        "--include-bots",
-        action="store_true",
-        help="Include bot messages in analysis"
-    )
+    parser.add_argument("--include-bots", action="store_true", help="Include bot messages in analysis")
 
-    parser.add_argument(
-        "--min-length",
-        type=int,
-        default=10,
-        help="Minimum message length to include (default: 10)"
-    )
+    parser.add_argument("--min-length", type=int, default=10, help="Minimum message length to include (default: 10)")
 
     args = parser.parse_args()
 
@@ -214,7 +162,7 @@ def run_cli():
         verbose=not args.quiet,
         include_media=args.include_media,
         exclude_bots=not args.include_bots,
-        min_message_length=args.min_length
+        min_message_length=args.min_length,
     )
 
     # Load custom prompt if provided
@@ -251,7 +199,7 @@ def run_cli():
             for topic in result.topics[:5]:
                 print(f"  - {topic.name} ({topic.mentions} mentions, {topic.sentiment})")
             print()
-            print(f"Key Insights:")
+            print("Key Insights:")
             for insight in result.insights[:5]:
                 print(f"  - {insight}")
             print("=" * 80)
@@ -262,6 +210,7 @@ def run_cli():
         print(f"Error: {e}")
         if config.verbose:
             import traceback
+
             traceback.print_exc()
         return 1
 

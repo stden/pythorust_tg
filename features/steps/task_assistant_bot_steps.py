@@ -8,7 +8,7 @@ import types
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from behave import given, when, then
+from behave import given, then, when
 
 # Настраиваем окружение до импорта модуля
 os.environ.setdefault("TELEGRAM_API_ID", "1")
@@ -65,8 +65,7 @@ def _fake_aiohttp_module(status_code: int):
             return FakeResponse(self.status)
 
     return types.SimpleNamespace(
-        ClientSession=lambda: FakeSession(status_code),
-        ClientTimeout=lambda total=None: FakeTimeout(total)
+        ClientSession=lambda: FakeSession(status_code), ClientTimeout=lambda total=None: FakeTimeout(total)
     )
 
 
@@ -95,7 +94,7 @@ def step_allowed_users(context, user_ids):
     task_assistant_bot.ALLOWED_USERS = ids
 
 
-@when('пользователь {user_id:d} отправляет /start')
+@when("пользователь {user_id:d} отправляет /start")
 def step_user_sends_start(context, user_id):
     """Отправляем команду /start и сохраняем ответ."""
     event = MockEvent(user_id)
@@ -118,9 +117,7 @@ def step_check_n8n(context):
     fake_aiohttp = _fake_aiohttp_module(status_code=200)
     loop = _get_loop()
     with patch.dict(sys.modules, {"aiohttp": fake_aiohttp}):
-        context.health_result = loop.run_until_complete(
-            context.bot.check_n8n_health()
-        )
+        context.health_result = loop.run_until_complete(context.bot.check_n8n_health())
 
 
 @when("я перезапускаю N8N сервис")
@@ -130,15 +127,11 @@ def step_restart_n8n(context):
     process.returncode = 0
     process.communicate = AsyncMock(return_value=(b"ok", b""))
 
-    context.bot.check_n8n_health = AsyncMock(
-        return_value={"status": "✅ Работает", "code": 200}
-    )
+    context.bot.check_n8n_health = AsyncMock(return_value={"status": "✅ Работает", "code": 200})
 
     loop = _get_loop()
     with patch("task_assistant_bot.asyncio.create_subprocess_shell", AsyncMock(return_value=process)):
-        context.restart_result = loop.run_until_complete(
-            context.bot.restart_n8n_service()
-        )
+        context.restart_result = loop.run_until_complete(context.bot.restart_n8n_service())
 
 
 @when("бот создаёт бэкап N8N")
@@ -150,14 +143,13 @@ def step_create_backup(context):
 
     loop = _get_loop()
     with patch("task_assistant_bot.asyncio.create_subprocess_shell", AsyncMock(return_value=process)):
-        context.backup_result = loop.run_until_complete(
-            context.bot.create_n8n_backup()
-        )
+        context.backup_result = loop.run_until_complete(context.bot.create_n8n_backup())
 
 
 @when("бот запрашивает статус серверов")
 def step_server_status(context):
     """Возвращаем фейковые метрики ресурсов."""
+
     def make_process(output: bytes):
         proc = MagicMock()
         proc.communicate = AsyncMock(return_value=(output, b""))
@@ -167,20 +159,15 @@ def step_server_status(context):
     processes = [
         make_process(b"12.5\n"),  # CPU
         make_process(b"42.0\n"),  # Memory
-        make_process(b"55\n"),    # Disk
+        make_process(b"55\n"),  # Disk
     ]
 
     loop = _get_loop()
-    with patch(
-        "task_assistant_bot.asyncio.create_subprocess_shell",
-        side_effect=processes
-    ):
-        context.server_status = loop.run_until_complete(
-            context.bot.get_server_status()
-        )
+    with patch("task_assistant_bot.asyncio.create_subprocess_shell", side_effect=processes):
+        context.server_status = loop.run_until_complete(context.bot.get_server_status())
 
 
-@then('бот показывает {count:d} кнопок')
+@then("бот показывает {count:d} кнопок")
 def step_check_buttons_count(context, count):
     """Проверяем количество inline кнопок."""
     response = context.last_event.responses[0]
@@ -195,8 +182,7 @@ def step_buttons_have_payload(context, payload):
     response = context.last_event.responses[0]
     flat = [btn for row in response.get("buttons") or [] for btn in row]
     found = any(
-        (btn.get("data").decode() if isinstance(btn.get("data"), bytes) else btn.get("data")) == payload
-        for btn in flat
+        (btn.get("data").decode() if isinstance(btn.get("data"), bytes) else btn.get("data")) == payload for btn in flat
     )
     assert found, f"Не найдена кнопка с payload {payload}"
 
@@ -214,7 +200,7 @@ def step_health_status(context, status):
     assert context.health_result["status"] == status
 
 
-@then('код ответа равен {code:d}')
+@then("код ответа равен {code:d}")
 def step_health_code(context, code):
     """Проверяем HTTP код health-check."""
     assert context.health_result["code"] == code
@@ -226,7 +212,7 @@ def step_restart_success(context):
     assert context.restart_result["success"] is True
 
 
-@then('результат содержит здоровье с кодом {code:d}')
+@then("результат содержит здоровье с кодом {code:d}")
 def step_restart_health(context, code):
     """В ответе на перезапуск есть результат health-check."""
     health = context.restart_result.get("health", {})
@@ -244,8 +230,7 @@ def step_backup_output(context, text):
 def step_server_status_result(context):
     """Проверяем, что статус серверов содержит все метрики."""
     data = context.server_status
-    assert set(data.keys()) == {"cpu", "memory", "disk"}, \
-        f"Некорректные ключи статуса: {data.keys()}"
+    assert set(data.keys()) == {"cpu", "memory", "disk"}, f"Некорректные ключи статуса: {data.keys()}"
     assert data["cpu"] == 12.5
     assert data["memory"] == 42.0
     assert data["disk"] == 55.0

@@ -4,7 +4,6 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-
 from bfl_sales_bot import BFLSalesBot, MySQLLogger, PromptVariant
 
 
@@ -65,9 +64,7 @@ async def test_handle_start_saves_user_and_sends_onboarding(bot_with_mocks):
 
     bot.db.save_user.assert_called_once_with(user)
     bot.db.create_session.assert_called_once_with(user.id)
-    bot.experiments.get_or_assign_variant.assert_called_once_with(
-        user.id, bot.db.create_session.return_value
-    )
+    bot.experiments.get_or_assign_variant.assert_called_once_with(user.id, bot.db.create_session.return_value)
 
     # First saved message is /start, remaining three are bot responses
     directions = [call.kwargs["direction"] for call in bot.db.save_message.call_args_list]
@@ -97,9 +94,7 @@ async def test_handle_message_builds_ai_payload_and_logs(bot_with_mocks):
         {"direction": "outgoing", "message_text": "Расскажите про бюджет"},
     ]
 
-    ai_response = SimpleNamespace(
-        choices=[SimpleNamespace(message=SimpleNamespace(content="AI reply text"))]
-    )
+    ai_response = SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="AI reply text"))])
     ai.chat_completion.return_value = ai_response
 
     user = SimpleNamespace(
@@ -120,9 +115,7 @@ async def test_handle_message_builds_ai_payload_and_logs(bot_with_mocks):
     bot.db.save_user.assert_called_once_with(user)
     bot.db.get_conversation_history.assert_called_once_with(user.id)
     bot.experiments.get_or_assign_variant.assert_called_once_with(user.id, 555)
-    bot.experiments.detect_and_mark_conversion.assert_called_once_with(
-        555, event.message.text
-    )
+    bot.experiments.detect_and_mark_conversion.assert_called_once_with(555, event.message.text)
 
     ai_call = ai.chat_completion.await_args
     messages = ai_call.args[0]
@@ -157,13 +150,10 @@ async def test_handle_message_handles_ai_error(bot_with_mocks):
 
     # Verify fallback message
     event.respond.assert_awaited_once_with("Извините, произошла ошибка. Попробуйте ещё раз.")
-    
+
     # Verify it was logged to DB
     bot.db.save_message.assert_called_with(
-        user_id=user.id,
-        message_id=222,
-        text="Извините, произошла ошибка. Попробуйте ещё раз.",
-        direction="outgoing"
+        user_id=user.id, message_id=222, text="Извините, произошла ошибка. Попробуйте ещё раз.", direction="outgoing"
     )
 
 
@@ -171,10 +161,10 @@ async def test_handle_message_handles_ai_error(bot_with_mocks):
 async def test_handle_message_uses_default_prompt_if_no_experiment(bot_with_mocks):
     """If experiments manager is missing or returns None, use default prompt."""
     bot, ai, _ = bot_with_mocks
-    
+
     # Disable experiments
     bot.experiments = None
-    
+
     # Mock default prompt import
     with patch("bfl_sales_bot.SALES_SYSTEM_PROMPT", "DEFAULT_PROMPT"):
         ai.chat_completion.return_value = SimpleNamespace(
@@ -240,13 +230,13 @@ async def test_handle_message_uses_existing_session(bot_with_mocks):
 async def test_integration_openai_api_call(bot_with_mocks):
     """Integration test simulating a real conversation flow with OpenAI response."""
     bot, ai, _ = bot_with_mocks
-    
+
     # Setup a realistic conversation history
     bot.db.get_conversation_history.return_value = [
         {"direction": "incoming", "message_text": "Сколько стоит банкротство?"},
         {"direction": "outgoing", "message_text": "Стоимость зависит от суммы долга. Какая у вас общая сумма?"},
     ]
-    
+
     # Mock OpenAI response to simulate GPT-4o behavior
     ai_response_text = "При долге 500 тысяч рублей процедура будет стоить около 120 тысяч. Есть ли у вас имущество?"
     ai.chat_completion.return_value = SimpleNamespace(
@@ -264,7 +254,7 @@ async def test_integration_openai_api_call(bot_with_mocks):
     # Verify the prompt sent to OpenAI contains the conversation context
     ai_call = ai.chat_completion.await_args
     messages = ai_call.args[0]
-    
+
     # System prompt
     assert messages[0]["role"] == "system"
     # History
@@ -275,4 +265,3 @@ async def test_integration_openai_api_call(bot_with_mocks):
 
     # Verify bot sends the AI response back to user
     event.respond.assert_awaited_once_with(ai_response_text)
-

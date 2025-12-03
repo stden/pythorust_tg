@@ -5,8 +5,6 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
@@ -29,6 +27,7 @@ class TestIsOllamaRunning:
             mock_get.side_effect = requests.RequestException("Connection refused")
 
             from integrations.ollama_client import is_ollama_running
+
             assert is_ollama_running() is False
 
     def test_is_ollama_running_false_bad_status(self):
@@ -50,12 +49,14 @@ class TestListModels:
         with patch("requests.get") as mock_get:
             mock_get.return_value = MagicMock(
                 status_code=200,
-                json=MagicMock(return_value={
-                    "models": [
-                        {"name": "qwen2.5:3b"},
-                        {"name": "llama3:8b"},
-                    ]
-                })
+                json=MagicMock(
+                    return_value={
+                        "models": [
+                            {"name": "qwen2.5:3b"},
+                            {"name": "llama3:8b"},
+                        ]
+                    }
+                ),
             )
 
             models = list_models()
@@ -67,10 +68,7 @@ class TestListModels:
         from integrations.ollama_client import list_models
 
         with patch("requests.get") as mock_get:
-            mock_get.return_value = MagicMock(
-                status_code=200,
-                json=MagicMock(return_value={"models": []})
-            )
+            mock_get.return_value = MagicMock(status_code=200, json=MagicMock(return_value={"models": []}))
 
             models = list_models()
             assert models == []
@@ -85,8 +83,7 @@ class TestGenerate:
 
         with patch("requests.post") as mock_post:
             mock_post.return_value = MagicMock(
-                status_code=200,
-                json=MagicMock(return_value={"response": "Hello there!"})
+                status_code=200, json=MagicMock(return_value={"response": "Hello there!"})
             )
 
             result = generate("Hello!")
@@ -98,15 +95,10 @@ class TestGenerate:
 
         with patch("requests.post") as mock_post:
             mock_post.return_value = MagicMock(
-                status_code=200,
-                json=MagicMock(return_value={"response": "Ответ на русском"})
+                status_code=200, json=MagicMock(return_value={"response": "Ответ на русском"})
             )
 
-            result = generate(
-                "Привет!",
-                model="qwen2.5:3b",
-                system="Отвечай на русском"
-            )
+            result = generate("Привет!", model="qwen2.5:3b", system="Отвечай на русском")
             assert result == "Ответ на русском"
 
             call_kwargs = mock_post.call_args.kwargs
@@ -118,16 +110,10 @@ class TestGenerate:
 
         with patch("requests.post") as mock_post:
             mock_post.return_value = MagicMock(
-                status_code=200,
-                json=MagicMock(return_value={"response": "Custom response"})
+                status_code=200, json=MagicMock(return_value={"response": "Custom response"})
             )
 
-            result = generate(
-                "Test",
-                model="llama3:8b",
-                temperature=0.5,
-                max_tokens=1000
-            )
+            result = generate("Test", model="llama3:8b", temperature=0.5, max_tokens=1000)
             assert result == "Custom response"
 
             call_kwargs = mock_post.call_args.kwargs
@@ -161,10 +147,7 @@ class TestChat:
 
         with patch("requests.post") as mock_post:
             mock_post.return_value = MagicMock(
-                status_code=200,
-                json=MagicMock(return_value={
-                    "message": {"content": "Hello! How can I help?"}
-                })
+                status_code=200, json=MagicMock(return_value={"message": {"content": "Hello! How can I help?"}})
             )
 
             result = chat([{"role": "user", "content": "Hello"}])
@@ -176,17 +159,14 @@ class TestChat:
 
         with patch("requests.post") as mock_post:
             mock_post.return_value = MagicMock(
-                status_code=200,
-                json=MagicMock(return_value={
-                    "message": {"content": "Based on our conversation..."}
-                })
+                status_code=200, json=MagicMock(return_value={"message": {"content": "Based on our conversation..."}})
             )
 
             messages = [
                 {"role": "system", "content": "Be helpful"},
                 {"role": "user", "content": "Hi"},
                 {"role": "assistant", "content": "Hello!"},
-                {"role": "user", "content": "Continue"}
+                {"role": "user", "content": "Continue"},
             ]
             result = chat(messages)
             assert result == "Based on our conversation..."
@@ -212,10 +192,7 @@ class TestSalesAgentResponse:
         with patch("integrations.ollama_client.generate") as mock_generate:
             mock_generate.return_value = "Курс окупится!"
 
-            result = sales_agent_response(
-                "Мне нужно подумать",
-                context="Курс программирования за 50,000 руб"
-            )
+            result = sales_agent_response("Мне нужно подумать", context="Курс программирования за 50,000 руб")
             assert result == "Курс окупится!"
 
             call_kwargs = mock_generate.call_args.kwargs

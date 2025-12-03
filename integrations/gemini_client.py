@@ -63,10 +63,7 @@ class GeminiClient:
 
     def __post_init__(self):
         if not self.api_key:
-            raise ValueError(
-                "GOOGLE_API_KEY не установлен. "
-                "Получите ключ на https://aistudio.google.com/"
-            )
+            raise ValueError("GOOGLE_API_KEY не установлен. Получите ключ на https://aistudio.google.com/")
 
     async def chat(
         self,
@@ -110,9 +107,7 @@ class GeminiClient:
         # Добавляем историю
         if history:
             for msg in history:
-                contents.append(
-                    {"role": msg.role, "parts": [{"text": msg.content}]}
-                )
+                contents.append({"role": msg.role, "parts": [{"text": msg.content}]})
 
         # Добавляем текущее сообщение
         contents.append({"role": "user", "parts": [{"text": message}]})
@@ -175,9 +170,7 @@ class GeminiClient:
 
         if history:
             for msg in history:
-                contents.append(
-                    {"role": msg.role, "parts": [{"text": msg.content}]}
-                )
+                contents.append({"role": msg.role, "parts": [{"text": msg.content}]})
 
         contents.append({"role": "user", "parts": [{"text": message}]})
 

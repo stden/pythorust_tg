@@ -26,11 +26,7 @@ if not API_ID_ENV or not API_HASH:
     raise RuntimeError("TELEGRAM_API_ID and TELEGRAM_API_HASH are required for DevOps AI bot.")
 
 API_ID = int(API_ID_ENV)
-BOT_TOKEN = (
-    os.getenv("DEVOPS_BOT_TOKEN")
-    or os.getenv("TASK_ASSISTANT_BOT_TOKEN")
-    or os.getenv("TELEGRAM_BOT_TOKEN")
-)
+BOT_TOKEN = os.getenv("DEVOPS_BOT_TOKEN") or os.getenv("TASK_ASSISTANT_BOT_TOKEN") or os.getenv("TELEGRAM_BOT_TOKEN")
 CONFIG_PATH = Path(os.getenv("DEVOPS_BOT_CONFIG", "devops_bot.yml"))
 
 DEFAULT_SYSTEM_PROMPT = (
@@ -83,9 +79,7 @@ class DevOpsAIBot:
         self.cooldown = int(monitor_cfg.get("cooldown_seconds") or os.getenv("DEVOPS_ALERT_COOLDOWN", 300))
 
         alert_chat = (
-            monitor_cfg.get("alert_chat_id")
-            or os.getenv("DEVOPS_ALERT_CHAT_ID")
-            or os.getenv("TELEGRAM_CHAT_ID")
+            monitor_cfg.get("alert_chat_id") or os.getenv("DEVOPS_ALERT_CHAT_ID") or os.getenv("TELEGRAM_CHAT_ID")
         )
         self.alert_chat_id = int(alert_chat) if alert_chat else None
         self.monitor_enabled = monitor_cfg.get("enabled", True)
@@ -209,9 +203,7 @@ class DevOpsAIBot:
 
         try:
             start = time.perf_counter()
-            reader, writer = await asyncio.wait_for(
-                asyncio.open_connection(host, port), timeout=svc.timeout
-            )
+            reader, writer = await asyncio.wait_for(asyncio.open_connection(host, port), timeout=svc.timeout)
             latency_ms = int((time.perf_counter() - start) * 1000)
             writer.close()
             await writer.wait_closed()
@@ -228,7 +220,9 @@ class DevOpsAIBot:
         ok = code == 0 and ("active" in output or "running" in output)
         return {"name": svc.name, "ok": ok, "detail": output or f"exit {code}"}
 
-    async def check_service(self, svc: ServiceConfig, session: Optional[aiohttp.ClientSession] = None) -> Dict[str, Any]:
+    async def check_service(
+        self, svc: ServiceConfig, session: Optional[aiohttp.ClientSession] = None
+    ) -> Dict[str, Any]:
         if svc.kind == "http":
             if not svc.url:
                 return {"name": svc.name, "ok": False, "detail": "URL is not set"}

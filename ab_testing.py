@@ -80,9 +80,7 @@ class ABTestManager:
                 return variant
         return self.variants[-1]
 
-    def _fetch_assigned_variant(
-        self, session_id: Optional[int], user_id: Optional[int]
-    ) -> Optional[str]:
+    def _fetch_assigned_variant(self, session_id: Optional[int], user_id: Optional[int]) -> Optional[str]:
         """Fetch saved variant name for a session/user if present."""
         self.db.ensure_connection()
         where = ["bot_name = %s", "experiment_name = %s"]
@@ -107,9 +105,7 @@ class ABTestManager:
             row = cursor.fetchone()
             return row["variant"] if row else None
 
-    def get_or_assign_variant(
-        self, user_id: int, session_id: Optional[int]
-    ) -> PromptVariant:
+    def get_or_assign_variant(self, user_id: int, session_id: Optional[int]) -> PromptVariant:
         """
         Returns an assigned variant, creating one if needed.
         """
@@ -196,16 +192,12 @@ class ABTestManager:
                 return "purchase_intent"
 
         delivery_keywords = ["доставка", "оплата", "адрес", "курьер", "самовывоз"]
-        if any(word in normalized for word in delivery_keywords) and (
-            "давай" in normalized or "офор" in normalized
-        ):
+        if any(word in normalized for word in delivery_keywords) and ("давай" in normalized or "офор" in normalized):
             return "checkout_details"
 
         return None
 
-    def detect_and_mark_conversion(
-        self, session_id: Optional[int], text: str
-    ) -> Optional[str]:
+    def detect_and_mark_conversion(self, session_id: Optional[int], text: str) -> Optional[str]:
         reason = self.detect_conversion(text)
         if reason:
             self.mark_conversion(session_id, reason)

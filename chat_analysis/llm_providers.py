@@ -2,7 +2,7 @@
 
 import os
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Dict
 
 from .config import AnalyzerConfig
 
@@ -34,6 +34,7 @@ class OpenAIProvider(LLMProvider):
             api_key: OpenAI API key
         """
         import openai
+
         self.client = openai.OpenAI(api_key=api_key)
 
     def call(self, prompt: str, config: AnalyzerConfig) -> str:
@@ -41,14 +42,11 @@ class OpenAIProvider(LLMProvider):
         response = self.client.chat.completions.create(
             model=config.model,
             messages=[
-                {
-                    "role": "system",
-                    "content": "Ты эксперт по анализу чатов. Всегда отвечай в валидном JSON формате."
-                },
-                {"role": "user", "content": prompt}
+                {"role": "system", "content": "Ты эксперт по анализу чатов. Всегда отвечай в валидном JSON формате."},
+                {"role": "user", "content": prompt},
             ],
             temperature=config.temperature,
-            max_tokens=config.max_tokens
+            max_tokens=config.max_tokens,
         )
         return response.choices[0].message.content
 
@@ -63,6 +61,7 @@ class ClaudeProvider(LLMProvider):
             api_key: Anthropic API key
         """
         import anthropic
+
         self.client = anthropic.Anthropic(api_key=api_key)
 
     def call(self, prompt: str, config: AnalyzerConfig) -> str:
@@ -71,9 +70,7 @@ class ClaudeProvider(LLMProvider):
             model=config.model,
             max_tokens=config.max_tokens,
             temperature=config.temperature,
-            messages=[
-                {"role": "user", "content": prompt}
-            ]
+            messages=[{"role": "user", "content": prompt}],
         )
         return response.content[0].text
 
@@ -88,6 +85,7 @@ class GeminiProvider(LLMProvider):
             api_key: Google API key
         """
         import google.generativeai as genai
+
         genai.configure(api_key=api_key)
         self.model = None  # Will be set in call()
 
@@ -99,11 +97,7 @@ class GeminiProvider(LLMProvider):
             self.model = genai.GenerativeModel(config.model)
 
         response = self.model.generate_content(
-            prompt,
-            generation_config={
-                "temperature": config.temperature,
-                "max_output_tokens": config.max_tokens
-            }
+            prompt, generation_config={"temperature": config.temperature, "max_output_tokens": config.max_tokens}
         )
         return response.text
 
@@ -132,8 +126,7 @@ class LLMProviderFactory:
         """
         if provider_name not in cls._providers:
             raise ValueError(
-                f"Unsupported LLM provider: {provider_name}. "
-                f"Supported: {', '.join(cls._providers.keys())}"
+                f"Unsupported LLM provider: {provider_name}. Supported: {', '.join(cls._providers.keys())}"
             )
 
         provider_class = cls._providers[provider_name]

@@ -5,43 +5,43 @@ Saves all users and messages to MySQL database
 """
 
 import asyncio
-import os
 import logging
+import os
 import re
-from datetime import datetime
 from typing import Optional
+
 import pymysql
+from dotenv import load_dotenv
 from telethon import TelegramClient, events
 from telethon.tl.types import User
-from dotenv import load_dotenv
-from integrations.openai_client import OpenAIClient
 
+from integrations.openai_client import OpenAIClient
 
 # Emoji removal pattern
 EMOJI_PATTERN = re.compile(
     "["
-    "\U0001F600-\U0001F64F"  # emoticons
-    "\U0001F300-\U0001F5FF"  # symbols & pictographs
-    "\U0001F680-\U0001F6FF"  # transport & map symbols
-    "\U0001F1E0-\U0001F1FF"  # flags
-    "\U00002702-\U000027B0"  # dingbats
-    "\U000024C2-\U0001F251"  # enclosed characters
-    "\U0001F900-\U0001F9FF"  # supplemental symbols
-    "\U0001FA00-\U0001FA6F"  # chess symbols
-    "\U0001FA70-\U0001FAFF"  # symbols extended-A
-    "\U00002600-\U000026FF"  # misc symbols
-    "\U00002700-\U000027BF"  # dingbats
+    "\U0001f600-\U0001f64f"  # emoticons
+    "\U0001f300-\U0001f5ff"  # symbols & pictographs
+    "\U0001f680-\U0001f6ff"  # transport & map symbols
+    "\U0001f1e0-\U0001f1ff"  # flags
+    "\U00002702-\U000027b0"  # dingbats
+    "\U000024c2-\U0001f251"  # enclosed characters
+    "\U0001f900-\U0001f9ff"  # supplemental symbols
+    "\U0001fa00-\U0001fa6f"  # chess symbols
+    "\U0001fa70-\U0001faff"  # symbols extended-A
+    "\U00002600-\U000026ff"  # misc symbols
+    "\U00002700-\U000027bf"  # dingbats
     "]+",
-    flags=re.UNICODE
+    flags=re.UNICODE,
 )
 
 # Name validation pattern (Russian/English names)
-NAME_PATTERN = re.compile(r'^[А-Яа-яЁёA-Za-z][А-Яа-яЁёA-Za-z\-\s]{1,30}$')
+NAME_PATTERN = re.compile(r"^[А-Яа-яЁёA-Za-z][А-Яа-яЁёA-Za-z\-\s]{1,30}$")
 
 
 def strip_emoji(text: str) -> str:
     """Remove emoji from text"""
-    return EMOJI_PATTERN.sub('', text).strip()
+    return EMOJI_PATTERN.sub("", text).strip()
 
 
 def is_valid_name(name: str) -> bool:
@@ -54,38 +54,52 @@ def is_valid_name(name: str) -> bool:
     if not NAME_PATTERN.match(name):
         return False
     # Probably not a name if contains common non-name words
-    non_names = ['привет', 'здравствуй', 'добрый', 'вечер', 'день', 'утро', 
-                 'да', 'нет', 'ок', 'окей', 'хорошо', 'ладно', 'понял',
-                 'спасибо', 'пожалуйста', 'извини', 'простите']
+    non_names = [
+        "привет",
+        "здравствуй",
+        "добрый",
+        "вечер",
+        "день",
+        "утро",
+        "да",
+        "нет",
+        "ок",
+        "окей",
+        "хорошо",
+        "ладно",
+        "понял",
+        "спасибо",
+        "пожалуйста",
+        "извини",
+        "простите",
+    ]
     if name.lower() in non_names:
         return False
     return True
 
+
 # Load environment
-load_dotenv('/srv/pythorust_tg/.env')
+load_dotenv("/srv/pythorust_tg/.env")
 
 # Logging setup
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger('Credit_Expert_Bot')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger("Credit_Expert_Bot")
 
 # Telegram credentials
-API_ID = int(os.getenv('TELEGRAM_API_ID'))
-API_HASH = os.getenv('TELEGRAM_API_HASH')
-BOT_TOKEN = os.getenv('CREDIT_EXPERT_BOT_TOKEN') # Assuming a new token env var
-SESSION_FILE = '/srv/pythorust_tg/credit_expert_bot'
+API_ID = int(os.getenv("TELEGRAM_API_ID"))
+API_HASH = os.getenv("TELEGRAM_API_HASH")
+BOT_TOKEN = os.getenv("CREDIT_EXPERT_BOT_TOKEN")  # Assuming a new token env var
+SESSION_FILE = "/srv/pythorust_tg/credit_expert_bot"
 
 # MySQL config
 MYSQL_CONFIG = {
-    'host': os.getenv('MYSQL_HOST', 'localhost'),
-    'port': int(os.getenv('MYSQL_PORT', 3306)),
-    'database': os.getenv('MYSQL_DATABASE', 'pythorust_tg'),
-    'user': os.getenv('MYSQL_USER', 'pythorust_tg'),
-    'password': os.getenv('MYSQL_PASSWORD'),
-    'charset': 'utf8mb4',
-    'cursorclass': pymysql.cursors.DictCursor
+    "host": os.getenv("MYSQL_HOST", "localhost"),
+    "port": int(os.getenv("MYSQL_PORT", 3306)),
+    "database": os.getenv("MYSQL_DATABASE", "pythorust_tg"),
+    "user": os.getenv("MYSQL_USER", "pythorust_tg"),
+    "password": os.getenv("MYSQL_PASSWORD"),
+    "charset": "utf8mb4",
+    "cursorclass": pymysql.cursors.DictCursor,
 }
 
 # System prompt based on user instruction
@@ -171,21 +185,30 @@ class MySQLLogger:
         """
 
         with self.conn.cursor() as cursor:
-            cursor.execute(query, (
-                user.id,
-                user.username,
-                user.first_name,
-                user.last_name,
-                getattr(user, 'lang_code', None),
-                getattr(user, 'premium', False),
-                user.bot if hasattr(user, 'bot') else False
-            ))
+            cursor.execute(
+                query,
+                (
+                    user.id,
+                    user.username,
+                    user.first_name,
+                    user.last_name,
+                    getattr(user, "lang_code", None),
+                    getattr(user, "premium", False),
+                    user.bot if hasattr(user, "bot") else False,
+                ),
+            )
         self.conn.commit()
         logger.info(f"Saved user: {user.id} ({user.first_name})")
 
-    def save_message(self, user_id: int, message_id: int, text: str,
-                     direction: str, bot_name: str = 'Credit_Expert_Bot',
-                     reply_to: Optional[int] = None) -> None:
+    def save_message(
+        self,
+        user_id: int,
+        message_id: int,
+        text: str,
+        direction: str,
+        bot_name: str = "Credit_Expert_Bot",
+        reply_to: Optional[int] = None,
+    ) -> None:
         """Save message to database"""
         self.ensure_connection()
 
@@ -196,18 +219,11 @@ class MySQLLogger:
         """
 
         with self.conn.cursor() as cursor:
-            cursor.execute(query, (
-                message_id,
-                user_id,
-                bot_name,
-                direction,
-                text,
-                reply_to
-            ))
+            cursor.execute(query, (message_id, user_id, bot_name, direction, text, reply_to))
         self.conn.commit()
         logger.info(f"Saved {direction} message for user {user_id}")
 
-    def get_session(self, user_id: int, bot_name: str = 'Credit_Expert_Bot') -> Optional[dict]:
+    def get_session(self, user_id: int, bot_name: str = "Credit_Expert_Bot") -> Optional[dict]:
         """Get active session for user"""
         self.ensure_connection()
 
@@ -221,7 +237,7 @@ class MySQLLogger:
             cursor.execute(query, (user_id, bot_name))
             return cursor.fetchone()
 
-    def create_session(self, user_id: int, bot_name: str = 'Credit_Expert_Bot') -> int:
+    def create_session(self, user_id: int, bot_name: str = "Credit_Expert_Bot") -> int:
         """Create new session"""
         self.ensure_connection()
 
@@ -243,8 +259,7 @@ class MySQLLogger:
         self.conn.commit()
         return session_id
 
-    def get_conversation_history(self, user_id: int, bot_name: str = 'Credit_Expert_Bot',
-                                  limit: int = 20) -> list:
+    def get_conversation_history(self, user_id: int, bot_name: str = "Credit_Expert_Bot", limit: int = 20) -> list:
         """Get recent conversation history"""
         self.ensure_connection()
 
@@ -288,13 +303,13 @@ class CreditExpertBot:
         logger.info("Credit Expert Bot started")
 
         # Register handlers
-        @self.client.on(events.NewMessage(pattern='/start'))
+        @self.client.on(events.NewMessage(pattern="/start"))
         async def start_handler(event):
             await self.handle_start(event)
 
         @self.client.on(events.NewMessage)
         async def message_handler(event):
-            if not event.message.text.startswith('/'):
+            if not event.message.text.startswith("/"):
                 await self.handle_message(event)
 
         # Run until disconnected
@@ -308,12 +323,7 @@ class CreditExpertBot:
         self.db.save_user(user)
 
         # Save incoming message
-        self.db.save_message(
-            user_id=user.id,
-            message_id=event.message.id,
-            text='/start',
-            direction='incoming'
-        )
+        self.db.save_message(user_id=user.id, message_id=event.message.id, text="/start", direction="incoming")
 
         # Create new session
         self.db.create_session(user.id)
@@ -325,12 +335,7 @@ class CreditExpertBot:
         msg1 = await event.respond(greeting)
 
         # Save outgoing messages
-        self.db.save_message(
-            user_id=user.id,
-            message_id=msg1.id,
-            text=greeting,
-            direction='outgoing'
-        )
+        self.db.save_message(user_id=user.id, message_id=msg1.id, text=greeting, direction="outgoing")
 
     async def handle_message(self, event):
         """Handle incoming messages"""
@@ -341,12 +346,7 @@ class CreditExpertBot:
         self.db.save_user(user)
 
         # Save incoming message
-        self.db.save_message(
-            user_id=user.id,
-            message_id=event.message.id,
-            text=text,
-            direction='incoming'
-        )
+        self.db.save_message(user_id=user.id, message_id=event.message.id, text=text, direction="incoming")
 
         # Get or create session - ensure conversation continues
         session = self.db.get_session(user.id)
@@ -363,15 +363,15 @@ class CreditExpertBot:
         messages = [{"role": "system", "content": CREDIT_EXPERT_SYSTEM_PROMPT}]
 
         for msg in history:
-            role = "assistant" if msg['direction'] == 'outgoing' else "user"
-            messages.append({"role": role, "content": msg['message_text']})
+            role = "assistant" if msg["direction"] == "outgoing" else "user"
+            messages.append({"role": role, "content": msg["message_text"]})
 
         # Add current message with name validation hint if needed
         current_msg = text
         if is_name_expected and not is_valid_name(text):
             # Add hint for AI that name seems invalid
             current_msg = f"{text}\n[СИСТЕМА: Это не похоже на имя. Переспроси имя клиента вежливо.]"
-        
+
         messages.append({"role": "user", "content": current_msg})
 
         # Get AI response
@@ -381,8 +381,8 @@ class CreditExpertBot:
             # Strip emoji from response - professional tone
             response_text = strip_emoji(response_text)
             # Clean up extra whitespace that might appear after emoji removal
-            response_text = re.sub(r'\s+', ' ', response_text).strip()
-            response_text = re.sub(r' ([.,!?])', r'\1', response_text)
+            response_text = re.sub(r"\s+", " ", response_text).strip()
+            response_text = re.sub(r" ([.,!?])", r"\1", response_text)
         except Exception as e:
             logger.error(f"AI error: {e}")
             response_text = "Извините, произошла техническая ошибка. Напишите ещё раз."
@@ -391,12 +391,7 @@ class CreditExpertBot:
         sent_msg = await event.respond(response_text)
 
         # Save outgoing message
-        self.db.save_message(
-            user_id=user.id,
-            message_id=sent_msg.id,
-            text=response_text,
-            direction='outgoing'
-        )
+        self.db.save_message(user_id=user.id, message_id=sent_msg.id, text=response_text, direction="outgoing")
 
     def stop(self):
         """Stop the bot"""
@@ -417,5 +412,5 @@ async def main():
         raise
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

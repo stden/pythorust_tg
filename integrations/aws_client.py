@@ -12,9 +12,10 @@ Supports:
 """
 
 import os
-from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
 from datetime import date, timedelta
+from typing import Any, Dict, List, Optional
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -22,6 +23,7 @@ load_dotenv()
 try:
     import boto3
     from botocore.exceptions import ClientError, NoCredentialsError
+
     AWS_AVAILABLE = True
 except ImportError:
     AWS_AVAILABLE = False
@@ -33,6 +35,7 @@ except ImportError:
 @dataclass
 class AWSConfig:
     """AWS configuration from environment."""
+
     access_key_id: str
     secret_access_key: str
     session_token: Optional[str] = None
@@ -166,10 +169,12 @@ class AWSClient:
 
             response = tagging.get_resources(**params)
             for item in response.get("ResourceTagMappingList", []):
-                resources.append({
-                    "arn": item.get("ResourceARN"),
-                    "tags": {tag["Key"]: tag["Value"] for tag in item.get("Tags", [])},
-                })
+                resources.append(
+                    {
+                        "arn": item.get("ResourceARN"),
+                        "tags": {tag["Key"]: tag["Value"] for tag in item.get("Tags", [])},
+                    }
+                )
                 if limit and len(resources) >= limit:
                     return resources[:limit]
 
@@ -198,15 +203,17 @@ class AWSClient:
                         name = tag["Value"]
                         break
 
-                instances.append({
-                    "id": instance["InstanceId"],
-                    "name": name,
-                    "type": instance.get("InstanceType"),
-                    "state": instance["State"]["Name"],
-                    "public_ip": instance.get("PublicIpAddress"),
-                    "private_ip": instance.get("PrivateIpAddress"),
-                    "launch_time": str(instance.get("LaunchTime")),
-                })
+                instances.append(
+                    {
+                        "id": instance["InstanceId"],
+                        "name": name,
+                        "type": instance.get("InstanceType"),
+                        "state": instance["State"]["Name"],
+                        "public_ip": instance.get("PublicIpAddress"),
+                        "private_ip": instance.get("PrivateIpAddress"),
+                        "launch_time": str(instance.get("LaunchTime")),
+                    }
+                )
         return instances
 
     # === S3 ===
@@ -318,16 +325,18 @@ class AWSClient:
         clusters: List[Dict[str, Any]] = []
         # describe_clusters accepts up to 100 arns
         for i in range(0, len(arns), 100):
-            chunk = arns[i:i + 100]
+            chunk = arns[i : i + 100]
             response = ecs.describe_clusters(clusters=chunk)
             for cluster in response.get("clusters", []):
-                clusters.append({
-                    "arn": cluster["clusterArn"],
-                    "name": cluster.get("clusterName"),
-                    "status": cluster.get("status"),
-                    "active_services": cluster.get("activeServicesCount"),
-                    "running_tasks": cluster.get("runningTasksCount"),
-                })
+                clusters.append(
+                    {
+                        "arn": cluster["clusterArn"],
+                        "name": cluster.get("clusterName"),
+                        "status": cluster.get("status"),
+                        "active_services": cluster.get("activeServicesCount"),
+                        "running_tasks": cluster.get("runningTasksCount"),
+                    }
+                )
         return clusters
 
     # === EKS ===
@@ -339,12 +348,14 @@ class AWSClient:
         clusters = []
         for name in names:
             details = eks.describe_cluster(name=name).get("cluster", {})
-            clusters.append({
-                "name": name,
-                "status": details.get("status"),
-                "version": details.get("version"),
-                "endpoint": details.get("endpoint"),
-            })
+            clusters.append(
+                {
+                    "name": name,
+                    "status": details.get("status"),
+                    "version": details.get("version"),
+                    "endpoint": details.get("endpoint"),
+                }
+            )
         return clusters
 
     # === CloudWatch Logs ===
@@ -378,12 +389,14 @@ class AWSClient:
                     "ApproximateNumberOfMessagesNotVisible",
                 ],
             ).get("Attributes", {})
-            queues.append({
-                "url": url,
-                "arn": attrs.get("QueueArn"),
-                "approx_messages": int(attrs.get("ApproximateNumberOfMessages", 0)),
-                "inflight": int(attrs.get("ApproximateNumberOfMessagesNotVisible", 0)),
-            })
+            queues.append(
+                {
+                    "url": url,
+                    "arn": attrs.get("QueueArn"),
+                    "approx_messages": int(attrs.get("ApproximateNumberOfMessages", 0)),
+                    "inflight": int(attrs.get("ApproximateNumberOfMessagesNotVisible", 0)),
+                }
+            )
         return queues
 
     # === SNS ===
@@ -419,11 +432,13 @@ class AWSClient:
         version_paginator = s3.get_paginator("list_object_versions")
         for page in version_paginator.paginate(Bucket=bucket, Prefix=prefix):
             objects = [{"Key": obj["Key"], "VersionId": obj["VersionId"]} for obj in page.get("Versions", [])]
-            objects += [{"Key": marker["Key"], "VersionId": marker["VersionId"]} for marker in page.get("DeleteMarkers", [])]
+            objects += [
+                {"Key": marker["Key"], "VersionId": marker["VersionId"]} for marker in page.get("DeleteMarkers", [])
+            ]
             if not objects:
                 continue
             for idx in range(0, len(objects), 1000):
-                chunk = objects[idx:idx + 1000]
+                chunk = objects[idx : idx + 1000]
                 resp = s3.delete_objects(Bucket=bucket, Delete={"Objects": chunk, "Quiet": True})
                 deleted += len(resp.get("Deleted", []))
 
@@ -433,7 +448,7 @@ class AWSClient:
             if not objects:
                 continue
             for idx in range(0, len(objects), 1000):
-                chunk = objects[idx:idx + 1000]
+                chunk = objects[idx : idx + 1000]
                 resp = s3.delete_objects(Bucket=bucket, Delete={"Objects": chunk, "Quiet": True})
                 deleted += len(resp.get("Deleted", []))
 
@@ -560,7 +575,7 @@ class AWSClient:
 def print_resources(resources: Dict[str, Any]) -> None:
     """Print AWS resources in readable format."""
     if "identity" in resources:
-        print(f"\n=== AWS Identity ===")
+        print("\n=== AWS Identity ===")
         identity = resources["identity"]
         print(f"Account: {identity.get('Account')}")
         print(f"User ARN: {identity.get('Arn')}")
@@ -605,7 +620,9 @@ def print_resources(resources: Dict[str, Any]) -> None:
         clusters = resources["ecs_clusters"]
         print(f"\n=== ECS Clusters ({len(clusters)}) ===")
         for cluster in clusters:
-            print(f"  {cluster['name']} ({cluster['status']}) - services: {cluster['active_services']}, running tasks: {cluster['running_tasks']}")
+            print(
+                f"  {cluster['name']} ({cluster['status']}) - services: {cluster['active_services']}, running tasks: {cluster['running_tasks']}"
+            )
 
     if "eks_clusters" in resources:
         clusters = resources["eks_clusters"]
@@ -648,4 +665,5 @@ async def main():
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main())

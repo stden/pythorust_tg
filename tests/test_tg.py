@@ -8,8 +8,9 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent))
 pytest.importorskip("telethon")
 
-from chat_export_utils import load_chats_from_config
 from telethon.tl.types import PeerChannel, PeerChat
+
+from chat_export_utils import load_chats_from_config
 
 
 class TestLoadChatsFromConfig:

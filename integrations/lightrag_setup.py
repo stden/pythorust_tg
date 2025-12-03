@@ -20,9 +20,9 @@ LightRAG Setup - Knowledge Graph + Vector RAG System
 
 Документация: https://github.com/HKUDS/LightRAG
 """
+
 import os
-import asyncio
-from typing import Optional
+
 
 # Check dependencies
 def check_dependencies():
@@ -39,42 +39,49 @@ def check_dependencies():
 
     try:
         import lightrag
+
         deps["lightrag"] = True
     except ImportError:
         pass
 
     try:
         import tiktoken
+
         deps["tiktoken"] = True
     except ImportError:
         pass
 
     try:
         import nano_vectordb
+
         deps["nano_vectordb"] = True
     except ImportError:
         pass
 
     try:
         import neo4j
+
         deps["neo4j"] = True
     except ImportError:
         pass
 
     try:
         import faiss
+
         deps["faiss"] = True
     except ImportError:
         pass
 
     try:
         import chromadb
+
         deps["chromadb"] = True
     except ImportError:
         pass
 
     try:
         import pymilvus
+
         deps["pymilvus"] = True
     except ImportError:
         pass
@@ -153,15 +160,17 @@ async def setup_lightrag(
     # Configure LLM
     if use_openai:
         from lightrag.llm.openai import gpt_4o_mini_complete, openai_embed
+
         llm_func = gpt_4o_mini_complete
         embed_func = openai_embed
         print("✓ Используем OpenAI API")
 
     elif use_ollama:
-        from lightrag.llm.ollama import ollama_model_complete, ollama_embed
-        llm_func = lambda prompt, **kwargs: ollama_model_complete(
-            prompt, model_name=ollama_model, **kwargs
-        )
+        from lightrag.llm.ollama import ollama_embed, ollama_model_complete
+
+        def llm_func(prompt, **kwargs):
+            return ollama_model_complete(prompt, model_name=ollama_model, **kwargs)
+
         embed_func = ollama_embed
         print(f"✓ Используем Ollama ({ollama_model})")
 
@@ -178,12 +187,14 @@ async def setup_lightrag(
     elif vector_storage == "faiss":
         try:
             from lightrag.kg.faiss_impl import FaissVectorDBStorage
+
             storage_config["vector_storage"] = FaissVectorDBStorage
         except ImportError:
             print("⚠ FAISS не установлен, используем NanoVectorDB")
     elif vector_storage == "chroma":
         try:
             from lightrag.kg.chroma_impl import ChromaVectorDBStorage
+
             storage_config["vector_storage"] = ChromaVectorDBStorage
         except ImportError:
             print("⚠ ChromaDB не установлен, используем NanoVectorDB")
@@ -191,6 +202,7 @@ async def setup_lightrag(
     if graph_storage == "neo4j":
         try:
             from lightrag.kg.neo4j_impl import Neo4JStorage
+
             storage_config["graph_storage"] = Neo4JStorage
             # Need NEO4J_URI, NEO4J_USER, NEO4J_PASSWORD env vars
             print("✓ Используем Neo4j")
@@ -198,12 +210,7 @@ async def setup_lightrag(
             print("⚠ Neo4j не установлен, используем NetworkX")
 
     # Create RAG instance
-    rag = LightRAG(
-        working_dir=working_dir,
-        embedding_func=embed_func,
-        llm_model_func=llm_func,
-        **storage_config
-    )
+    rag = LightRAG(working_dir=working_dir, embedding_func=embed_func, llm_model_func=llm_func, **storage_config)
 
     # Initialize
     await rag.initialize_storages()
@@ -255,10 +262,7 @@ async def demo():
     print("\n🔍 Тестируем разные режимы поиска:")
     for mode in modes:
         try:
-            result = await rag.aquery(
-                "Что такое Центр Пример?",
-                param=QueryParam(mode=mode)
-            )
+            result = await rag.aquery("Что такое Центр Пример?", param=QueryParam(mode=mode))
             print(f"\n   [{mode}]: {result[:200]}...")
         except Exception as e:
             print(f"\n   [{mode}]: Ошибка - {e}")

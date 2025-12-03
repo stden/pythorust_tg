@@ -2,7 +2,7 @@
 
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -86,6 +86,7 @@ class TestAutoanswerHandler:
     @pytest.mark.asyncio
     async def test_handler_ignores_outgoing(self):
         """Test that handler ignores outgoing messages."""
+
         # Simulate the handler logic
         async def handler_logic(event):
             if event.out:
@@ -101,6 +102,7 @@ class TestAutoanswerHandler:
     @pytest.mark.asyncio
     async def test_handler_ignores_empty_message(self):
         """Test that handler ignores empty messages."""
+
         async def handler_logic(event):
             if event.out:
                 return None
@@ -119,6 +121,7 @@ class TestAutoanswerHandler:
     @pytest.mark.asyncio
     async def test_handler_processes_valid_message(self):
         """Test that handler processes valid messages."""
+
         async def handler_logic(event):
             if event.out:
                 return None

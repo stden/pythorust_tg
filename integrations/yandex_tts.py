@@ -4,9 +4,11 @@ Yandex SpeechKit TTS (Text-to-Speech) Client.
 
 Документация: https://cloud.yandex.ru/docs/speechkit/tts/
 """
+
 import os
-import requests
 from typing import Literal
+
+import requests
 
 # Yandex Cloud credentials
 # Можно использовать либо API_KEY, либо IAM_TOKEN
@@ -43,9 +45,7 @@ def _get_headers() -> dict:
     elif YANDEX_API_KEY:
         return {"Authorization": f"Api-Key {YANDEX_API_KEY}"}
     else:
-        raise ValueError(
-            "Установите YANDEX_API_KEY или YANDEX_IAM_TOKEN в переменных окружения"
-        )
+        raise ValueError("Установите YANDEX_API_KEY или YANDEX_IAM_TOKEN в переменных окружения")
 
 
 def text_to_speech(
@@ -203,9 +203,7 @@ if __name__ == "__main__":
         print("\n✓ Credentials найдены, тестируем...")
         try:
             output = text_to_speech(
-                "Привет! Это тест синтеза речи от Яндекса.",
-                "/tmp/yandex_tts_test.mp3",
-                voice="alena"
+                "Привет! Это тест синтеза речи от Яндекса.", "/tmp/yandex_tts_test.mp3", voice="alena"
             )
             print(f"✓ Аудио сохранено: {output}")
         except Exception as e:

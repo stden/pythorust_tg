@@ -6,13 +6,13 @@
 1. Не запускайте скрипты без существующего session файла!
 2. Не запускайте несколько скриптов одновременно - только последовательно!
 """
+
+import fcntl
 import os
 import sys
-import time
-import fcntl
-from telethon import TelegramClient
 
 from dotenv import load_dotenv
+from telethon import TelegramClient
 
 load_dotenv()
 
@@ -43,7 +43,7 @@ API_HASH = _require_env("TELEGRAM_API_HASH")
 # для избежания конфликта с Rust сессией.
 _raw_session = os.getenv("TELEGRAM_SESSION_NAME", "telegram_session").strip() or "telegram_session"
 SESSION_NAME = f"{_raw_session}_py" if _raw_session == "telegram_session" else _raw_session
-LOCK_FILE = f'{SESSION_NAME}.lock'
+LOCK_FILE = f"{SESSION_NAME}.lock"
 
 
 def _get_user_id() -> int | None:
@@ -66,12 +66,13 @@ class SessionLock:
     Контекстный менеджер для блокировки сессии.
     Гарантирует, что только один скрипт использует сессию одновременно.
     """
+
     def __init__(self):
         self.lock_file = None
         self.locked = False
 
     def __enter__(self):
-        self.lock_file = open(LOCK_FILE, 'w')
+        self.lock_file = open(LOCK_FILE, "w")
         try:
             # Пытаемся получить эксклюзивную блокировку (неблокирующий режим)
             fcntl.flock(self.lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -108,7 +109,7 @@ def check_session_exists():
 
     ВАЖНО: Это защищает от случайного создания новой сессии!
     """
-    session_file = f'{SESSION_NAME}.session'
+    session_file = f"{SESSION_NAME}.session"
     if not os.path.exists(session_file):
         print(f"""
 ⚠️  ОШИБКА: Session файл '{session_file}' не найден!

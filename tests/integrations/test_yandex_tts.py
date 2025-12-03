@@ -1,19 +1,18 @@
 """Tests for Yandex TTS integration."""
 
-import pytest
-import asyncio
-import base64
-from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from integrations.yandex_tts import (
+    AudioFormat,
+    SpeechRecognitionResult,
+    SpeechSynthesisResult,
+    Voice,
     YandexTTSClient,
     YandexTTSConfig,
     YandexTTSError,
-    Voice,
-    AudioFormat,
-    SpeechSynthesisResult,
-    SpeechRecognitionResult,
 )
 
 
@@ -60,10 +59,7 @@ class TestYandexTTSClient:
     @pytest.fixture
     def config(self):
         """Create test config."""
-        return YandexTTSConfig(
-            api_key="test_api_key",
-            folder_id="test_folder"
-        )
+        return YandexTTSConfig(api_key="test_api_key", folder_id="test_folder")
 
     @pytest.fixture
     def client(self, config):
@@ -85,10 +81,7 @@ class TestYandexTTSClient:
         """Test getting IAM token with API key."""
         mock_response = MagicMock()
         mock_response.status_code = 200
-        mock_response.json.return_value = {
-            "iamToken": "new_iam_token",
-            "expiresAt": "2025-12-31T23:59:59Z"
-        }
+        mock_response.json.return_value = {"iamToken": "new_iam_token", "expiresAt": "2025-12-31T23:59:59Z"}
         mock_httpx_client.post.return_value = mock_response
 
         token = await client._get_iam_token()
@@ -131,11 +124,7 @@ class TestYandexTTSClient:
         mock_response.content = b"audio_data"
         mock_httpx_client.post.return_value = mock_response
 
-        result = await client.synthesize_speech(
-            text="Hello world",
-            voice=Voice.ALENA,
-            format=AudioFormat.MP3
-        )
+        result = await client.synthesize_speech(text="Hello world", voice=Voice.ALENA, format=AudioFormat.MP3)
 
         assert isinstance(result, SpeechSynthesisResult)
         assert result.audio_content == b"audio_data"
@@ -145,12 +134,7 @@ class TestYandexTTSClient:
         mock_httpx_client.post.assert_called_with(
             "https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize",
             headers={"Authorization": "Bearer test_token"},
-            data={
-                "text": "Hello world",
-                "voice": "alena",
-                "format": "mp3",
-                "folderId": "test_folder"
-            }
+            data={"text": "Hello world", "voice": "alena", "format": "mp3", "folderId": "test_folder"},
         )
 
     @pytest.mark.asyncio
@@ -165,11 +149,7 @@ class TestYandexTTSClient:
         mock_httpx_client.post.return_value = mock_response
 
         result = await client.synthesize_speech(
-            text="Test text",
-            voice=Voice.FILIPP,
-            format=AudioFormat.OGG_OPUS,
-            speed=1.5,
-            emotion="friendly"
+            text="Test text", voice=Voice.FILIPP, format=AudioFormat.OGG_OPUS, speed=1.5, emotion="friendly"
         )
 
         assert result.audio_content == b"audio_data"
@@ -206,16 +186,13 @@ class TestYandexTTSClient:
             "result": "recognized text",
             "alternatives": [
                 {"text": "recognized text", "confidence": 0.95},
-                {"text": "alternative text", "confidence": 0.85}
-            ]
+                {"text": "alternative text", "confidence": 0.85},
+            ],
         }
         mock_httpx_client.post.return_value = mock_response
 
         audio_data = b"test_audio_data"
-        result = await client.recognize_speech(
-            audio_content=audio_data,
-            format=AudioFormat.OGG_OPUS
-        )
+        result = await client.recognize_speech(audio_content=audio_data, format=AudioFormat.OGG_OPUS)
 
         assert isinstance(result, SpeechRecognitionResult)
         assert result.text == "recognized text"
@@ -225,16 +202,9 @@ class TestYandexTTSClient:
         # Verify API call
         mock_httpx_client.post.assert_called_with(
             "https://stt.api.cloud.yandex.net/speech/v1/stt:recognize",
-            headers={
-                "Authorization": "Bearer test_token",
-                "Content-Type": "audio/ogg"
-            },
-            params={
-                "format": "oggopus",
-                "folderId": "test_folder",
-                "lang": "ru-RU"
-            },
-            content=audio_data
+            headers={"Authorization": "Bearer test_token", "Content-Type": "audio/ogg"},
+            params={"format": "oggopus", "folderId": "test_folder", "lang": "ru-RU"},
+            content=audio_data,
         )
 
     @pytest.mark.asyncio
@@ -248,12 +218,7 @@ class TestYandexTTSClient:
         mock_response.json.return_value = {"result": "test"}
         mock_httpx_client.post.return_value = mock_response
 
-        await client.recognize_speech(
-            audio_content=b"audio",
-            format=AudioFormat.PCM,
-            language="en-US",
-            model="general"
-        )
+        await client.recognize_speech(audio_content=b"audio", format=AudioFormat.PCM, language="en-US", model="general")
 
         # Verify parameters
         call_params = mock_httpx_client.post.call_args[1]["params"]

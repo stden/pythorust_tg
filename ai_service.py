@@ -2,7 +2,7 @@
 
 import os
 from abc import ABC, abstractmethod
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 import openai
 from dotenv import load_dotenv
@@ -11,27 +11,23 @@ from dotenv import load_dotenv
 class AIService(ABC):
     """
     Abstract interface for AI services (SOLID: DIP - Dependency Inversion).
-    
+
     Allows swapping AI providers without changing dependent code.
     """
 
     @abstractmethod
     async def chat_completion(
-        self,
-        messages: List[Dict[str, str]],
-        model: Optional[str] = None,
-        temperature: float = 0.7,
-        **kwargs
+        self, messages: List[Dict[str, str]], model: Optional[str] = None, temperature: float = 0.7, **kwargs
     ) -> str:
         """
         Get AI completion for a conversation.
-        
+
         Args:
             messages: List of message dicts with 'role' and 'content'
             model: AI model to use (provider-specific)
             temperature: Sampling temperature (0.0 to 2.0)
             **kwargs: Additional provider-specific parameters
-            
+
         Returns:
             AI response text
         """
@@ -41,7 +37,7 @@ class AIService(ABC):
 class OpenAIService(AIService):
     """
     OpenAI API service implementation (SOLID: SRP).
-    
+
     Responsibilities:
     - OpenAI API authentication
     - Chat completions
@@ -56,44 +52,39 @@ class OpenAIService(AIService):
     ):
         """
         Initialize OpenAI service.
-        
+
         Args:
             api_key: OpenAI API key (if None, reads from env)
             default_model: Default model to use
             default_temperature: Default temperature
         """
         load_dotenv()
-        
+
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
         if not self.api_key:
             raise ValueError(
-                "OpenAI API key required. Set OPENAI_API_KEY environment variable "
-                "or pass api_key parameter."
+                "OpenAI API key required. Set OPENAI_API_KEY environment variable or pass api_key parameter."
             )
-        
+
         openai.api_key = self.api_key
         self.default_model = default_model
         self.default_temperature = default_temperature
 
     async def chat_completion(
-        self,
-        messages: List[Dict[str, str]],
-        model: Optional[str] = None,
-        temperature: Optional[float] = None,
-        **kwargs
+        self, messages: List[Dict[str, str]], model: Optional[str] = None, temperature: Optional[float] = None, **kwargs
     ) -> str:
         """
         Get OpenAI chat completion (SOLID: SRP).
-        
+
         Args:
             messages: List of message dicts with 'role' and 'content'
             model: Model to use (overrides default)
             temperature: Temperature to use (overrides default)
             **kwargs: Additional OpenAI-specific parameters
-            
+
         Returns:
             AI response text
-            
+
         Raises:
             Exception: If API call fails
         """
@@ -102,7 +93,7 @@ class OpenAIService(AIService):
                 model=model or self.default_model,
                 messages=messages,
                 temperature=temperature if temperature is not None else self.default_temperature,
-                **kwargs
+                **kwargs,
             )
             return response.choices[0].message.content.strip()
         except Exception as e:
@@ -111,10 +102,10 @@ class OpenAIService(AIService):
     def build_system_message(self, instructions: str) -> Dict[str, str]:
         """
         Build system message dict (SOLID: KISS - Keep It Simple).
-        
+
         Args:
             instructions: System instructions text
-            
+
         Returns:
             Message dict
         """
@@ -123,10 +114,10 @@ class OpenAIService(AIService):
     def build_user_message(self, content: str) -> Dict[str, str]:
         """
         Build user message dict (SOLID: KISS).
-        
+
         Args:
             content: User message content
-            
+
         Returns:
             Message dict
         """
@@ -135,10 +126,10 @@ class OpenAIService(AIService):
     def build_assistant_message(self, content: str) -> Dict[str, str]:
         """
         Build assistant message dict (SOLID: KISS).
-        
+
         Args:
             content: Assistant message content
-            
+
         Returns:
             Message dict
         """
@@ -148,7 +139,7 @@ class OpenAIService(AIService):
 class ConversationManager:
     """
     Manages conversation history (SOLID: SRP).
-    
+
     Responsibilities:
     - Storing message history
     - Context window management
@@ -162,7 +153,7 @@ class ConversationManager:
     ):
         """
         Initialize conversation manager.
-        
+
         Args:
             system_instructions: System instructions for AI
             max_history: Maximum messages to keep in history
@@ -170,12 +161,9 @@ class ConversationManager:
         self.system_instructions = system_instructions
         self.max_history = max_history
         self.messages: List[Dict[str, str]] = []
-        
+
         if system_instructions:
-            self.messages.append({
-                "role": "system",
-                "content": system_instructions
-            })
+            self.messages.append({"role": "system", "content": system_instructions})
 
     def add_user_message(self, content: str):
         """Add user message to history."""
@@ -194,7 +182,7 @@ class ConversationManager:
     def clear_history(self, keep_system: bool = True):
         """
         Clear conversation history.
-        
+
         Args:
             keep_system: If True, keeps system message
         """
@@ -207,7 +195,7 @@ class ConversationManager:
         """Trim history to max_history, keeping system message."""
         if len(self.messages) <= self.max_history:
             return
-        
+
         # Keep system message if present
         system_msg = None
         if self.messages and self.messages[0]["role"] == "system":
@@ -215,10 +203,10 @@ class ConversationManager:
             messages = self.messages[1:]
         else:
             messages = self.messages
-        
+
         # Trim to max
-        messages = messages[-(self.max_history - (1 if system_msg else 0)):]
-        
+        messages = messages[-(self.max_history - (1 if system_msg else 0)) :]
+
         # Rebuild
         if system_msg:
             self.messages = [system_msg] + messages

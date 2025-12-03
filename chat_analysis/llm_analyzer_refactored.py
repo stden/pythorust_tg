@@ -1,13 +1,13 @@
 """Refactored LLM-based chat analyzer using Strategy Pattern and SRP."""
 
 import json
-from typing import Dict, Any, List, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from .config import AnalyzerConfig
-from .models import ChatAnalysisResult, Topic, ActivityMetrics, Discussion
 from .llm_providers import LLMProviderFactory
-from .utils import parse_datetime, load_prompt_template
+from .models import ActivityMetrics, ChatAnalysisResult, Discussion, Topic
+from .utils import load_prompt_template, parse_datetime
 
 
 class ResponseParser:
@@ -63,7 +63,7 @@ class ResponseParser:
             "key_participants": [],
             "summary": "Failed to parse analysis",
             "insights": [],
-            "recommendations": []
+            "recommendations": [],
         }
 
 
@@ -71,11 +71,7 @@ class ResultBuilder:
     """Builds ChatAnalysisResult from parsed data."""
 
     @staticmethod
-    def build(
-        analysis_data: Dict[str, Any],
-        chat_name: str,
-        metadata: Dict[str, Any]
-    ) -> ChatAnalysisResult:
+    def build(analysis_data: Dict[str, Any], chat_name: str, metadata: Dict[str, Any]) -> ChatAnalysisResult:
         """Create ChatAnalysisResult from parsed data.
 
         Args:
@@ -115,7 +111,7 @@ class ResultBuilder:
             date_range_end=date_range_end,
             summary=analysis_data.get("summary", ""),
             insights=analysis_data.get("insights", []),
-            recommendations=analysis_data.get("recommendations", [])
+            recommendations=analysis_data.get("recommendations", []),
         )
 
     @staticmethod
@@ -127,7 +123,7 @@ class ResultBuilder:
                 name=topic_data.get("name", "Unknown"),
                 mentions=topic_data.get("mentions", 0),
                 sentiment=topic_data.get("sentiment", "neutral"),
-                key_message_ids=topic_data.get("key_message_ids", [])
+                key_message_ids=topic_data.get("key_message_ids", []),
             )
             topics.append(topic)
         return topics
@@ -144,7 +140,7 @@ class ResultBuilder:
                 date=date,
                 participants=disc_data.get("participants", []),
                 messages_count=disc_data.get("messages_count", 0),
-                summary=disc_data.get("summary", "")
+                summary=disc_data.get("summary", ""),
             )
             discussions.append(discussion)
         return discussions
@@ -172,7 +168,7 @@ class ResultBuilder:
             messages_per_day=messages_per_day,
             avg_message_length=0.0,  # Would need to calculate from messages
             media_percentage=0.0,  # Would need to calculate from messages
-            reactions_count=total_reactions
+            reactions_count=total_reactions,
         )
 
     @staticmethod
@@ -192,12 +188,7 @@ class PromptBuilder:
     """Builds analysis prompts."""
 
     @staticmethod
-    def build(
-        template: str,
-        messages_text: str,
-        metadata: Dict[str, Any],
-        chat_name: str
-    ) -> str:
+    def build(template: str, messages_text: str, metadata: Dict[str, Any], chat_name: str) -> str:
         """Build complete prompt with messages and metadata.
 
         Args:
@@ -241,11 +232,7 @@ class LLMAnalyzer:
         self.prompt_builder = PromptBuilder()
 
     def analyze(
-        self,
-        messages_text: str,
-        metadata: Dict[str, Any],
-        chat_name: str,
-        prompt_template: Optional[str] = None
+        self, messages_text: str, metadata: Dict[str, Any], chat_name: str, prompt_template: Optional[str] = None
     ) -> ChatAnalysisResult:
         """Analyze chat messages using LLM.
 
@@ -263,12 +250,7 @@ class LLMAnalyzer:
             prompt_template = load_prompt_template("chat_categorizer")
 
         # Build analysis prompt
-        prompt = self.prompt_builder.build(
-            prompt_template,
-            messages_text,
-            metadata,
-            chat_name
-        )
+        prompt = self.prompt_builder.build(prompt_template, messages_text, metadata, chat_name)
 
         # Get LLM response
         response = self.provider.call(prompt, self.config)
