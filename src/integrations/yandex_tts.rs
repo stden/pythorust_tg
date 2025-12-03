@@ -372,16 +372,20 @@ mod tests {
 
     #[test]
     fn test_get_auth_header_with_iam_token() {
-        let client =
-            YandexTTSClient::new(Some("key".to_string()), Some("token".to_string()), "folder".to_string())
-                .unwrap();
+        let client = YandexTTSClient::new(
+            Some("key".to_string()),
+            Some("token".to_string()),
+            "folder".to_string(),
+        )
+        .unwrap();
         // IAM token takes precedence
         assert_eq!(client.get_auth_header(), "Bearer token");
     }
 
     #[test]
     fn test_get_auth_header_with_api_key() {
-        let client = YandexTTSClient::new(Some("key".to_string()), None, "folder".to_string()).unwrap();
+        let client =
+            YandexTTSClient::new(Some("key".to_string()), None, "folder".to_string()).unwrap();
         assert_eq!(client.get_auth_header(), "Api-Key key");
     }
 

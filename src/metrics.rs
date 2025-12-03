@@ -161,12 +161,7 @@ mod tests {
         record_command_result(cmd, Duration::from_millis(120), true);
 
         assert_eq!(COMMAND_INFLIGHT.with_label_values(&[cmd]).get(), 0);
-        assert_eq!(
-            COMMAND_TOTAL
-                .with_label_values(&[cmd, "ok"])
-                .get(),
-            1
-        );
+        assert_eq!(COMMAND_TOTAL.with_label_values(&[cmd, "ok"]).get(), 1);
         assert_eq!(
             COMMAND_DURATION
                 .with_label_values(&[cmd])
@@ -182,12 +177,7 @@ mod tests {
         record_command_start(cmd);
         record_command_result(cmd, Duration::from_secs(2), false);
 
-        assert_eq!(
-            COMMAND_TOTAL
-                .with_label_values(&[cmd, "error"])
-                .get(),
-            1
-        );
+        assert_eq!(COMMAND_TOTAL.with_label_values(&[cmd, "error"]).get(), 1);
         assert_eq!(
             COMMAND_DURATION
                 .with_label_values(&[cmd])

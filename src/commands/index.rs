@@ -447,7 +447,9 @@ mod tests {
     #[test]
     fn test_estimate_sentiment_clamped() {
         // Many positive words should be clamped to 1.0
-        let sentiment = estimate_sentiment("хорошо отлично супер круто спасибо люблю рад счастье ❤️ 👍 🔥 😊 😍");
+        let sentiment = estimate_sentiment(
+            "хорошо отлично супер круто спасибо люблю рад счастье ❤️ 👍 🔥 😊 😍",
+        );
         assert!(sentiment <= 1.0);
         assert!(sentiment >= -1.0);
     }

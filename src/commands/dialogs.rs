@@ -318,22 +318,43 @@ mod tests {
 
     #[test]
     fn output_format_parse_table() {
-        assert!(matches!(OutputFormat::parse("table"), Ok(OutputFormat::Table)));
-        assert!(matches!(OutputFormat::parse("pretty"), Ok(OutputFormat::Table)));
-        assert!(matches!(OutputFormat::parse("TABLE"), Ok(OutputFormat::Table)));
+        assert!(matches!(
+            OutputFormat::parse("table"),
+            Ok(OutputFormat::Table)
+        ));
+        assert!(matches!(
+            OutputFormat::parse("pretty"),
+            Ok(OutputFormat::Table)
+        ));
+        assert!(matches!(
+            OutputFormat::parse("TABLE"),
+            Ok(OutputFormat::Table)
+        ));
     }
 
     #[test]
     fn output_format_parse_json() {
-        assert!(matches!(OutputFormat::parse("json"), Ok(OutputFormat::Json)));
-        assert!(matches!(OutputFormat::parse("JSON"), Ok(OutputFormat::Json)));
+        assert!(matches!(
+            OutputFormat::parse("json"),
+            Ok(OutputFormat::Json)
+        ));
+        assert!(matches!(
+            OutputFormat::parse("JSON"),
+            Ok(OutputFormat::Json)
+        ));
     }
 
     #[test]
     fn output_format_parse_yaml() {
-        assert!(matches!(OutputFormat::parse("yaml"), Ok(OutputFormat::Yaml)));
+        assert!(matches!(
+            OutputFormat::parse("yaml"),
+            Ok(OutputFormat::Yaml)
+        ));
         assert!(matches!(OutputFormat::parse("yml"), Ok(OutputFormat::Yaml)));
-        assert!(matches!(OutputFormat::parse("YAML"), Ok(OutputFormat::Yaml)));
+        assert!(matches!(
+            OutputFormat::parse("YAML"),
+            Ok(OutputFormat::Yaml)
+        ));
     }
 
     #[test]
