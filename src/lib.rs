@@ -27,6 +27,7 @@
 #![allow(clippy::collapsible_match)]
 #![allow(deprecated)]
 #![allow(dead_code)]
+#![allow(unused_imports)]
 
 pub mod analysis;
 pub mod chat;
