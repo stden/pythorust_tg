@@ -14,6 +14,12 @@
 #![allow(clippy::assertions_on_constants)]
 #![allow(clippy::field_reassign_with_default)]
 #![allow(clippy::unnecessary_literal_unwrap)]
+#![allow(clippy::print_literal)]
+#![allow(clippy::type_complexity)]
+#![allow(clippy::infallible_destructuring_match)]
+#![allow(clippy::manual_div_ceil)]
+#![allow(clippy::needless_borrow)]
+#![allow(clippy::needless_lifetimes)]
 
 pub mod analysis;
 pub mod chat;
