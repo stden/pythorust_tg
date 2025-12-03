@@ -20,6 +20,11 @@
 #![allow(clippy::manual_div_ceil)]
 #![allow(clippy::needless_borrow)]
 #![allow(clippy::needless_lifetimes)]
+#![allow(clippy::large_enum_variant)]
+#![allow(clippy::len_without_is_empty)]
+#![allow(clippy::should_implement_trait)]
+#![allow(clippy::unwrap_or_default)]
+#![allow(clippy::collapsible_match)]
 
 pub mod analysis;
 pub mod chat;
