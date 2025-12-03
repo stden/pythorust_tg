@@ -8,6 +8,13 @@
 //! - Store messages in vector database for semantic search
 //! - Build relationship graphs in Neo4j for analysis
 
+// Clippy lints - allow some patterns that are intentional in tests and API structures
+#![allow(clippy::items_after_test_module)]
+#![allow(clippy::const_is_empty)]
+#![allow(clippy::assertions_on_constants)]
+#![allow(clippy::field_reassign_with_default)]
+#![allow(clippy::unnecessary_literal_unwrap)]
+
 pub mod analysis;
 pub mod chat;
 pub mod config;
