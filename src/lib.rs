@@ -25,6 +25,8 @@
 #![allow(clippy::should_implement_trait)]
 #![allow(clippy::unwrap_or_default)]
 #![allow(clippy::collapsible_match)]
+#![allow(deprecated)]
+#![allow(dead_code)]
 
 pub mod analysis;
 pub mod chat;
