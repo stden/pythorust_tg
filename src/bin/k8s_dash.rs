@@ -6,6 +6,8 @@
 //! - Список namespaces
 //! - Статус nodes
 
+#![allow(clippy::field_reassign_with_default)]
+
 use std::io::{stdout, Write};
 
 use clap::{Parser, Subcommand};
