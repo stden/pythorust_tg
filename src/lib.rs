@@ -28,6 +28,9 @@
 #![allow(deprecated)]
 #![allow(dead_code)]
 #![allow(unused_imports)]
+#![allow(clippy::redundant_closure)]
+#![allow(clippy::unnecessary_cast)]
+#![allow(clippy::for_kv_map)]
 
 pub mod analysis;
 pub mod chat;
