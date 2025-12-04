@@ -92,6 +92,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E402", "F401"]  # Allow imports in tests
+"integrations/*" = ["I001"]  # Dynamic imports in try-except blocks
 
 [tool.coverage.report]
 exclude_lines = [
