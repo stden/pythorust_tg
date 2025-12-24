@@ -205,4 +205,98 @@ mod tests {
         assert!(text.contains("telegram_reader_command_total"));
         assert!(text.contains(cmd));
     }
+
+    #[test]
+    fn multiple_commands_tracked_separately() {
+        let cmd1 = "test_cmd_separate_1";
+        let cmd2 = "test_cmd_separate_2";
+
+        record_command_start(cmd1);
+        record_command_start(cmd2);
+        
+        assert_eq!(COMMAND_INFLIGHT.with_label_values(&[cmd1]).get(), 1);
+        assert_eq!(COMMAND_INFLIGHT.with_label_values(&[cmd2]).get(), 1);
+
+        record_command_result(cmd1, Duration::from_millis(50), true);
+        
+        assert_eq!(COMMAND_INFLIGHT.with_label_values(&[cmd1]).get(), 0);
+        assert_eq!(COMMAND_INFLIGHT.with_label_values(&[cmd2]).get(), 1);
+
+        record_command_result(cmd2, Duration::from_millis(100), false);
+        
+        assert_eq!(COMMAND_INFLIGHT.with_label_values(&[cmd2]).get(), 0);
+    }
+
+    #[test]
+    fn command_duration_recorded() {
+        let cmd = "test_duration_recording";
+        
+        record_command_start(cmd);
+        record_command_result(cmd, Duration::from_secs_f64(0.5), true);
+        
+        let count = COMMAND_DURATION.with_label_values(&[cmd]).get_sample_count();
+        assert!(count >= 1);
+        
+        let sum = COMMAND_DURATION.with_label_values(&[cmd]).get_sample_sum();
+        assert!(sum >= 0.5);
+    }
+
+    #[test]
+    fn init_collectors_can_be_called_multiple_times() {
+        init_collectors();
+        init_collectors();
+        init_collectors();
+        // Should not panic
+    }
+
+    #[test]
+    fn records_multiple_success_and_failure() {
+        let cmd = "test_multi_status";
+        
+        record_command_start(cmd);
+        record_command_result(cmd, Duration::from_millis(10), true);
+        
+        record_command_start(cmd);
+        record_command_result(cmd, Duration::from_millis(20), true);
+        
+        record_command_start(cmd);
+        record_command_result(cmd, Duration::from_millis(30), false);
+        
+        assert!(COMMAND_TOTAL.with_label_values(&[cmd, "ok"]).get() >= 2);
+        assert!(COMMAND_TOTAL.with_label_values(&[cmd, "error"]).get() >= 1);
+    }
+
+    #[tokio::test]
+    async fn metrics_response_has_correct_content_type() {
+        let response = metrics_response().await.expect("metrics response");
+        
+        let content_type = response.headers().get(hyper::header::CONTENT_TYPE);
+        assert!(content_type.is_some());
+        
+        let ct_str = content_type.unwrap().to_str().unwrap();
+        assert!(ct_str.contains("text/plain") || ct_str.contains("text/"));
+    }
+
+    #[tokio::test]
+    async fn metrics_response_contains_duration_histogram() {
+        let cmd = "test_histogram_check";
+        record_command_start(cmd);
+        record_command_result(cmd, Duration::from_millis(100), true);
+        
+        let response = metrics_response().await.expect("metrics response");
+        let body_bytes = response.into_body().collect().await.unwrap().to_bytes();
+        let text = String::from_utf8(body_bytes.to_vec()).unwrap();
+        
+        assert!(text.contains("telegram_reader_command_duration_seconds"));
+    }
+
+    #[tokio::test]
+    async fn metrics_response_contains_inflight_gauge() {
+        let response = metrics_response().await.expect("metrics response");
+        let body_bytes = response.into_body().collect().await.unwrap().to_bytes();
+        let text = String::from_utf8(body_bytes.to_vec()).unwrap();
+        
+        assert!(text.contains("telegram_reader_command_inflight"));
+    }
 }
+

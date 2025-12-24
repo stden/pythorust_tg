@@ -634,4 +634,183 @@ mod tests {
 
         assert_eq!(client.api_key, "arg-key");
     }
+
+    #[test]
+    fn linear_api_url_constant() {
+        assert_eq!(LINEAR_API_URL, "https://api.linear.app/graphql");
+    }
+
+    #[test]
+    fn team_query_contains_team_for_key() {
+        assert!(TEAM_QUERY.contains("teamForKey"));
+        assert!(TEAM_QUERY.contains("query TeamId"));
+    }
+
+    #[test]
+    fn issue_create_mutation_contains_issue_create() {
+        assert!(ISSUE_CREATE_MUTATION.contains("issueCreate"));
+        assert!(ISSUE_CREATE_MUTATION.contains("mutation IssueCreate"));
+    }
+
+    #[test]
+    fn create_issue_input_clone() {
+        let input = CreateIssueInput {
+            team_key: "APP".into(),
+            title: "Title".into(),
+            description: Some("Desc".into()),
+            project_id: None,
+            priority: Some(2),
+            assignee_id: None,
+            label_ids: vec!["l1".into()],
+        };
+        
+        let cloned = input.clone();
+        
+        assert_eq!(cloned.team_key, "APP");
+        assert_eq!(cloned.title, "Title");
+        assert_eq!(cloned.priority, Some(2));
+    }
+
+    #[test]
+    fn create_issue_input_debug() {
+        let input = CreateIssueInput {
+            team_key: "TEST".into(),
+            title: "Test Title".into(),
+            description: None,
+            project_id: None,
+            priority: None,
+            assignee_id: None,
+            label_ids: vec![],
+        };
+        
+        let debug_str = format!("{:?}", input);
+        
+        assert!(debug_str.contains("CreateIssueInput"));
+        assert!(debug_str.contains("TEST"));
+    }
+
+    #[test]
+    fn created_issue_deserialization() {
+        let json = r#"{
+            "id": "issue-123",
+            "identifier": "APP-42",
+            "title": "My Issue",
+            "url": "https://linear.app/issue"
+        }"#;
+        
+        let issue: CreatedIssue = serde_json::from_str(json).unwrap();
+        
+        assert_eq!(issue.id, "issue-123");
+        assert_eq!(issue.identifier, Some("APP-42".into()));
+        assert_eq!(issue.title, "My Issue");
+        assert_eq!(issue.url, Some("https://linear.app/issue".into()));
+    }
+
+    #[test]
+    fn created_issue_deserialization_optional_fields() {
+        let json = r#"{
+            "id": "issue-456",
+            "title": "Minimal Issue"
+        }"#;
+        
+        let issue: CreatedIssue = serde_json::from_str(json).unwrap();
+        
+        assert_eq!(issue.id, "issue-456");
+        assert!(issue.identifier.is_none());
+        assert!(issue.url.is_none());
+    }
+
+    #[test]
+    fn created_issue_clone() {
+        let issue = CreatedIssue {
+            id: "id1".into(),
+            identifier: Some("APP-1".into()),
+            title: "Title".into(),
+            url: None,
+        };
+        
+        let cloned = issue.clone();
+        
+        assert_eq!(cloned.id, issue.id);
+        assert_eq!(cloned.title, issue.title);
+    }
+
+    #[test]
+    fn created_issue_debug() {
+        let issue = CreatedIssue {
+            id: "debug-id".into(),
+            identifier: Some("DBG-1".into()),
+            title: "Debug Title".into(),
+            url: Some("https://example.com".into()),
+        };
+        
+        let debug_str = format!("{:?}", issue);
+        
+        assert!(debug_str.contains("CreatedIssue"));
+        assert!(debug_str.contains("debug-id"));
+    }
+
+    #[test]
+    fn linear_client_clone() {
+        let client = LinearClient::new("test-key").unwrap();
+        let cloned = client.clone();
+        
+        assert_eq!(cloned.api_key, client.api_key);
+        assert_eq!(cloned.base_url, client.base_url);
+    }
+
+    #[test]
+    fn linear_client_debug() {
+        let client = LinearClient::new("debug-key").unwrap();
+        let debug_str = format!("{:?}", client);
+        
+        assert!(debug_str.contains("LinearClient"));
+    }
+
+    #[tokio::test]
+    async fn create_issue_returns_error_on_failed_issue_create() {
+        let server = MockServer::start_async().await;
+
+        server.mock(|when, then| {
+            when.method(POST).path("/graphql").is_true(|req| {
+                let body = String::from_utf8_lossy(req.body().as_ref());
+                body.contains("query TeamId")
+            });
+            then.status(200).json_body(serde_json::json!({
+                "data": { "team": { "id": "team-x", "key": "APP" } }
+            }));
+        });
+
+        server.mock(|when, then| {
+            when.method(POST).path("/graphql").is_true(|req| {
+                let body = String::from_utf8_lossy(req.body().as_ref());
+                body.contains("mutation IssueCreate")
+            });
+            then.status(200).json_body(serde_json::json!({
+                "data": {
+                    "issueCreate": {
+                        "success": false,
+                        "issue": null
+                    }
+                }
+            }));
+        });
+
+        let client = setup_client(&server);
+        let err = client
+            .create_issue(CreateIssueInput {
+                team_key: "APP".into(),
+                title: "Test".into(),
+                description: None,
+                project_id: None,
+                priority: None,
+                assignee_id: None,
+                label_ids: vec![],
+            })
+            .await
+            .unwrap_err();
+
+        assert!(format!("{err}").contains("не подтвердил"));
+    }
 }
+

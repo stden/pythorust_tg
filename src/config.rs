@@ -600,4 +600,188 @@ chats:
 
         std::fs::remove_file(temp_file).ok();
     }
+
+    #[test]
+    fn chat_entity_channel_debug() {
+        let channel = ChatEntity::Channel(123456);
+        let debug_str = format!("{:?}", channel);
+        
+        assert!(debug_str.contains("Channel"));
+        assert!(debug_str.contains("123456"));
+    }
+
+    #[test]
+    fn chat_entity_chat_debug() {
+        let chat = ChatEntity::Chat(-999);
+        let debug_str = format!("{:?}", chat);
+        
+        assert!(debug_str.contains("Chat"));
+        assert!(debug_str.contains("-999"));
+    }
+
+    #[test]
+    fn chat_entity_username_debug() {
+        let username = ChatEntity::Username("testuser".into());
+        let debug_str = format!("{:?}", username);
+        
+        assert!(debug_str.contains("Username"));
+        assert!(debug_str.contains("testuser"));
+    }
+
+    #[test]
+    fn chat_entity_user_id_debug() {
+        let user_id = ChatEntity::UserId(777);
+        let debug_str = format!("{:?}", user_id);
+        
+        assert!(debug_str.contains("UserId"));
+        assert!(debug_str.contains("777"));
+    }
+
+    #[test]
+    fn chat_entity_clone() {
+        let original = ChatEntity::Channel(111);
+        let cloned = original.clone();
+        
+        match cloned {
+            ChatEntity::Channel(id) => assert_eq!(id, 111),
+            _ => panic!("Expected Channel variant"),
+        }
+    }
+
+    #[test]
+    fn chat_entity_username_clone() {
+        let original = ChatEntity::Username("clone_test".into());
+        let cloned = original.clone();
+        
+        match cloned {
+            ChatEntity::Username(s) => assert_eq!(s, "clone_test"),
+            _ => panic!("Expected Username variant"),
+        }
+    }
+
+    #[test]
+    fn config_constants_values() {
+        assert_eq!(SESSION_NAME, "telegram_session");
+        assert_eq!(LOCK_FILE, "telegram_session.lock");
+        assert_eq!(DEFAULT_LIMIT, 3000);
+        assert_eq!(CI_LIMIT, 1000);
+        assert_eq!(API_ID, 0);
+    }
+
+    #[test]
+    fn config_defaults_has_correct_values() {
+        let config = Config::defaults();
+        
+        assert_eq!(config.session_name, SESSION_NAME);
+        assert_eq!(config.lock_file, LOCK_FILE);
+        assert_eq!(config.default_limit, DEFAULT_LIMIT);
+        assert_eq!(config.ci_limit, CI_LIMIT);
+        assert!(config.chats.is_empty());
+    }
+
+    #[test]
+    fn chat_entity_user_id_constructor() {
+        let entity = ChatEntity::user_id(999);
+        
+        match entity {
+            ChatEntity::UserId(id) => assert_eq!(id, 999),
+            _ => panic!("Expected UserId variant"),
+        }
+    }
+
+    #[test]
+    fn chat_entity_chat_constructor() {
+        let entity = ChatEntity::chat(-12345);
+        
+        match entity {
+            ChatEntity::Chat(id) => assert_eq!(id, -12345),
+            _ => panic!("Expected Chat variant"),
+        }
+    }
+
+    #[test]
+    fn config_debug_trait() {
+        let config = Config::defaults();
+        let debug_str = format!("{:?}", config);
+        
+        assert!(debug_str.contains("Config"));
+        assert!(debug_str.contains("session_name"));
+    }
+
+    #[test]
+    fn config_clone() {
+        let config = Config::defaults();
+        let cloned = config.clone();
+        
+        assert_eq!(cloned.session_name, config.session_name);
+        assert_eq!(cloned.default_limit, config.default_limit);
+    }
+
+    #[test]
+    fn parses_group_chat_type() {
+        let yaml = r#"
+telegram:
+  api_id: 111
+  api_hash: "hash"
+chats:
+  my_group:
+    type: group
+    id: -1001234567890
+"#;
+        let temp_file = std::env::temp_dir().join("config_group_chat.yml");
+        std::fs::write(&temp_file, yaml).unwrap();
+
+        let config = Config::load_from_file(&temp_file).unwrap();
+
+        assert!(config.chats.contains_key("my_group"));
+        match config.chats.get("my_group") {
+            Some(ChatEntity::Chat(id)) => assert_eq!(*id, -1001234567890),
+            _ => panic!("Expected Chat variant"),
+        }
+
+        std::fs::remove_file(temp_file).ok();
+    }
+
+    #[test]
+    fn parses_user_type() {
+        let yaml = r#"
+telegram:
+  api_id: 111
+  api_hash: "hash"
+chats:
+  my_user:
+    type: user
+    id: 5555
+"#;
+        let temp_file = std::env::temp_dir().join("config_user_type.yml");
+        std::fs::write(&temp_file, yaml).unwrap();
+
+        let config = Config::load_from_file(&temp_file).unwrap();
+
+        assert!(config.chats.contains_key("my_user"));
+        match config.chats.get("my_user") {
+            Some(ChatEntity::UserId(id)) => assert_eq!(*id, 5555),
+            _ => panic!("Expected UserId variant"),
+        }
+
+        std::fs::remove_file(temp_file).ok();
+    }
+
+    #[test]
+    fn load_from_file_fails_on_missing_file() {
+        let result = Config::load_from_file("/nonexistent/path/config.yml");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn load_from_file_fails_on_invalid_yaml() {
+        let temp_file = std::env::temp_dir().join("config_invalid_yaml.yml");
+        std::fs::write(&temp_file, "{ invalid yaml [").unwrap();
+
+        let result = Config::load_from_file(&temp_file);
+        assert!(result.is_err());
+
+        std::fs::remove_file(temp_file).ok();
+    }
 }
+

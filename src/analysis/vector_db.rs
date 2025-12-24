@@ -539,4 +539,141 @@ mod tests {
         let field = extract_field(&filter.must[0]);
         assert_eq!(field.key, "chat_id");
     }
+
+    #[test]
+    fn search_filter_sender_only() {
+        let filter = SearchFilter::new().sender(12345);
+        
+        assert!(filter.chat_id.is_none());
+        assert_eq!(filter.sender_id, Some(12345));
+        assert!(filter.is_outgoing.is_none());
+    }
+
+    #[test]
+    fn search_filter_outgoing_only() {
+        let filter = SearchFilter::new().outgoing(false);
+        
+        assert!(filter.chat_id.is_none());
+        assert!(filter.sender_id.is_none());
+        assert_eq!(filter.is_outgoing, Some(false));
+    }
+
+    #[test]
+    fn search_filter_into_qdrant_filter_sender() {
+        let filter = SearchFilter::new().sender(999).into_qdrant_filter();
+        
+        assert_eq!(filter.must.len(), 1);
+        let field = extract_field(&filter.must[0]);
+        assert_eq!(field.key, "sender_id");
+    }
+
+    #[test]
+    fn search_filter_into_qdrant_filter_outgoing() {
+        let filter = SearchFilter::new().outgoing(true).into_qdrant_filter();
+        
+        assert_eq!(filter.must.len(), 1);
+        let field = extract_field(&filter.must[0]);
+        assert_eq!(field.key, "is_outgoing");
+    }
+
+    #[test]
+    fn search_filter_three_conditions() {
+        let filter = SearchFilter::new()
+            .chat(1)
+            .sender(2)
+            .outgoing(true)
+            .into_qdrant_filter();
+        
+        assert_eq!(filter.must.len(), 3);
+    }
+
+    #[test]
+    fn collection_stats_zero_values() {
+        let stats = CollectionStats {
+            points_count: 0,
+            dimension: 0,
+        };
+        
+        assert_eq!(stats.points_count, 0);
+        assert_eq!(stats.dimension, 0);
+    }
+
+    #[test]
+    fn collection_stats_large_values() {
+        let stats = CollectionStats {
+            points_count: u64::MAX,
+            dimension: u64::MAX,
+        };
+        
+        assert_eq!(stats.points_count, u64::MAX);
+        assert_eq!(stats.dimension, u64::MAX);
+    }
+
+    #[test]
+    fn search_filter_default_is_empty() {
+        let filter = SearchFilter::default();
+        
+        assert!(filter.chat_id.is_none());
+        assert!(filter.sender_id.is_none());
+        assert!(filter.is_outgoing.is_none());
+    }
+
+    #[test]
+    fn search_filter_clone() {
+        let filter = SearchFilter::new().chat(42).sender(99);
+        let cloned = filter.clone();
+        
+        assert_eq!(cloned.chat_id, filter.chat_id);
+        assert_eq!(cloned.sender_id, filter.sender_id);
+    }
+
+    #[test]
+    fn search_filter_empty_generates_empty_must() {
+        let filter = SearchFilter::new().into_qdrant_filter();
+        
+        assert!(filter.must.is_empty());
+    }
+
+    #[test]
+    fn search_filter_negative_chat_id() {
+        // Telegram can have negative chat IDs for groups
+        let filter = SearchFilter::new().chat(-1234567890);
+        
+        assert_eq!(filter.chat_id, Some(-1234567890));
+        
+        let qdrant_filter = filter.into_qdrant_filter();
+        assert_eq!(qdrant_filter.must.len(), 1);
+    }
+
+    #[test]
+    fn collection_stats_typical_values() {
+        let stats = CollectionStats {
+            points_count: 100000,
+            dimension: 1536,
+        };
+        
+        assert!(stats.points_count > 0);
+        assert!(stats.dimension == 1536 || stats.dimension == 768 || stats.dimension == 3072);
+    }
+
+    #[test]
+    fn extract_field_helper_works() {
+        let filter = SearchFilter::new().chat(555).into_qdrant_filter();
+        let field = extract_field(&filter.must[0]);
+        
+        assert_eq!(field.key, "chat_id");
+        assert_eq!(extract_i64(&field.r#match), Some(555));
+    }
+
+    #[test]
+    fn search_filter_chain_override() {
+        let filter = SearchFilter::new()
+            .chat(1)
+            .chat(2)
+            .chat(3);
+        
+        // Last value should be used
+        assert_eq!(filter.chat_id, Some(3));
+    }
 }
+
