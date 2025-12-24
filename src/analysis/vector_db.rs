@@ -599,32 +599,61 @@ mod tests {
     }
 
     #[test]
-    fn collection_stats_large_values() {
+    fn collection_stats_large_points() {
         let stats = CollectionStats {
             points_count: u64::MAX,
-            dimension: u64::MAX,
+            dimension: 4096,
         };
         
         assert_eq!(stats.points_count, u64::MAX);
-        assert_eq!(stats.dimension, u64::MAX);
+        assert_eq!(stats.dimension, 4096);
     }
 
     #[test]
-    fn search_filter_default_is_empty() {
-        let filter = SearchFilter::default();
+    fn search_filter_sender_only() {
+        let filter = SearchFilter::new().sender(12345);
         
         assert!(filter.chat_id.is_none());
-        assert!(filter.sender_id.is_none());
+        assert_eq!(filter.sender_id, Some(12345));
         assert!(filter.is_outgoing.is_none());
     }
 
     #[test]
-    fn search_filter_clone() {
-        let filter = SearchFilter::new().chat(42).sender(99);
-        let cloned = filter.clone();
+    fn search_filter_outgoing_only() {
+        let filter = SearchFilter::new().outgoing(false);
         
-        assert_eq!(cloned.chat_id, filter.chat_id);
-        assert_eq!(cloned.sender_id, filter.sender_id);
+        assert!(filter.chat_id.is_none());
+        assert!(filter.sender_id.is_none());
+        assert_eq!(filter.is_outgoing, Some(false));
+    }
+
+    #[test]
+    fn search_filter_into_qdrant_filter_sender() {
+        let filter = SearchFilter::new().sender(999).into_qdrant_filter();
+        
+        assert_eq!(filter.must.len(), 1);
+        let field = extract_field(&filter.must[0]);
+        assert_eq!(field.key, "sender_id");
+    }
+
+    #[test]
+    fn search_filter_into_qdrant_filter_outgoing() {
+        let filter = SearchFilter::new().outgoing(true).into_qdrant_filter();
+        
+        assert_eq!(filter.must.len(), 1);
+        let field = extract_field(&filter.must[0]);
+        assert_eq!(field.key, "is_outgoing");
+    }
+
+    #[test]
+    fn search_filter_three_conditions() {
+        let filter = SearchFilter::new()
+            .chat(1)
+            .sender(2)
+            .outgoing(true)
+            .into_qdrant_filter();
+        
+        assert_eq!(filter.must.len(), 3);
     }
 
     #[test]
@@ -657,15 +686,6 @@ mod tests {
     }
 
     #[test]
-    fn extract_field_helper_works() {
-        let filter = SearchFilter::new().chat(555).into_qdrant_filter();
-        let field = extract_field(&filter.must[0]);
-        
-        assert_eq!(field.key, "chat_id");
-        assert_eq!(extract_i64(&field.r#match), Some(555));
-    }
-
-    #[test]
     fn search_filter_chain_override() {
         let filter = SearchFilter::new()
             .chat(1)
@@ -676,4 +696,3 @@ mod tests {
         assert_eq!(filter.chat_id, Some(3));
     }
 }
-
