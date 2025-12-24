@@ -157,6 +157,66 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn embed_batch_empty_input_returns_empty() {
+        let service = make_service("text-embedding-3-small");
+        
+        let embeddings = service.embed_batch(&[]).await.unwrap();
+        
+        assert!(embeddings.is_empty());
+    }
+
+    #[tokio::test]
+    async fn embed_batch_tabs_and_newlines_count_as_empty() {
+        let service = make_service("text-embedding-3-small");
+        
+        let embeddings = service
+            .embed_batch(&["\t\t".to_string(), "\r\n".to_string(), " \n ".to_string()])
+            .await
+            .unwrap();
+        
+        assert_eq!(embeddings.len(), 3);
+        for e in &embeddings {
+            assert!(e.is_empty());
+        }
+    }
+
+    #[test]
+    fn dimension_unknown_model_returns_default() {
+        let service = make_service("totally-unknown-model-xyz");
+        assert_eq!(service.dimension(), 1536);
+    }
+
+    #[test]
+    fn dimension_empty_model_returns_default() {
+        let service = make_service("");
+        assert_eq!(service.dimension(), 1536);
+    }
+
+    #[test]
+    fn embedding_service_model_field() {
+        let service = make_service("my-custom-model");
+        assert_eq!(service.model, "my-custom-model");
+    }
+
+    #[test]
+    fn text_embedding_3_small_dimension() {
+        let service = make_service("text-embedding-3-small");
+        assert_eq!(service.dimension(), 1536);
+    }
+
+    #[test]
+    fn text_embedding_3_large_dimension() {
+        let service = make_service("text-embedding-3-large");
+        assert_eq!(service.dimension(), 3072);
+    }
+
+    #[test]
+    fn text_embedding_ada_002_dimension() {
+        let service = make_service("text-embedding-ada-002");
+        assert_eq!(service.dimension(), 1536);
+    }
+
+    #[tokio::test]
     #[ignore] // Requires API key
     async fn test_embed_single() {
         dotenvy::dotenv().ok();

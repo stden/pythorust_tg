@@ -537,4 +537,107 @@ mod tests {
         let msg = format!("{err}");
         assert!(msg.contains("400"));
     }
+
+    #[tokio::test]
+    async fn generate_returns_response() {
+        let server = MockServer::start_async().await;
+
+        server.mock(|when, then| {
+            when.method(POST).path("/api/generate");
+            then.status(200).json_body(json!({ "response": "Hello world" }));
+        });
+
+        let response = client(&server)
+            .generate("Test prompt", "llama3", None, 0.7, 100)
+            .await
+            .unwrap();
+
+        assert_eq!(response, "Hello world");
+    }
+
+    #[tokio::test]
+    async fn generate_with_system_prompt() {
+        let server = MockServer::start_async().await;
+
+        server.mock(|when, then| {
+            when.method(POST).path("/api/generate").is_true(|req| {
+                let body = String::from_utf8_lossy(req.body().as_ref());
+                body.contains("\"system\":")
+            });
+            then.status(200).json_body(json!({ "response": "System response" }));
+        });
+
+        let response = client(&server)
+            .generate("Prompt", "model", Some("You are helpful"), 0.5, 50)
+            .await
+            .unwrap();
+
+        assert_eq!(response, "System response");
+    }
+
+    #[tokio::test]
+    async fn list_models_handles_error() {
+        let server = MockServer::start_async().await;
+
+        server.mock(|when, then| {
+            when.method(GET).path("/api/tags");
+            then.status(500).body("Server down");
+        });
+
+        let err = client(&server).list_models().await.unwrap_err();
+        // The HTTP request succeeds but parsing the non-JSON body fails
+        assert!(err.to_string().contains("Invalid response"));
+    }
+
+    #[tokio::test]
+    async fn sales_agent_response_without_context() {
+        let server = MockServer::start_async().await;
+
+        server.mock(|when, then| {
+            when.method(POST).path("/api/generate").is_true(|req| {
+                let body = String::from_utf8_lossy(req.body().as_ref());
+                // System prompt should contain SPIN but not "Контекст:" when empty
+                body.contains("SPIN") && !body.contains("Контекст:")
+            });
+            then.status(200).json_body(json!({ "response": "Sales pitch" }));
+        });
+
+        let response = client(&server)
+            .sales_agent_response("Tell me more", "", "llama3")
+            .await
+            .unwrap();
+
+        assert_eq!(response, "Sales pitch");
+    }
+
+    #[tokio::test]
+    async fn generate_invalid_json_response() {
+        let server = MockServer::start_async().await;
+
+        server.mock(|when, then| {
+            when.method(POST).path("/api/generate");
+            then.status(200).body("not json");
+        });
+
+        let err = client(&server)
+            .generate("Test", "model", None, 0.5, 50)
+            .await
+            .unwrap_err();
+
+        assert!(err.to_string().contains("Invalid response"));
+    }
+
+    #[test]
+    fn recommended_models_contains_expected_models() {
+        let model_names: Vec<&str> = RECOMMENDED_MODELS.iter().map(|(n, _)| *n).collect();
+        assert!(model_names.iter().any(|m| m.contains("qwen")));
+        assert!(model_names.iter().any(|m| m.contains("llama")));
+        assert!(model_names.iter().any(|m| m.contains("deepseek")));
+    }
+
+    #[test]
+    fn recommended_models_count() {
+        assert_eq!(RECOMMENDED_MODELS.len(), 3);
+    }
 }
+

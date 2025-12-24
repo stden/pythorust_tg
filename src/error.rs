@@ -226,4 +226,93 @@ mod tests {
             assert!(inner.source().is_none() || inner.source().is_some());
         }
     }
+
+    #[test]
+    fn test_error_from_serde_json() {
+        let json_err = serde_json::from_str::<i32>("not a number").unwrap_err();
+        let err: Error = json_err.into();
+        
+        assert!(matches!(err, Error::SerializationError(_)));
+        assert!(err.to_string().contains("Serialization error"));
+    }
+
+    #[test]
+    fn test_error_mysql_display() {
+        let err = Error::MySqlError("connection refused".to_string());
+        let msg = err.to_string();
+        
+        assert!(msg.contains("MySQL error"));
+        assert!(msg.contains("connection refused"));
+    }
+
+    #[test]
+    fn test_error_mysql_debug() {
+        let err = Error::MySqlError("timeout".to_string());
+        let debug_str = format!("{:?}", err);
+        
+        assert!(debug_str.contains("MySqlError"));
+        assert!(debug_str.contains("timeout"));
+    }
+
+    #[test]
+    fn test_error_all_variants_debug() {
+        let variants: Vec<Error> = vec![
+            Error::SessionNotFound("session".to_string()),
+            Error::SessionLocked,
+            Error::LockError("lock".to_string()),
+            Error::TelegramError("telegram".to_string()),
+            Error::ChatNotFound("chat".to_string()),
+            Error::SerializationError("serial".to_string()),
+            Error::OpenAiError("openai".to_string()),
+            Error::LinearError("linear".to_string()),
+            Error::MySqlError("mysql".to_string()),
+            Error::InvalidArgument("arg".to_string()),
+            Error::ConnectionError("conn".to_string()),
+            Error::AuthorizationRequired,
+            Error::Unknown("unknown".to_string()),
+        ];
+        
+        for err in variants {
+            let debug_str = format!("{:?}", err);
+            assert!(!debug_str.is_empty());
+        }
+    }
+
+    #[test]
+    fn test_result_unwrap_or_else() {
+        let result: Result<i32> = Err(Error::Unknown("error".to_string()));
+        let value = result.unwrap_or_else(|_| 42);
+        assert_eq!(value, 42);
+    }
+
+    #[test]
+    fn test_result_is_ok() {
+        let result: Result<i32> = Ok(100);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_error_io_permission_denied() {
+        let io_err = std::io::Error::new(std::io::ErrorKind::PermissionDenied, "denied");
+        let err: Error = io_err.into();
+        
+        assert!(matches!(err, Error::IoError(_)));
+        assert!(err.to_string().contains("IO error"));
+    }
+
+    #[test]
+    fn test_error_serialization_from_json_syntax() {
+        let json_err = serde_json::from_str::<Vec<i32>>("[1, 2,]").unwrap_err();
+        let err: Error = json_err.into();
+        
+        assert!(matches!(err, Error::SerializationError(_)));
+    }
+
+    #[test]
+    fn test_error_serialization_from_json_type() {
+        let json_err = serde_json::from_str::<String>("123").unwrap_err();
+        let err: Error = json_err.into();
+        
+        assert!(matches!(err, Error::SerializationError(_)));
+    }
 }

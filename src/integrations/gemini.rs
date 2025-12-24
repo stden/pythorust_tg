@@ -451,4 +451,80 @@ mod tests {
         let client = GeminiClient::new("my_secret_key", "gemini-2.0-flash").unwrap();
         assert_eq!(client.api_key, "my_secret_key");
     }
+
+    #[test]
+    fn gemini_client_stores_base_url() {
+        let client = GeminiClient::new("key", "model").unwrap();
+        assert_eq!(client.base_url, "https://generativelanguage.googleapis.com/v1beta");
+    }
+
+    #[test]
+    fn gemini_models_count() {
+        assert_eq!(GEMINI_MODELS.len(), 6);
+    }
+
+    #[test]
+    fn gemini_models_all_have_gemini_prefix() {
+        for model in GEMINI_MODELS {
+            assert!(model.starts_with("gemini-"));
+        }
+    }
+
+    #[tokio::test]
+    async fn analyze_image_returns_error_on_failure() {
+        let server = MockServer::start_async().await;
+
+        server.mock(|when, then| {
+            when.method(POST)
+                .path("/models/gemini-2.0-flash:generateContent");
+            then.status(500).body("server error");
+        });
+
+        let err = client(&server)
+            .analyze_image(&[1, 2, 3], "What is this?", "image/png")
+            .await
+            .unwrap_err();
+
+        assert!(err.to_string().contains("Gemini Vision error 500"));
+    }
+
+    #[tokio::test]
+    async fn analyze_image_returns_error_on_empty_candidates() {
+        let server = MockServer::start_async().await;
+
+        server.mock(|when, then| {
+            when.method(POST)
+                .path("/models/gemini-2.0-flash:generateContent");
+            then.status(200).json_body(json!({ "candidates": [] }));
+        });
+
+        let err = client(&server)
+            .analyze_image(&[1, 2, 3], "Describe", "image/jpeg")
+            .await
+            .unwrap_err();
+
+        assert!(err.to_string().contains("Empty response from Gemini"));
+    }
+
+    #[tokio::test]
+    async fn chat_without_system_prompt_works() {
+        let server = MockServer::start_async().await;
+
+        server.mock(|when, then| {
+            when.method(POST)
+                .path("/models/gemini-2.0-flash:generateContent");
+            then.status(200).json_body(json!({
+                "candidates": [{
+                    "content": {
+                        "role": "model",
+                        "parts": [{ "text": "Hello!" }]
+                    }
+                }]
+            }));
+        });
+
+        let reply = client(&server).chat("Hi").await.unwrap();
+        assert_eq!(reply, "Hello!");
+    }
 }
+

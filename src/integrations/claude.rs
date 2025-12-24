@@ -458,4 +458,72 @@ mod tests {
         
         assert_eq!(client.model, "model3");
     }
+
+    #[test]
+    fn claude_client_stores_api_key() {
+        let client = ClaudeClient::new("my_secret_key", "claude-3-haiku-20240307").unwrap();
+        assert_eq!(client.api_key, "my_secret_key");
+    }
+
+    #[test]
+    fn claude_client_stores_base_url() {
+        let client = ClaudeClient::new("key", "model").unwrap();
+        assert_eq!(client.base_url, "https://api.anthropic.com/v1");
+    }
+
+    #[test]
+    fn claude_models_count() {
+        assert_eq!(CLAUDE_MODELS.len(), 5);
+    }
+
+    #[tokio::test]
+    async fn chat_returns_error_on_empty_content() {
+        let server = MockServer::start_async().await;
+
+        server.mock(|when, then| {
+            when.method(POST).path("/messages");
+            then.status(200).json_body(json!({ "content": [] }));
+        });
+
+        let err = client(&server).chat("Hi").await.unwrap_err();
+        assert!(err.to_string().contains("Empty response from Claude"));
+    }
+
+    #[tokio::test]
+    async fn analyze_image_url_returns_error_on_failure() {
+        let server = MockServer::start_async().await;
+
+        server.mock(|when, then| {
+            when.method(POST).path("/messages");
+            then.status(500).body("Internal Server Error");
+        });
+
+        let err = client(&server)
+            .analyze_image("https://example.com/image.jpg", "What is this?")
+            .await
+            .unwrap_err();
+
+        assert!(err.to_string().contains("Claude Vision error 500"));
+    }
+
+    #[tokio::test]
+    async fn analyze_image_base64_malformed_still_works() {
+        // Test that malformed base64 data URLs are handled
+        let server = MockServer::start_async().await;
+
+        server.mock(|when, then| {
+            when.method(POST).path("/messages");
+            then.status(200).json_body(json!({
+                "content": [{ "type": "text", "text": "result" }]
+            }));
+        });
+
+        let result = client(&server)
+            .analyze_image("data:image/jpeg;base64,AAA", "Describe")
+            .await
+            .unwrap();
+
+        assert_eq!(result, "result");
+    }
 }
+

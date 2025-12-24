@@ -422,5 +422,77 @@ mod tests {
         assert_eq!(stats.message_count, 0);
         assert_eq!(stats.relation_count, 0);
     }
+
+    #[test]
+    fn test_graph_stats_large_values() {
+        let stats = GraphStats {
+            user_count: u64::MAX,
+            chat_count: u64::MAX,
+            message_count: u64::MAX,
+            relation_count: u64::MAX,
+        };
+        
+        assert_eq!(stats.user_count, u64::MAX);
+        assert_eq!(stats.chat_count, u64::MAX);
+    }
+
+    #[test]
+    fn test_graph_stats_mixed_values() {
+        let stats = GraphStats {
+            user_count: 1000000,
+            chat_count: 500,
+            message_count: 10000000,
+            relation_count: 50000000,
+        };
+        
+        assert!(stats.relation_count > stats.message_count);
+        assert!(stats.message_count > stats.user_count);
+        assert!(stats.user_count > stats.chat_count);
+    }
+
+    #[test]
+    fn test_graph_stats_debug_contains_struct_name() {
+        let stats = GraphStats::default();
+        let debug = format!("{:?}", stats);
+        
+        assert!(debug.contains("GraphStats"));
+    }
+
+    #[test]
+    fn test_graph_stats_all_fields_accessible() {
+        let stats = GraphStats {
+            user_count: 11,
+            chat_count: 22,
+            message_count: 33,
+            relation_count: 44,
+        };
+        
+        let total = stats.user_count + stats.chat_count + stats.message_count + stats.relation_count;
+        assert_eq!(total, 110);
+    }
+
+    #[test]
+    fn test_graph_stats_default_is_empty() {
+        let stats = GraphStats::default();
+        
+        assert_eq!(stats.user_count + stats.chat_count + stats.message_count + stats.relation_count, 0);
+    }
+
+    #[test]
+    fn test_graph_stats_realistic_values() {
+        // Simulate realistic graph database stats
+        let stats = GraphStats {
+            user_count: 5000,
+            chat_count: 150,
+            message_count: 250000,
+            relation_count: 750000,
+        };
+        
+        // Typical ratios in a messaging app
+        assert!(stats.relation_count > stats.message_count);
+        assert!(stats.message_count > stats.user_count);
+        assert!(stats.user_count > stats.chat_count);
+    }
 }
+
 

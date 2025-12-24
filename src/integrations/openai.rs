@@ -465,4 +465,158 @@ mod tests {
         assert!(msg.contains("TTS error 400"));
         assert!(msg.contains("bad request"));
     }
+
+    #[test]
+    fn tts_voices_not_empty() {
+        assert!(!TTS_VOICES.is_empty());
+    }
+
+    #[test]
+    fn tts_voices_contains_known_voices() {
+        assert!(TTS_VOICES.contains(&"alloy"));
+        assert!(TTS_VOICES.contains(&"echo"));
+        assert!(TTS_VOICES.contains(&"fable"));
+        assert!(TTS_VOICES.contains(&"onyx"));
+        assert!(TTS_VOICES.contains(&"nova"));
+        assert!(TTS_VOICES.contains(&"shimmer"));
+    }
+
+    #[test]
+    fn tts_voices_count() {
+        assert_eq!(TTS_VOICES.len(), 6);
+    }
+
+    #[test]
+    fn chat_message_creation() {
+        let msg = ChatMessage {
+            role: "user".to_string(),
+            content: Some("Hello".to_string()),
+        };
+        
+        assert_eq!(msg.role, "user");
+        assert_eq!(msg.content, Some("Hello".to_string()));
+    }
+
+    #[test]
+    fn chat_message_clone() {
+        let msg = ChatMessage {
+            role: "assistant".to_string(),
+            content: Some("Hi there".to_string()),
+        };
+        
+        let cloned = msg.clone();
+        assert_eq!(cloned.role, "assistant");
+        assert_eq!(cloned.content, Some("Hi there".to_string()));
+    }
+
+    #[test]
+    fn chat_message_debug() {
+        let msg = ChatMessage {
+            role: "system".to_string(),
+            content: Some("You are helpful".to_string()),
+        };
+        
+        let debug_str = format!("{:?}", msg);
+        assert!(debug_str.contains("ChatMessage"));
+        assert!(debug_str.contains("system"));
+    }
+
+    #[test]
+    fn chat_message_serialize() {
+        let msg = ChatMessage {
+            role: "user".to_string(),
+            content: Some("Test".to_string()),
+        };
+        
+        let json = serde_json::to_string(&msg).unwrap();
+        assert!(json.contains("\"role\":\"user\""));
+        assert!(json.contains("\"content\":\"Test\""));
+    }
+
+    #[test]
+    fn chat_message_serialize_none_content() {
+        let msg = ChatMessage {
+            role: "user".to_string(),
+            content: None,
+        };
+        
+        let json = serde_json::to_string(&msg).unwrap();
+        // content should be skipped when None
+        assert!(json.contains("\"role\":\"user\""));
+        assert!(!json.contains("\"content\""));
+    }
+
+    #[test]
+    fn chat_message_deserialize() {
+        let json = r#"{"role":"assistant","content":"Reply"}"#;
+        let msg: ChatMessage = serde_json::from_str(json).unwrap();
+        
+        assert_eq!(msg.role, "assistant");
+        assert_eq!(msg.content, Some("Reply".to_string()));
+    }
+
+    #[test]
+    fn chat_message_deserialize_without_content() {
+        let json = r#"{"role":"user"}"#;
+        let msg: ChatMessage = serde_json::from_str(json).unwrap();
+        
+        assert_eq!(msg.role, "user");
+        assert_eq!(msg.content, None);
+    }
+
+    #[test]
+    fn openai_client_debug() {
+        let client = OpenAIClient::new("test_key").unwrap();
+        let debug_str = format!("{:?}", client);
+        
+        assert!(debug_str.contains("OpenAIClient"));
+    }
+
+    #[test]
+    fn openai_client_clone() {
+        let client = OpenAIClient::new("key123").unwrap();
+        let cloned = client.clone();
+        
+        assert_eq!(cloned.api_key, "key123");
+    }
+
+    #[test]
+    fn openai_api_url_constant() {
+        assert_eq!(OPENAI_API_URL, "https://api.openai.com/v1");
+    }
+
+    #[test]
+    fn openai_client_stores_api_key() {
+        let client = OpenAIClient::new("my_secret_key").unwrap();
+        assert_eq!(client.api_key, "my_secret_key");
+    }
+
+    #[test]
+    fn openai_client_stores_base_url() {
+        let client = OpenAIClient::new("key").unwrap();
+        assert_eq!(client.base_url, "https://api.openai.com/v1");
+    }
+
+    #[tokio::test]
+    async fn transcribe_audio_returns_error_on_failure() {
+        let server = MockServer::start_async().await;
+
+        server.mock(|when, then| {
+            when.method(POST).path("/audio/transcriptions");
+            then.status(500).body("server error");
+        });
+
+        let dir = tempdir().expect("tempdir");
+        let audio_path = dir.path().join("audio.ogg");
+        std::fs::write(&audio_path, b"audio-bytes").expect("write audio");
+
+        let err = client(&server)
+            .transcribe_audio(&audio_path, "ru")
+            .await
+            .unwrap_err();
+
+        let msg = err.to_string();
+        assert!(msg.contains("Whisper error 500"));
+    }
 }
+

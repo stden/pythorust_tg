@@ -46,7 +46,7 @@ markers = [
 ]
 
 [tool.coverage.run]
-source = ["integrations"]
+source = ["integrations", "chat_export_utils"]
 branch = true
 omit = [
     "tests/*",
