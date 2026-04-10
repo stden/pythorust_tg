@@ -1,0 +1,1314 @@
+[
+  {
+    "diff": "--- src/prompts.rs\n+++ replace Prompt::filename -> &'static str with \"\"\n@@ -21,24 +21,17 @@\n     Digest,\n     /// Парсер CRM данных.\n     CrmParser,\n }\n \n impl Prompt {\n     /// Имя файла промпта (Markdown).\n     pub fn filename(&self) -> &'static str {\n-        match self {\n-            Prompt::SalesAgent => \"sales_agent.md\",\n-            Prompt::Calculator => \"calculator.md\",\n-            Prompt::FriendlyAI => \"friendly_ai.md\",\n-            Prompt::Moderator => \"moderator.md\",\n-            Prompt::Digest => \"digest.md\",\n-            Prompt::CrmParser => \"crm_parser.md\",\n-        }\n+        \"\" /* ~ changed by cargo-mutants ~ */\n     }\n \n     /// Загрузить промпт из файла.\n     pub fn load(&self) -> Result<String> {\n         load_prompt(self.filename())\n     }\n }\n \n",
+    "file": "src/prompts.rs",
+    "function": {
+      "function_name": "Prompt::filename",
+      "return_type": "-> &'static str",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 37
+        },
+        "start": {
+          "column": 5,
+          "line": 27
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/prompts.rs:29:9: replace Prompt::filename -> &'static str with \"\"",
+    "package": "telegram_reader",
+    "replacement": "\"\"",
+    "span": {
+      "end": {
+        "column": 10,
+        "line": 36
+      },
+      "start": {
+        "column": 9,
+        "line": 29
+      }
+    }
+  },
+  {
+    "diff": "--- src/prompts.rs\n+++ replace Prompt::filename -> &'static str with \"xyzzy\"\n@@ -21,24 +21,17 @@\n     Digest,\n     /// Парсер CRM данных.\n     CrmParser,\n }\n \n impl Prompt {\n     /// Имя файла промпта (Markdown).\n     pub fn filename(&self) -> &'static str {\n-        match self {\n-            Prompt::SalesAgent => \"sales_agent.md\",\n-            Prompt::Calculator => \"calculator.md\",\n-            Prompt::FriendlyAI => \"friendly_ai.md\",\n-            Prompt::Moderator => \"moderator.md\",\n-            Prompt::Digest => \"digest.md\",\n-            Prompt::CrmParser => \"crm_parser.md\",\n-        }\n+        \"xyzzy\" /* ~ changed by cargo-mutants ~ */\n     }\n \n     /// Загрузить промпт из файла.\n     pub fn load(&self) -> Result<String> {\n         load_prompt(self.filename())\n     }\n }\n \n",
+    "file": "src/prompts.rs",
+    "function": {
+      "function_name": "Prompt::filename",
+      "return_type": "-> &'static str",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 37
+        },
+        "start": {
+          "column": 5,
+          "line": 27
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/prompts.rs:29:9: replace Prompt::filename -> &'static str with \"xyzzy\"",
+    "package": "telegram_reader",
+    "replacement": "\"xyzzy\"",
+    "span": {
+      "end": {
+        "column": 10,
+        "line": 36
+      },
+      "start": {
+        "column": 9,
+        "line": 29
+      }
+    }
+  },
+  {
+    "diff": "--- src/prompts.rs\n+++ replace Prompt::load -> Result<String> with Ok(String::new())\n@@ -33,17 +33,17 @@\n             Prompt::Moderator => \"moderator.md\",\n             Prompt::Digest => \"digest.md\",\n             Prompt::CrmParser => \"crm_parser.md\",\n         }\n     }\n \n     /// Загрузить промпт из файла.\n     pub fn load(&self) -> Result<String> {\n-        load_prompt(self.filename())\n+        Ok(String::new()) /* ~ changed by cargo-mutants ~ */\n     }\n }\n \n /// Загрузить промпт по имени файла.\n pub fn load_prompt(filename: &str) -> Result<String> {\n     let path = prompts_dir().join(filename);\n     std::fs::read_to_string(&path).map_err(|e| {\n         Error::InvalidArgument(format!(\"Не удалось загрузить промпт {}: {}\", filename, e))\n",
+    "file": "src/prompts.rs",
+    "function": {
+      "function_name": "Prompt::load",
+      "return_type": "-> Result<String>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 42
+        },
+        "start": {
+          "column": 5,
+          "line": 39
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/prompts.rs:41:9: replace Prompt::load -> Result<String> with Ok(String::new())",
+    "package": "telegram_reader",
+    "replacement": "Ok(String::new())",
+    "span": {
+      "end": {
+        "column": 37,
+        "line": 41
+      },
+      "start": {
+        "column": 9,
+        "line": 41
+      }
+    }
+  },
+  {
+    "diff": "--- src/prompts.rs\n+++ replace Prompt::load -> Result<String> with Ok(\"xyzzy\".into())\n@@ -33,17 +33,17 @@\n             Prompt::Moderator => \"moderator.md\",\n             Prompt::Digest => \"digest.md\",\n             Prompt::CrmParser => \"crm_parser.md\",\n         }\n     }\n \n     /// Загрузить промпт из файла.\n     pub fn load(&self) -> Result<String> {\n-        load_prompt(self.filename())\n+        Ok(\"xyzzy\".into()) /* ~ changed by cargo-mutants ~ */\n     }\n }\n \n /// Загрузить промпт по имени файла.\n pub fn load_prompt(filename: &str) -> Result<String> {\n     let path = prompts_dir().join(filename);\n     std::fs::read_to_string(&path).map_err(|e| {\n         Error::InvalidArgument(format!(\"Не удалось загрузить промпт {}: {}\", filename, e))\n",
+    "file": "src/prompts.rs",
+    "function": {
+      "function_name": "Prompt::load",
+      "return_type": "-> Result<String>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 42
+        },
+        "start": {
+          "column": 5,
+          "line": 39
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/prompts.rs:41:9: replace Prompt::load -> Result<String> with Ok(\"xyzzy\".into())",
+    "package": "telegram_reader",
+    "replacement": "Ok(\"xyzzy\".into())",
+    "span": {
+      "end": {
+        "column": 37,
+        "line": 41
+      },
+      "start": {
+        "column": 9,
+        "line": 41
+      }
+    }
+  },
+  {
+    "diff": "--- src/prompts.rs\n+++ replace load_prompt -> Result<String> with Ok(String::new())\n@@ -39,20 +39,17 @@\n     /// Загрузить промпт из файла.\n     pub fn load(&self) -> Result<String> {\n         load_prompt(self.filename())\n     }\n }\n \n /// Загрузить промпт по имени файла.\n pub fn load_prompt(filename: &str) -> Result<String> {\n-    let path = prompts_dir().join(filename);\n-    std::fs::read_to_string(&path).map_err(|e| {\n-        Error::InvalidArgument(format!(\"Не удалось загрузить промпт {}: {}\", filename, e))\n-    })\n+    Ok(String::new()) /* ~ changed by cargo-mutants ~ */\n }\n \n /// Путь к каталогу промптов.\n pub fn prompts_dir() -> PathBuf {\n     // Ищем prompts/ относительно текущей директории или родительской\n     let candidates = [\n         PathBuf::from(\"prompts\"),\n         PathBuf::from(\"../prompts\"),\n",
+    "file": "src/prompts.rs",
+    "function": {
+      "function_name": "load_prompt",
+      "return_type": "-> Result<String>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 51
+        },
+        "start": {
+          "column": 1,
+          "line": 45
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/prompts.rs:47:5: replace load_prompt -> Result<String> with Ok(String::new())",
+    "package": "telegram_reader",
+    "replacement": "Ok(String::new())",
+    "span": {
+      "end": {
+        "column": 7,
+        "line": 50
+      },
+      "start": {
+        "column": 5,
+        "line": 47
+      }
+    }
+  },
+  {
+    "diff": "--- src/prompts.rs\n+++ replace load_prompt -> Result<String> with Ok(\"xyzzy\".into())\n@@ -39,20 +39,17 @@\n     /// Загрузить промпт из файла.\n     pub fn load(&self) -> Result<String> {\n         load_prompt(self.filename())\n     }\n }\n \n /// Загрузить промпт по имени файла.\n pub fn load_prompt(filename: &str) -> Result<String> {\n-    let path = prompts_dir().join(filename);\n-    std::fs::read_to_string(&path).map_err(|e| {\n-        Error::InvalidArgument(format!(\"Не удалось загрузить промпт {}: {}\", filename, e))\n-    })\n+    Ok(\"xyzzy\".into()) /* ~ changed by cargo-mutants ~ */\n }\n \n /// Путь к каталогу промптов.\n pub fn prompts_dir() -> PathBuf {\n     // Ищем prompts/ относительно текущей директории или родительской\n     let candidates = [\n         PathBuf::from(\"prompts\"),\n         PathBuf::from(\"../prompts\"),\n",
+    "file": "src/prompts.rs",
+    "function": {
+      "function_name": "load_prompt",
+      "return_type": "-> Result<String>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 51
+        },
+        "start": {
+          "column": 1,
+          "line": 45
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/prompts.rs:47:5: replace load_prompt -> Result<String> with Ok(\"xyzzy\".into())",
+    "package": "telegram_reader",
+    "replacement": "Ok(\"xyzzy\".into())",
+    "span": {
+      "end": {
+        "column": 7,
+        "line": 50
+      },
+      "start": {
+        "column": 5,
+        "line": 47
+      }
+    }
+  },
+  {
+    "diff": "--- src/prompts.rs\n+++ replace prompts_dir -> PathBuf with Default::default()\n@@ -48,30 +48,17 @@\n     std::fs::read_to_string(&path).map_err(|e| {\n         Error::InvalidArgument(format!(\"Не удалось загрузить промпт {}: {}\", filename, e))\n     })\n }\n \n /// Путь к каталогу промптов.\n pub fn prompts_dir() -> PathBuf {\n     // Ищем prompts/ относительно текущей директории или родительской\n-    let candidates = [\n-        PathBuf::from(\"prompts\"),\n-        PathBuf::from(\"../prompts\"),\n-        PathBuf::from(\"../../prompts\"),\n-    ];\n-\n-    for path in candidates {\n-        if path.exists() {\n-            return path;\n-        }\n-    }\n-\n-    // Fallback\n-    PathBuf::from(\"prompts\")\n+    Default::default() /* ~ changed by cargo-mutants ~ */\n }\n \n /// Список всех доступных промптов.\n pub fn list_prompts() -> Vec<Prompt> {\n     vec![\n         Prompt::SalesAgent,\n         Prompt::Calculator,\n         Prompt::FriendlyAI,\n",
+    "file": "src/prompts.rs",
+    "function": {
+      "function_name": "prompts_dir",
+      "return_type": "-> PathBuf",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 70
+        },
+        "start": {
+          "column": 1,
+          "line": 53
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/prompts.rs:56:5: replace prompts_dir -> PathBuf with Default::default()",
+    "package": "telegram_reader",
+    "replacement": "Default::default()",
+    "span": {
+      "end": {
+        "column": 29,
+        "line": 69
+      },
+      "start": {
+        "column": 5,
+        "line": 56
+      }
+    }
+  },
+  {
+    "diff": "--- src/prompts.rs\n+++ replace list_prompts -> Vec<Prompt> with vec![]\n@@ -66,24 +66,17 @@\n     }\n \n     // Fallback\n     PathBuf::from(\"prompts\")\n }\n \n /// Список всех доступных промптов.\n pub fn list_prompts() -> Vec<Prompt> {\n-    vec![\n-        Prompt::SalesAgent,\n-        Prompt::Calculator,\n-        Prompt::FriendlyAI,\n-        Prompt::Moderator,\n-        Prompt::Digest,\n-        Prompt::CrmParser,\n-    ]\n+    vec![] /* ~ changed by cargo-mutants ~ */\n }\n \n #[cfg(test)]\n mod tests {\n     use super::*;\n \n     #[test]\n     fn test_prompt_filenames() {\n",
+    "file": "src/prompts.rs",
+    "function": {
+      "function_name": "list_prompts",
+      "return_type": "-> Vec<Prompt>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 82
+        },
+        "start": {
+          "column": 1,
+          "line": 72
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/prompts.rs:74:5: replace list_prompts -> Vec<Prompt> with vec![]",
+    "package": "telegram_reader",
+    "replacement": "vec![]",
+    "span": {
+      "end": {
+        "column": 6,
+        "line": 81
+      },
+      "start": {
+        "column": 5,
+        "line": 74
+      }
+    }
+  },
+  {
+    "diff": "--- src/prompts.rs\n+++ replace list_prompts -> Vec<Prompt> with vec![Default::default()]\n@@ -66,24 +66,17 @@\n     }\n \n     // Fallback\n     PathBuf::from(\"prompts\")\n }\n \n /// Список всех доступных промптов.\n pub fn list_prompts() -> Vec<Prompt> {\n-    vec![\n-        Prompt::SalesAgent,\n-        Prompt::Calculator,\n-        Prompt::FriendlyAI,\n-        Prompt::Moderator,\n-        Prompt::Digest,\n-        Prompt::CrmParser,\n-    ]\n+    vec![Default::default()] /* ~ changed by cargo-mutants ~ */\n }\n \n #[cfg(test)]\n mod tests {\n     use super::*;\n \n     #[test]\n     fn test_prompt_filenames() {\n",
+    "file": "src/prompts.rs",
+    "function": {
+      "function_name": "list_prompts",
+      "return_type": "-> Vec<Prompt>",
+      "span": {
+        "end": {
+          "column": 2,
+          "line": 82
+        },
+        "start": {
+          "column": 1,
+          "line": 72
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/prompts.rs:74:5: replace list_prompts -> Vec<Prompt> with vec![Default::default()]",
+    "package": "telegram_reader",
+    "replacement": "vec![Default::default()]",
+    "span": {
+      "end": {
+        "column": 6,
+        "line": 81
+      },
+      "start": {
+        "column": 5,
+        "line": 74
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/chunker.rs\n+++ replace Chunker::with_strategy -> Self with Default::default()\n@@ -49,21 +49,17 @@\n             size: size.max(1),\n             overlap: overlap.min(size.saturating_sub(1)),\n             strategy: ChunkingStrategy::Words,\n         }\n     }\n \n     /// Create with custom strategy.\n     pub fn with_strategy(size: usize, overlap: usize, strategy: ChunkingStrategy) -> Self {\n-        Self {\n-            size: size.max(1),\n-            overlap: overlap.min(size.saturating_sub(1)),\n-            strategy,\n-        }\n+        Default::default() /* ~ changed by cargo-mutants ~ */\n     }\n \n     /// Split text into overlapping chunks.\n     pub fn chunk(&self, text: &str, source: impl Into<String>) -> Vec<Chunk> {\n         match self.strategy {\n             ChunkingStrategy::Words => self.chunk_words(text, source),\n         }\n     }\n",
+    "file": "src/lightrag/chunker.rs",
+    "function": {
+      "function_name": "Chunker::with_strategy",
+      "return_type": "-> Self",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 62
+        },
+        "start": {
+          "column": 5,
+          "line": 55
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/lightrag/chunker.rs:57:9: replace Chunker::with_strategy -> Self with Default::default()",
+    "package": "telegram_reader",
+    "replacement": "Default::default()",
+    "span": {
+      "end": {
+        "column": 10,
+        "line": 61
+      },
+      "start": {
+        "column": 9,
+        "line": 57
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/chunker.rs\n+++ replace Chunker::chunk -> Vec<Chunk> with vec![]\n@@ -58,19 +58,17 @@\n             size: size.max(1),\n             overlap: overlap.min(size.saturating_sub(1)),\n             strategy,\n         }\n     }\n \n     /// Split text into overlapping chunks.\n     pub fn chunk(&self, text: &str, source: impl Into<String>) -> Vec<Chunk> {\n-        match self.strategy {\n-            ChunkingStrategy::Words => self.chunk_words(text, source),\n-        }\n+        vec![] /* ~ changed by cargo-mutants ~ */\n     }\n \n     fn chunk_words(&self, text: &str, source: impl Into<String>) -> Vec<Chunk> {\n         let words: Vec<&str> = text.split_whitespace().collect();\n         if words.is_empty() {\n             return Vec::new();\n         }\n \n",
+    "file": "src/lightrag/chunker.rs",
+    "function": {
+      "function_name": "Chunker::chunk",
+      "return_type": "-> Vec<Chunk>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 69
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/lightrag/chunker.rs:66:9: replace Chunker::chunk -> Vec<Chunk> with vec![]",
+    "package": "telegram_reader",
+    "replacement": "vec![]",
+    "span": {
+      "end": {
+        "column": 10,
+        "line": 68
+      },
+      "start": {
+        "column": 9,
+        "line": 66
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/chunker.rs\n+++ replace Chunker::chunk -> Vec<Chunk> with vec![Default::default()]\n@@ -58,19 +58,17 @@\n             size: size.max(1),\n             overlap: overlap.min(size.saturating_sub(1)),\n             strategy,\n         }\n     }\n \n     /// Split text into overlapping chunks.\n     pub fn chunk(&self, text: &str, source: impl Into<String>) -> Vec<Chunk> {\n-        match self.strategy {\n-            ChunkingStrategy::Words => self.chunk_words(text, source),\n-        }\n+        vec![Default::default()] /* ~ changed by cargo-mutants ~ */\n     }\n \n     fn chunk_words(&self, text: &str, source: impl Into<String>) -> Vec<Chunk> {\n         let words: Vec<&str> = text.split_whitespace().collect();\n         if words.is_empty() {\n             return Vec::new();\n         }\n \n",
+    "file": "src/lightrag/chunker.rs",
+    "function": {
+      "function_name": "Chunker::chunk",
+      "return_type": "-> Vec<Chunk>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 69
+        },
+        "start": {
+          "column": 5,
+          "line": 64
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/lightrag/chunker.rs:66:9: replace Chunker::chunk -> Vec<Chunk> with vec![Default::default()]",
+    "package": "telegram_reader",
+    "replacement": "vec![Default::default()]",
+    "span": {
+      "end": {
+        "column": 10,
+        "line": 68
+      },
+      "start": {
+        "column": 9,
+        "line": 66
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/chunker.rs\n+++ replace Chunker::chunk_words -> Vec<Chunk> with vec![]\n@@ -64,38 +64,17 @@\n     /// Split text into overlapping chunks.\n     pub fn chunk(&self, text: &str, source: impl Into<String>) -> Vec<Chunk> {\n         match self.strategy {\n             ChunkingStrategy::Words => self.chunk_words(text, source),\n         }\n     }\n \n     fn chunk_words(&self, text: &str, source: impl Into<String>) -> Vec<Chunk> {\n-        let words: Vec<&str> = text.split_whitespace().collect();\n-        if words.is_empty() {\n-            return Vec::new();\n-        }\n-\n-        let step = self.size.saturating_sub(self.overlap).max(1);\n-        let mut chunks = Vec::new();\n-        let mut idx = 0;\n-        let source = source.into();\n-\n-        while idx < words.len() {\n-            let end = (idx + self.size).min(words.len());\n-            let chunk_text = words[idx..end].join(\" \");\n-            chunks.push(Chunk::new(chunk_text, idx, end, source.clone()));\n-\n-            if end == words.len() {\n-                break;\n-            }\n-            idx += step;\n-        }\n-\n-        chunks\n+        vec![] /* ~ changed by cargo-mutants ~ */\n     }\n }\n \n #[cfg(test)]\n mod tests {\n     use super::*;\n \n     #[test]\n",
+    "file": "src/lightrag/chunker.rs",
+    "function": {
+      "function_name": "Chunker::chunk_words",
+      "return_type": "-> Vec<Chunk>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 94
+        },
+        "start": {
+          "column": 5,
+          "line": 71
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/lightrag/chunker.rs:72:9: replace Chunker::chunk_words -> Vec<Chunk> with vec![]",
+    "package": "telegram_reader",
+    "replacement": "vec![]",
+    "span": {
+      "end": {
+        "column": 15,
+        "line": 93
+      },
+      "start": {
+        "column": 9,
+        "line": 72
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/chunker.rs\n+++ replace Chunker::chunk_words -> Vec<Chunk> with vec![Default::default()]\n@@ -64,38 +64,17 @@\n     /// Split text into overlapping chunks.\n     pub fn chunk(&self, text: &str, source: impl Into<String>) -> Vec<Chunk> {\n         match self.strategy {\n             ChunkingStrategy::Words => self.chunk_words(text, source),\n         }\n     }\n \n     fn chunk_words(&self, text: &str, source: impl Into<String>) -> Vec<Chunk> {\n-        let words: Vec<&str> = text.split_whitespace().collect();\n-        if words.is_empty() {\n-            return Vec::new();\n-        }\n-\n-        let step = self.size.saturating_sub(self.overlap).max(1);\n-        let mut chunks = Vec::new();\n-        let mut idx = 0;\n-        let source = source.into();\n-\n-        while idx < words.len() {\n-            let end = (idx + self.size).min(words.len());\n-            let chunk_text = words[idx..end].join(\" \");\n-            chunks.push(Chunk::new(chunk_text, idx, end, source.clone()));\n-\n-            if end == words.len() {\n-                break;\n-            }\n-            idx += step;\n-        }\n-\n-        chunks\n+        vec![Default::default()] /* ~ changed by cargo-mutants ~ */\n     }\n }\n \n #[cfg(test)]\n mod tests {\n     use super::*;\n \n     #[test]\n",
+    "file": "src/lightrag/chunker.rs",
+    "function": {
+      "function_name": "Chunker::chunk_words",
+      "return_type": "-> Vec<Chunk>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 94
+        },
+        "start": {
+          "column": 5,
+          "line": 71
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/lightrag/chunker.rs:72:9: replace Chunker::chunk_words -> Vec<Chunk> with vec![Default::default()]",
+    "package": "telegram_reader",
+    "replacement": "vec![Default::default()]",
+    "span": {
+      "end": {
+        "column": 15,
+        "line": 93
+      },
+      "start": {
+        "column": 9,
+        "line": 72
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/chunker.rs\n+++ replace < with == in Chunker::chunk_words\n@@ -74,17 +74,17 @@\n             return Vec::new();\n         }\n \n         let step = self.size.saturating_sub(self.overlap).max(1);\n         let mut chunks = Vec::new();\n         let mut idx = 0;\n         let source = source.into();\n \n-        while idx < words.len() {\n+        while idx == /* ~ changed by cargo-mutants ~ */ words.len() {\n             let end = (idx + self.size).min(words.len());\n             let chunk_text = words[idx..end].join(\" \");\n             chunks.push(Chunk::new(chunk_text, idx, end, source.clone()));\n \n             if end == words.len() {\n                 break;\n             }\n             idx += step;\n",
+    "file": "src/lightrag/chunker.rs",
+    "function": {
+      "function_name": "Chunker::chunk_words",
+      "return_type": "-> Vec<Chunk>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 94
+        },
+        "start": {
+          "column": 5,
+          "line": 71
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/chunker.rs:82:19: replace < with == in Chunker::chunk_words",
+    "package": "telegram_reader",
+    "replacement": "==",
+    "span": {
+      "end": {
+        "column": 20,
+        "line": 82
+      },
+      "start": {
+        "column": 19,
+        "line": 82
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/chunker.rs\n+++ replace < with > in Chunker::chunk_words\n@@ -74,17 +74,17 @@\n             return Vec::new();\n         }\n \n         let step = self.size.saturating_sub(self.overlap).max(1);\n         let mut chunks = Vec::new();\n         let mut idx = 0;\n         let source = source.into();\n \n-        while idx < words.len() {\n+        while idx > /* ~ changed by cargo-mutants ~ */ words.len() {\n             let end = (idx + self.size).min(words.len());\n             let chunk_text = words[idx..end].join(\" \");\n             chunks.push(Chunk::new(chunk_text, idx, end, source.clone()));\n \n             if end == words.len() {\n                 break;\n             }\n             idx += step;\n",
+    "file": "src/lightrag/chunker.rs",
+    "function": {
+      "function_name": "Chunker::chunk_words",
+      "return_type": "-> Vec<Chunk>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 94
+        },
+        "start": {
+          "column": 5,
+          "line": 71
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/chunker.rs:82:19: replace < with > in Chunker::chunk_words",
+    "package": "telegram_reader",
+    "replacement": ">",
+    "span": {
+      "end": {
+        "column": 20,
+        "line": 82
+      },
+      "start": {
+        "column": 19,
+        "line": 82
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/chunker.rs\n+++ replace < with <= in Chunker::chunk_words\n@@ -74,17 +74,17 @@\n             return Vec::new();\n         }\n \n         let step = self.size.saturating_sub(self.overlap).max(1);\n         let mut chunks = Vec::new();\n         let mut idx = 0;\n         let source = source.into();\n \n-        while idx < words.len() {\n+        while idx <= /* ~ changed by cargo-mutants ~ */ words.len() {\n             let end = (idx + self.size).min(words.len());\n             let chunk_text = words[idx..end].join(\" \");\n             chunks.push(Chunk::new(chunk_text, idx, end, source.clone()));\n \n             if end == words.len() {\n                 break;\n             }\n             idx += step;\n",
+    "file": "src/lightrag/chunker.rs",
+    "function": {
+      "function_name": "Chunker::chunk_words",
+      "return_type": "-> Vec<Chunk>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 94
+        },
+        "start": {
+          "column": 5,
+          "line": 71
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/chunker.rs:82:19: replace < with <= in Chunker::chunk_words",
+    "package": "telegram_reader",
+    "replacement": "<=",
+    "span": {
+      "end": {
+        "column": 20,
+        "line": 82
+      },
+      "start": {
+        "column": 19,
+        "line": 82
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/chunker.rs\n+++ replace + with - in Chunker::chunk_words\n@@ -75,17 +75,17 @@\n         }\n \n         let step = self.size.saturating_sub(self.overlap).max(1);\n         let mut chunks = Vec::new();\n         let mut idx = 0;\n         let source = source.into();\n \n         while idx < words.len() {\n-            let end = (idx + self.size).min(words.len());\n+            let end = (idx - /* ~ changed by cargo-mutants ~ */ self.size).min(words.len());\n             let chunk_text = words[idx..end].join(\" \");\n             chunks.push(Chunk::new(chunk_text, idx, end, source.clone()));\n \n             if end == words.len() {\n                 break;\n             }\n             idx += step;\n         }\n",
+    "file": "src/lightrag/chunker.rs",
+    "function": {
+      "function_name": "Chunker::chunk_words",
+      "return_type": "-> Vec<Chunk>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 94
+        },
+        "start": {
+          "column": 5,
+          "line": 71
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/chunker.rs:83:28: replace + with - in Chunker::chunk_words",
+    "package": "telegram_reader",
+    "replacement": "-",
+    "span": {
+      "end": {
+        "column": 29,
+        "line": 83
+      },
+      "start": {
+        "column": 28,
+        "line": 83
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/chunker.rs\n+++ replace + with * in Chunker::chunk_words\n@@ -75,17 +75,17 @@\n         }\n \n         let step = self.size.saturating_sub(self.overlap).max(1);\n         let mut chunks = Vec::new();\n         let mut idx = 0;\n         let source = source.into();\n \n         while idx < words.len() {\n-            let end = (idx + self.size).min(words.len());\n+            let end = (idx * /* ~ changed by cargo-mutants ~ */ self.size).min(words.len());\n             let chunk_text = words[idx..end].join(\" \");\n             chunks.push(Chunk::new(chunk_text, idx, end, source.clone()));\n \n             if end == words.len() {\n                 break;\n             }\n             idx += step;\n         }\n",
+    "file": "src/lightrag/chunker.rs",
+    "function": {
+      "function_name": "Chunker::chunk_words",
+      "return_type": "-> Vec<Chunk>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 94
+        },
+        "start": {
+          "column": 5,
+          "line": 71
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/chunker.rs:83:28: replace + with * in Chunker::chunk_words",
+    "package": "telegram_reader",
+    "replacement": "*",
+    "span": {
+      "end": {
+        "column": 29,
+        "line": 83
+      },
+      "start": {
+        "column": 28,
+        "line": 83
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/chunker.rs\n+++ replace == with != in Chunker::chunk_words\n@@ -79,17 +79,17 @@\n         let mut idx = 0;\n         let source = source.into();\n \n         while idx < words.len() {\n             let end = (idx + self.size).min(words.len());\n             let chunk_text = words[idx..end].join(\" \");\n             chunks.push(Chunk::new(chunk_text, idx, end, source.clone()));\n \n-            if end == words.len() {\n+            if end != /* ~ changed by cargo-mutants ~ */ words.len() {\n                 break;\n             }\n             idx += step;\n         }\n \n         chunks\n     }\n }\n",
+    "file": "src/lightrag/chunker.rs",
+    "function": {
+      "function_name": "Chunker::chunk_words",
+      "return_type": "-> Vec<Chunk>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 94
+        },
+        "start": {
+          "column": 5,
+          "line": 71
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/chunker.rs:87:20: replace == with != in Chunker::chunk_words",
+    "package": "telegram_reader",
+    "replacement": "!=",
+    "span": {
+      "end": {
+        "column": 22,
+        "line": 87
+      },
+      "start": {
+        "column": 20,
+        "line": 87
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/chunker.rs\n+++ replace += with -= in Chunker::chunk_words\n@@ -82,17 +82,17 @@\n         while idx < words.len() {\n             let end = (idx + self.size).min(words.len());\n             let chunk_text = words[idx..end].join(\" \");\n             chunks.push(Chunk::new(chunk_text, idx, end, source.clone()));\n \n             if end == words.len() {\n                 break;\n             }\n-            idx += step;\n+            idx -= /* ~ changed by cargo-mutants ~ */ step;\n         }\n \n         chunks\n     }\n }\n \n #[cfg(test)]\n mod tests {\n",
+    "file": "src/lightrag/chunker.rs",
+    "function": {
+      "function_name": "Chunker::chunk_words",
+      "return_type": "-> Vec<Chunk>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 94
+        },
+        "start": {
+          "column": 5,
+          "line": 71
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/chunker.rs:90:17: replace += with -= in Chunker::chunk_words",
+    "package": "telegram_reader",
+    "replacement": "-=",
+    "span": {
+      "end": {
+        "column": 19,
+        "line": 90
+      },
+      "start": {
+        "column": 17,
+        "line": 90
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/chunker.rs\n+++ replace += with *= in Chunker::chunk_words\n@@ -82,17 +82,17 @@\n         while idx < words.len() {\n             let end = (idx + self.size).min(words.len());\n             let chunk_text = words[idx..end].join(\" \");\n             chunks.push(Chunk::new(chunk_text, idx, end, source.clone()));\n \n             if end == words.len() {\n                 break;\n             }\n-            idx += step;\n+            idx *= /* ~ changed by cargo-mutants ~ */ step;\n         }\n \n         chunks\n     }\n }\n \n #[cfg(test)]\n mod tests {\n",
+    "file": "src/lightrag/chunker.rs",
+    "function": {
+      "function_name": "Chunker::chunk_words",
+      "return_type": "-> Vec<Chunk>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 94
+        },
+        "start": {
+          "column": 5,
+          "line": 71
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/chunker.rs:90:17: replace += with *= in Chunker::chunk_words",
+    "package": "telegram_reader",
+    "replacement": "*=",
+    "span": {
+      "end": {
+        "column": 19,
+        "line": 90
+      },
+      "start": {
+        "column": 17,
+        "line": 90
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace EntityExtractor::extract -> (Vec<Entity>, Vec<Relation>) with (vec![], vec![])\n@@ -39,68 +39,17 @@\n         ] {\n             stopwords.insert(w.to_string());\n         }\n         Self { stopwords }\n     }\n \n     /// Extract entities and relations from a chunk.\n     pub fn extract(&self, chunk: &Chunk) -> (Vec<Entity>, Vec<Relation>) {\n-        let mut entities = Vec::new();\n-        let mut seen = HashSet::new();\n-        let mut relations = Vec::new();\n-\n-        for (idx, raw_token) in chunk.text.split_whitespace().enumerate() {\n-            let token =\n-                raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c != '@' && c != '#');\n-            if token.len() < 3 {\n-                continue;\n-            }\n-            let normalized = token.to_lowercase();\n-            if self.stopwords.contains(&normalized) {\n-                continue;\n-            }\n-\n-            // Heuristic: keep capitalized words, handles, hashtags, or tokens with digits.\n-            let is_candidate = token\n-                .chars()\n-                .next()\n-                .map(|c| c.is_uppercase())\n-                .unwrap_or(false)\n-                || token.contains('@')\n-                || token.contains('#')\n-                || token.chars().any(|c| c.is_numeric());\n-\n-            if !is_candidate {\n-                continue;\n-            }\n-\n-            if seen.insert(normalized.clone()) {\n-                entities.push(Entity {\n-                    name: token.to_string(),\n-                    normalized: normalized.clone(),\n-                    chunk_id: chunk.id,\n-                    position: idx,\n-                });\n-            }\n-        }\n-\n-        // Build simple co-occurrence relations between neighboring entities\n-        for pair in entities.windows(2) {\n-            if let [a, b] = pair {\n-                relations.push(Relation {\n-                    from: a.normalized.clone(),\n-                    to: b.normalized.clone(),\n-                    relation_type: \"co_occurs\".to_string(),\n-                    weight: 1.0,\n-                });\n-            }\n-        }\n-\n-        (entities, relations)\n+        (vec![], vec![]) /* ~ changed by cargo-mutants ~ */\n     }\n \n     /// Extract just entity names from free text (used for queries).\n     pub fn extract_keywords(&self, text: &str) -> Vec<String> {\n         let dummy = Chunk::new(\n             text.to_string(),\n             0,\n             text.split_whitespace().count(),\n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/lightrag/entity_extractor.rs:47:9: replace EntityExtractor::extract -> (Vec<Entity>, Vec<Relation>) with (vec![], vec![])",
+    "package": "telegram_reader",
+    "replacement": "(vec![], vec![])",
+    "span": {
+      "end": {
+        "column": 30,
+        "line": 98
+      },
+      "start": {
+        "column": 9,
+        "line": 47
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace EntityExtractor::extract -> (Vec<Entity>, Vec<Relation>) with (vec![], vec![Default::default()])\n@@ -39,68 +39,17 @@\n         ] {\n             stopwords.insert(w.to_string());\n         }\n         Self { stopwords }\n     }\n \n     /// Extract entities and relations from a chunk.\n     pub fn extract(&self, chunk: &Chunk) -> (Vec<Entity>, Vec<Relation>) {\n-        let mut entities = Vec::new();\n-        let mut seen = HashSet::new();\n-        let mut relations = Vec::new();\n-\n-        for (idx, raw_token) in chunk.text.split_whitespace().enumerate() {\n-            let token =\n-                raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c != '@' && c != '#');\n-            if token.len() < 3 {\n-                continue;\n-            }\n-            let normalized = token.to_lowercase();\n-            if self.stopwords.contains(&normalized) {\n-                continue;\n-            }\n-\n-            // Heuristic: keep capitalized words, handles, hashtags, or tokens with digits.\n-            let is_candidate = token\n-                .chars()\n-                .next()\n-                .map(|c| c.is_uppercase())\n-                .unwrap_or(false)\n-                || token.contains('@')\n-                || token.contains('#')\n-                || token.chars().any(|c| c.is_numeric());\n-\n-            if !is_candidate {\n-                continue;\n-            }\n-\n-            if seen.insert(normalized.clone()) {\n-                entities.push(Entity {\n-                    name: token.to_string(),\n-                    normalized: normalized.clone(),\n-                    chunk_id: chunk.id,\n-                    position: idx,\n-                });\n-            }\n-        }\n-\n-        // Build simple co-occurrence relations between neighboring entities\n-        for pair in entities.windows(2) {\n-            if let [a, b] = pair {\n-                relations.push(Relation {\n-                    from: a.normalized.clone(),\n-                    to: b.normalized.clone(),\n-                    relation_type: \"co_occurs\".to_string(),\n-                    weight: 1.0,\n-                });\n-            }\n-        }\n-\n-        (entities, relations)\n+        (vec![], vec![Default::default()]) /* ~ changed by cargo-mutants ~ */\n     }\n \n     /// Extract just entity names from free text (used for queries).\n     pub fn extract_keywords(&self, text: &str) -> Vec<String> {\n         let dummy = Chunk::new(\n             text.to_string(),\n             0,\n             text.split_whitespace().count(),\n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/lightrag/entity_extractor.rs:47:9: replace EntityExtractor::extract -> (Vec<Entity>, Vec<Relation>) with (vec![], vec![Default::default()])",
+    "package": "telegram_reader",
+    "replacement": "(vec![], vec![Default::default()])",
+    "span": {
+      "end": {
+        "column": 30,
+        "line": 98
+      },
+      "start": {
+        "column": 9,
+        "line": 47
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace EntityExtractor::extract -> (Vec<Entity>, Vec<Relation>) with (vec![Default::default()], vec![])\n@@ -39,68 +39,17 @@\n         ] {\n             stopwords.insert(w.to_string());\n         }\n         Self { stopwords }\n     }\n \n     /// Extract entities and relations from a chunk.\n     pub fn extract(&self, chunk: &Chunk) -> (Vec<Entity>, Vec<Relation>) {\n-        let mut entities = Vec::new();\n-        let mut seen = HashSet::new();\n-        let mut relations = Vec::new();\n-\n-        for (idx, raw_token) in chunk.text.split_whitespace().enumerate() {\n-            let token =\n-                raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c != '@' && c != '#');\n-            if token.len() < 3 {\n-                continue;\n-            }\n-            let normalized = token.to_lowercase();\n-            if self.stopwords.contains(&normalized) {\n-                continue;\n-            }\n-\n-            // Heuristic: keep capitalized words, handles, hashtags, or tokens with digits.\n-            let is_candidate = token\n-                .chars()\n-                .next()\n-                .map(|c| c.is_uppercase())\n-                .unwrap_or(false)\n-                || token.contains('@')\n-                || token.contains('#')\n-                || token.chars().any(|c| c.is_numeric());\n-\n-            if !is_candidate {\n-                continue;\n-            }\n-\n-            if seen.insert(normalized.clone()) {\n-                entities.push(Entity {\n-                    name: token.to_string(),\n-                    normalized: normalized.clone(),\n-                    chunk_id: chunk.id,\n-                    position: idx,\n-                });\n-            }\n-        }\n-\n-        // Build simple co-occurrence relations between neighboring entities\n-        for pair in entities.windows(2) {\n-            if let [a, b] = pair {\n-                relations.push(Relation {\n-                    from: a.normalized.clone(),\n-                    to: b.normalized.clone(),\n-                    relation_type: \"co_occurs\".to_string(),\n-                    weight: 1.0,\n-                });\n-            }\n-        }\n-\n-        (entities, relations)\n+        (vec![Default::default()], vec![]) /* ~ changed by cargo-mutants ~ */\n     }\n \n     /// Extract just entity names from free text (used for queries).\n     pub fn extract_keywords(&self, text: &str) -> Vec<String> {\n         let dummy = Chunk::new(\n             text.to_string(),\n             0,\n             text.split_whitespace().count(),\n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/lightrag/entity_extractor.rs:47:9: replace EntityExtractor::extract -> (Vec<Entity>, Vec<Relation>) with (vec![Default::default()], vec![])",
+    "package": "telegram_reader",
+    "replacement": "(vec![Default::default()], vec![])",
+    "span": {
+      "end": {
+        "column": 30,
+        "line": 98
+      },
+      "start": {
+        "column": 9,
+        "line": 47
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace EntityExtractor::extract -> (Vec<Entity>, Vec<Relation>) with (vec![Default::default()], vec![Default::default()])\n@@ -39,68 +39,17 @@\n         ] {\n             stopwords.insert(w.to_string());\n         }\n         Self { stopwords }\n     }\n \n     /// Extract entities and relations from a chunk.\n     pub fn extract(&self, chunk: &Chunk) -> (Vec<Entity>, Vec<Relation>) {\n-        let mut entities = Vec::new();\n-        let mut seen = HashSet::new();\n-        let mut relations = Vec::new();\n-\n-        for (idx, raw_token) in chunk.text.split_whitespace().enumerate() {\n-            let token =\n-                raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c != '@' && c != '#');\n-            if token.len() < 3 {\n-                continue;\n-            }\n-            let normalized = token.to_lowercase();\n-            if self.stopwords.contains(&normalized) {\n-                continue;\n-            }\n-\n-            // Heuristic: keep capitalized words, handles, hashtags, or tokens with digits.\n-            let is_candidate = token\n-                .chars()\n-                .next()\n-                .map(|c| c.is_uppercase())\n-                .unwrap_or(false)\n-                || token.contains('@')\n-                || token.contains('#')\n-                || token.chars().any(|c| c.is_numeric());\n-\n-            if !is_candidate {\n-                continue;\n-            }\n-\n-            if seen.insert(normalized.clone()) {\n-                entities.push(Entity {\n-                    name: token.to_string(),\n-                    normalized: normalized.clone(),\n-                    chunk_id: chunk.id,\n-                    position: idx,\n-                });\n-            }\n-        }\n-\n-        // Build simple co-occurrence relations between neighboring entities\n-        for pair in entities.windows(2) {\n-            if let [a, b] = pair {\n-                relations.push(Relation {\n-                    from: a.normalized.clone(),\n-                    to: b.normalized.clone(),\n-                    relation_type: \"co_occurs\".to_string(),\n-                    weight: 1.0,\n-                });\n-            }\n-        }\n-\n-        (entities, relations)\n+        (vec![Default::default()], vec![Default::default()]) /* ~ changed by cargo-mutants ~ */\n     }\n \n     /// Extract just entity names from free text (used for queries).\n     pub fn extract_keywords(&self, text: &str) -> Vec<String> {\n         let dummy = Chunk::new(\n             text.to_string(),\n             0,\n             text.split_whitespace().count(),\n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/lightrag/entity_extractor.rs:47:9: replace EntityExtractor::extract -> (Vec<Entity>, Vec<Relation>) with (vec![Default::default()], vec![Default::default()])",
+    "package": "telegram_reader",
+    "replacement": "(vec![Default::default()], vec![Default::default()])",
+    "span": {
+      "end": {
+        "column": 30,
+        "line": 98
+      },
+      "start": {
+        "column": 9,
+        "line": 47
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace && with || in EntityExtractor::extract\n@@ -45,17 +45,17 @@\n     /// Extract entities and relations from a chunk.\n     pub fn extract(&self, chunk: &Chunk) -> (Vec<Entity>, Vec<Relation>) {\n         let mut entities = Vec::new();\n         let mut seen = HashSet::new();\n         let mut relations = Vec::new();\n \n         for (idx, raw_token) in chunk.text.split_whitespace().enumerate() {\n             let token =\n-                raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c != '@' && c != '#');\n+                raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c != '@' || /* ~ changed by cargo-mutants ~ */ c != '#');\n             if token.len() < 3 {\n                 continue;\n             }\n             let normalized = token.to_lowercase();\n             if self.stopwords.contains(&normalized) {\n                 continue;\n             }\n \n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/entity_extractor.rs:53:83: replace && with || in EntityExtractor::extract",
+    "package": "telegram_reader",
+    "replacement": "||",
+    "span": {
+      "end": {
+        "column": 85,
+        "line": 53
+      },
+      "start": {
+        "column": 83,
+        "line": 53
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace && with || in EntityExtractor::extract\n@@ -45,17 +45,17 @@\n     /// Extract entities and relations from a chunk.\n     pub fn extract(&self, chunk: &Chunk) -> (Vec<Entity>, Vec<Relation>) {\n         let mut entities = Vec::new();\n         let mut seen = HashSet::new();\n         let mut relations = Vec::new();\n \n         for (idx, raw_token) in chunk.text.split_whitespace().enumerate() {\n             let token =\n-                raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c != '@' && c != '#');\n+                raw_token.trim_matches(|c: char| !c.is_alphanumeric() || /* ~ changed by cargo-mutants ~ */ c != '@' && c != '#');\n             if token.len() < 3 {\n                 continue;\n             }\n             let normalized = token.to_lowercase();\n             if self.stopwords.contains(&normalized) {\n                 continue;\n             }\n \n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/entity_extractor.rs:53:71: replace && with || in EntityExtractor::extract",
+    "package": "telegram_reader",
+    "replacement": "||",
+    "span": {
+      "end": {
+        "column": 73,
+        "line": 53
+      },
+      "start": {
+        "column": 71,
+        "line": 53
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ delete ! in EntityExtractor::extract\n@@ -45,17 +45,17 @@\n     /// Extract entities and relations from a chunk.\n     pub fn extract(&self, chunk: &Chunk) -> (Vec<Entity>, Vec<Relation>) {\n         let mut entities = Vec::new();\n         let mut seen = HashSet::new();\n         let mut relations = Vec::new();\n \n         for (idx, raw_token) in chunk.text.split_whitespace().enumerate() {\n             let token =\n-                raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c != '@' && c != '#');\n+                raw_token.trim_matches(|c: char|  /* ~ changed by cargo-mutants ~ */c.is_alphanumeric() && c != '@' && c != '#');\n             if token.len() < 3 {\n                 continue;\n             }\n             let normalized = token.to_lowercase();\n             if self.stopwords.contains(&normalized) {\n                 continue;\n             }\n \n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "UnaryOperator",
+    "name": "src/lightrag/entity_extractor.rs:53:50: delete ! in EntityExtractor::extract",
+    "package": "telegram_reader",
+    "replacement": "",
+    "span": {
+      "end": {
+        "column": 51,
+        "line": 53
+      },
+      "start": {
+        "column": 50,
+        "line": 53
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace != with == in EntityExtractor::extract\n@@ -45,17 +45,17 @@\n     /// Extract entities and relations from a chunk.\n     pub fn extract(&self, chunk: &Chunk) -> (Vec<Entity>, Vec<Relation>) {\n         let mut entities = Vec::new();\n         let mut seen = HashSet::new();\n         let mut relations = Vec::new();\n \n         for (idx, raw_token) in chunk.text.split_whitespace().enumerate() {\n             let token =\n-                raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c != '@' && c != '#');\n+                raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c == /* ~ changed by cargo-mutants ~ */ '@' && c != '#');\n             if token.len() < 3 {\n                 continue;\n             }\n             let normalized = token.to_lowercase();\n             if self.stopwords.contains(&normalized) {\n                 continue;\n             }\n \n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/entity_extractor.rs:53:76: replace != with == in EntityExtractor::extract",
+    "package": "telegram_reader",
+    "replacement": "==",
+    "span": {
+      "end": {
+        "column": 78,
+        "line": 53
+      },
+      "start": {
+        "column": 76,
+        "line": 53
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace != with == in EntityExtractor::extract\n@@ -45,17 +45,17 @@\n     /// Extract entities and relations from a chunk.\n     pub fn extract(&self, chunk: &Chunk) -> (Vec<Entity>, Vec<Relation>) {\n         let mut entities = Vec::new();\n         let mut seen = HashSet::new();\n         let mut relations = Vec::new();\n \n         for (idx, raw_token) in chunk.text.split_whitespace().enumerate() {\n             let token =\n-                raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c != '@' && c != '#');\n+                raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c != '@' && c == /* ~ changed by cargo-mutants ~ */ '#');\n             if token.len() < 3 {\n                 continue;\n             }\n             let normalized = token.to_lowercase();\n             if self.stopwords.contains(&normalized) {\n                 continue;\n             }\n \n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/entity_extractor.rs:53:88: replace != with == in EntityExtractor::extract",
+    "package": "telegram_reader",
+    "replacement": "==",
+    "span": {
+      "end": {
+        "column": 90,
+        "line": 53
+      },
+      "start": {
+        "column": 88,
+        "line": 53
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace < with == in EntityExtractor::extract\n@@ -46,17 +46,17 @@\n     pub fn extract(&self, chunk: &Chunk) -> (Vec<Entity>, Vec<Relation>) {\n         let mut entities = Vec::new();\n         let mut seen = HashSet::new();\n         let mut relations = Vec::new();\n \n         for (idx, raw_token) in chunk.text.split_whitespace().enumerate() {\n             let token =\n                 raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c != '@' && c != '#');\n-            if token.len() < 3 {\n+            if token.len() == /* ~ changed by cargo-mutants ~ */ 3 {\n                 continue;\n             }\n             let normalized = token.to_lowercase();\n             if self.stopwords.contains(&normalized) {\n                 continue;\n             }\n \n             // Heuristic: keep capitalized words, handles, hashtags, or tokens with digits.\n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/entity_extractor.rs:54:28: replace < with == in EntityExtractor::extract",
+    "package": "telegram_reader",
+    "replacement": "==",
+    "span": {
+      "end": {
+        "column": 29,
+        "line": 54
+      },
+      "start": {
+        "column": 28,
+        "line": 54
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace < with > in EntityExtractor::extract\n@@ -46,17 +46,17 @@\n     pub fn extract(&self, chunk: &Chunk) -> (Vec<Entity>, Vec<Relation>) {\n         let mut entities = Vec::new();\n         let mut seen = HashSet::new();\n         let mut relations = Vec::new();\n \n         for (idx, raw_token) in chunk.text.split_whitespace().enumerate() {\n             let token =\n                 raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c != '@' && c != '#');\n-            if token.len() < 3 {\n+            if token.len() > /* ~ changed by cargo-mutants ~ */ 3 {\n                 continue;\n             }\n             let normalized = token.to_lowercase();\n             if self.stopwords.contains(&normalized) {\n                 continue;\n             }\n \n             // Heuristic: keep capitalized words, handles, hashtags, or tokens with digits.\n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/entity_extractor.rs:54:28: replace < with > in EntityExtractor::extract",
+    "package": "telegram_reader",
+    "replacement": ">",
+    "span": {
+      "end": {
+        "column": 29,
+        "line": 54
+      },
+      "start": {
+        "column": 28,
+        "line": 54
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace < with <= in EntityExtractor::extract\n@@ -46,17 +46,17 @@\n     pub fn extract(&self, chunk: &Chunk) -> (Vec<Entity>, Vec<Relation>) {\n         let mut entities = Vec::new();\n         let mut seen = HashSet::new();\n         let mut relations = Vec::new();\n \n         for (idx, raw_token) in chunk.text.split_whitespace().enumerate() {\n             let token =\n                 raw_token.trim_matches(|c: char| !c.is_alphanumeric() && c != '@' && c != '#');\n-            if token.len() < 3 {\n+            if token.len() <= /* ~ changed by cargo-mutants ~ */ 3 {\n                 continue;\n             }\n             let normalized = token.to_lowercase();\n             if self.stopwords.contains(&normalized) {\n                 continue;\n             }\n \n             // Heuristic: keep capitalized words, handles, hashtags, or tokens with digits.\n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/entity_extractor.rs:54:28: replace < with <= in EntityExtractor::extract",
+    "package": "telegram_reader",
+    "replacement": "<=",
+    "span": {
+      "end": {
+        "column": 29,
+        "line": 54
+      },
+      "start": {
+        "column": 28,
+        "line": 54
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace || with && in EntityExtractor::extract\n@@ -62,17 +62,17 @@\n             // Heuristic: keep capitalized words, handles, hashtags, or tokens with digits.\n             let is_candidate = token\n                 .chars()\n                 .next()\n                 .map(|c| c.is_uppercase())\n                 .unwrap_or(false)\n                 || token.contains('@')\n                 || token.contains('#')\n-                || token.chars().any(|c| c.is_numeric());\n+                && /* ~ changed by cargo-mutants ~ */ token.chars().any(|c| c.is_numeric());\n \n             if !is_candidate {\n                 continue;\n             }\n \n             if seen.insert(normalized.clone()) {\n                 entities.push(Entity {\n                     name: token.to_string(),\n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/entity_extractor.rs:70:17: replace || with && in EntityExtractor::extract",
+    "package": "telegram_reader",
+    "replacement": "&&",
+    "span": {
+      "end": {
+        "column": 19,
+        "line": 70
+      },
+      "start": {
+        "column": 17,
+        "line": 70
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace || with && in EntityExtractor::extract\n@@ -61,17 +61,17 @@\n \n             // Heuristic: keep capitalized words, handles, hashtags, or tokens with digits.\n             let is_candidate = token\n                 .chars()\n                 .next()\n                 .map(|c| c.is_uppercase())\n                 .unwrap_or(false)\n                 || token.contains('@')\n-                || token.contains('#')\n+                && /* ~ changed by cargo-mutants ~ */ token.contains('#')\n                 || token.chars().any(|c| c.is_numeric());\n \n             if !is_candidate {\n                 continue;\n             }\n \n             if seen.insert(normalized.clone()) {\n                 entities.push(Entity {\n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/entity_extractor.rs:69:17: replace || with && in EntityExtractor::extract",
+    "package": "telegram_reader",
+    "replacement": "&&",
+    "span": {
+      "end": {
+        "column": 19,
+        "line": 69
+      },
+      "start": {
+        "column": 17,
+        "line": 69
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace || with && in EntityExtractor::extract\n@@ -60,17 +60,17 @@\n             }\n \n             // Heuristic: keep capitalized words, handles, hashtags, or tokens with digits.\n             let is_candidate = token\n                 .chars()\n                 .next()\n                 .map(|c| c.is_uppercase())\n                 .unwrap_or(false)\n-                || token.contains('@')\n+                && /* ~ changed by cargo-mutants ~ */ token.contains('@')\n                 || token.contains('#')\n                 || token.chars().any(|c| c.is_numeric());\n \n             if !is_candidate {\n                 continue;\n             }\n \n             if seen.insert(normalized.clone()) {\n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "BinaryOperator",
+    "name": "src/lightrag/entity_extractor.rs:68:17: replace || with && in EntityExtractor::extract",
+    "package": "telegram_reader",
+    "replacement": "&&",
+    "span": {
+      "end": {
+        "column": 19,
+        "line": 68
+      },
+      "start": {
+        "column": 17,
+        "line": 68
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ delete ! in EntityExtractor::extract\n@@ -64,17 +64,17 @@\n                 .chars()\n                 .next()\n                 .map(|c| c.is_uppercase())\n                 .unwrap_or(false)\n                 || token.contains('@')\n                 || token.contains('#')\n                 || token.chars().any(|c| c.is_numeric());\n \n-            if !is_candidate {\n+            if  /* ~ changed by cargo-mutants ~ */is_candidate {\n                 continue;\n             }\n \n             if seen.insert(normalized.clone()) {\n                 entities.push(Entity {\n                     name: token.to_string(),\n                     normalized: normalized.clone(),\n                     chunk_id: chunk.id,\n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract",
+      "return_type": "-> (Vec<Entity>, Vec<Relation>)",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 99
+        },
+        "start": {
+          "column": 5,
+          "line": 45
+        }
+      }
+    },
+    "genre": "UnaryOperator",
+    "name": "src/lightrag/entity_extractor.rs:72:16: delete ! in EntityExtractor::extract",
+    "package": "telegram_reader",
+    "replacement": "",
+    "span": {
+      "end": {
+        "column": 17,
+        "line": 72
+      },
+      "start": {
+        "column": 16,
+        "line": 72
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace EntityExtractor::extract_keywords -> Vec<String> with vec![]\n@@ -95,29 +95,17 @@\n             }\n         }\n \n         (entities, relations)\n     }\n \n     /// Extract just entity names from free text (used for queries).\n     pub fn extract_keywords(&self, text: &str) -> Vec<String> {\n-        let dummy = Chunk::new(\n-            text.to_string(),\n-            0,\n-            text.split_whitespace().count(),\n-            \"query\",\n-        );\n-        let (entities, _) = self.extract(&dummy);\n-        entities\n-            .into_iter()\n-            .map(|e| e.normalized)\n-            .collect::<HashSet<_>>()\n-            .into_iter()\n-            .collect()\n+        vec![] /* ~ changed by cargo-mutants ~ */\n     }\n }\n \n #[cfg(test)]\n mod tests {\n     use super::*;\n \n     #[test]\n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract_keywords",
+      "return_type": "-> Vec<String>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 116
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/lightrag/entity_extractor.rs:103:9: replace EntityExtractor::extract_keywords -> Vec<String> with vec![]",
+    "package": "telegram_reader",
+    "replacement": "vec![]",
+    "span": {
+      "end": {
+        "column": 23,
+        "line": 115
+      },
+      "start": {
+        "column": 9,
+        "line": 103
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace EntityExtractor::extract_keywords -> Vec<String> with vec![String::new()]\n@@ -95,29 +95,17 @@\n             }\n         }\n \n         (entities, relations)\n     }\n \n     /// Extract just entity names from free text (used for queries).\n     pub fn extract_keywords(&self, text: &str) -> Vec<String> {\n-        let dummy = Chunk::new(\n-            text.to_string(),\n-            0,\n-            text.split_whitespace().count(),\n-            \"query\",\n-        );\n-        let (entities, _) = self.extract(&dummy);\n-        entities\n-            .into_iter()\n-            .map(|e| e.normalized)\n-            .collect::<HashSet<_>>()\n-            .into_iter()\n-            .collect()\n+        vec![String::new()] /* ~ changed by cargo-mutants ~ */\n     }\n }\n \n #[cfg(test)]\n mod tests {\n     use super::*;\n \n     #[test]\n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract_keywords",
+      "return_type": "-> Vec<String>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 116
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/lightrag/entity_extractor.rs:103:9: replace EntityExtractor::extract_keywords -> Vec<String> with vec![String::new()]",
+    "package": "telegram_reader",
+    "replacement": "vec![String::new()]",
+    "span": {
+      "end": {
+        "column": 23,
+        "line": 115
+      },
+      "start": {
+        "column": 9,
+        "line": 103
+      }
+    }
+  },
+  {
+    "diff": "--- src/lightrag/entity_extractor.rs\n+++ replace EntityExtractor::extract_keywords -> Vec<String> with vec![\"xyzzy\".into()]\n@@ -95,29 +95,17 @@\n             }\n         }\n \n         (entities, relations)\n     }\n \n     /// Extract just entity names from free text (used for queries).\n     pub fn extract_keywords(&self, text: &str) -> Vec<String> {\n-        let dummy = Chunk::new(\n-            text.to_string(),\n-            0,\n-            text.split_whitespace().count(),\n-            \"query\",\n-        );\n-        let (entities, _) = self.extract(&dummy);\n-        entities\n-            .into_iter()\n-            .map(|e| e.normalized)\n-            .collect::<HashSet<_>>()\n-            .into_iter()\n-            .collect()\n+        vec![\"xyzzy\".into()] /* ~ changed by cargo-mutants ~ */\n     }\n }\n \n #[cfg(test)]\n mod tests {\n     use super::*;\n \n     #[test]\n",
+    "file": "src/lightrag/entity_extractor.rs",
+    "function": {
+      "function_name": "EntityExtractor::extract_keywords",
+      "return_type": "-> Vec<String>",
+      "span": {
+        "end": {
+          "column": 6,
+          "line": 116
+        },
+        "start": {
+          "column": 5,
+          "line": 101
+        }
+      }
+    },
+    "genre": "FnValue",
+    "name": "src/lightrag/entity_extractor.rs:103:9: replace EntityExtractor::extract_keywords -> Vec<String> with vec![\"xyzzy\".into()]",
+    "package": "telegram_reader",
+    "replacement": "vec![\"xyzzy\".into()]",
+    "span": {
+      "end": {
+        "column": 23,
+        "line": 115
+      },
+      "start": {
+        "column": 9,
+        "line": 103
+      }
+    }
+  }
+]

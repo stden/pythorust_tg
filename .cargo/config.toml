@@ -1,0 +1,16 @@
+[build]
+# Use sccache if available (detected in your environment)
+rustc-wrapper = "sccache"
+
+[target.x86_64-apple-darwin]
+rustflags = [
+    "-C", "link-arg=-Wl,-headerpad_max_install_names",
+]
+
+[target.aarch64-apple-darwin]
+rustflags = [
+    "-C", "link-arg=-Wl,-headerpad_max_install_names",
+]
+
+[registries.crates-io]
+protocol = "sparse"
