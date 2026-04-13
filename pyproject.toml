@@ -20,7 +20,7 @@ dependencies = [
     "ruff>=0.8.0",
     "pymysql>=1.1.0",
     "aiohttp>=3.9.0",
-    "boto3>=1.34.0",
+    "boto3>=1.42.89",
     "mysql-connector-python>=8.0.0",
     "cryptography>=42.0.0",
 ]
