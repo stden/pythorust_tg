@@ -21,7 +21,7 @@ dependencies = [
     "pymysql>=1.1.0",
     "aiohttp>=3.9.0",
     "boto3>=1.34.0",
-    "mysql-connector-python>=8.0.0",
+    "mysql-connector-python>=9.7.0",
     "cryptography>=42.0.0",
 ]
 
