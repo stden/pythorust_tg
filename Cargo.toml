@@ -264,7 +264,7 @@ csv = "1.4"
 schemars = "0.8"
 
 # MySQL database (using mysql_async to avoid sqlite conflict)
-mysql_async = { version = "0.36", features = ["chrono"] }
+mysql_async = { version = "0.37", features = ["chrono"] }
 
 # Telegram bot framework (polling mode)
 teloxide = { version = "0.17", default-features = true }
