@@ -270,7 +270,7 @@ jobs:
           tar -czf artifacts/telegram-reader-linux-x86_64.tar.gz -C artifacts/rust .
 
       - name: Upload Rust artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: rust-binaries
           path: artifacts/telegram-reader-linux-x86_64.tar.gz
@@ -303,7 +303,7 @@ jobs:
           uv build
 
       - name: Upload Python distributions
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: python-dist
           path: dist/*
