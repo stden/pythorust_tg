@@ -1,0 +1,97 @@
+[project]
+name = "my-telegram"
+version = "0.1.0"
+description = "Telegram chat reader and auto-responder toolkit"
+requires-python = ">=3.11"
+dependencies = [
+    "telethon>=1.44.0",
+    "openai>=2.44.0",
+    "mcp>=1.28.1,<2.0.0",
+    "requests>=2.34.2",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "pytest-asyncio>=1.4.0",
+    "python-dotenv>=1.2.2",
+    "behave>=1.3.3",
+    "kurigram>=2.2.23",
+    "PyYAML>=6.0.3",
+    "httpx>=0.28.1",
+    "respx>=0.23.1",
+    "ruff>=0.15.20",
+    "pymysql>=1.2.0",
+    "aiohttp>=3.14.1",
+    "boto3>=1.43.36",
+    "mysql-connector-python>=9.7.0",
+    "cryptography>=49.0.0",
+]
+
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "telegram_reader"
+python-source = "python"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow tests",
+]
+
+[tool.coverage.run]
+source = ["integrations"]
+branch = true
+omit = [
+    "tests/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+    ".venv/*",
+    "venv/*",
+    "rust_telegram/*",
+    "codev/*",
+    ".claude/*",
+    "integrations/lightrag_setup.py",
+    "integrations/aws_client.py",
+    "integrations/kurigram_client.py",
+    "integrations/openai_client.py",
+    "integrations/claude_client.py",
+    "integrations/gemini_client.py",
+    "integrations/yandex_tts.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    "except ImportError",
+]
+show_missing = true
+precision = 2
+fail_under = 90
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+ignore = ["E402"]  # Allow imports after sys.path manipulation
