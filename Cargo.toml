@@ -11,177 +11,7 @@ name = "telegram_reader"
 path = "src/lib.rs"
 crate-type = ["lib", "cdylib"]
 
-[[bin]]
-name = "telegram_reader"
-path = "src/main.rs"
-
-[[bin]]
-name = "init_session"
-path = "src/bin/dev/init_session.rs"
-
-[[bin]]
-name = "read_chat"
-path = "src/bin/chat/read_chat.rs"
-
-[[bin]]
-name = "tg"
-path = "src/bin/chat/tg.rs"
-
-[[bin]]
-name = "list_chats"
-path = "src/bin/chat/list_chats.rs"
-
-[[bin]]
-name = "get_active_chats"
-path = "src/bin/chat/get_active_chats.rs"
-
-[[bin]]
-name = "export_chat"
-path = "src/bin/export/export_chat.rs"
-
-[[bin]]
-name = "export_chats_mysql"
-path = "src/bin/export/export_chats_mysql.rs"
-
-[[bin]]
-name = "delete_zoom_messages"
-path = "src/bin/moderation/delete_zoom_messages.rs"
-
-[[bin]]
-name = "autoanswer"
-path = "src/bin/chat/autoanswer.rs"
-
-[[bin]]
-name = "download_chat"
-path = "src/bin/export/download_chat.rs"
-
-[[bin]]
-name = "download_user_chat"
-path = "src/bin/export/download_user_chat.rs"
-
-[[bin]]
-name = "linear_bot"
-path = "src/bin/bots/linear_bot.rs"
-
-[[bin]]
-name = "send_message"
-path = "src/bin/chat/send_message.rs"
-
-[[bin]]
-name = "send_viral_question"
-path = "src/bin/chat/send_viral_question.rs"
-
-[[bin]]
-name = "index_messages"
-path = "src/bin/data/index_messages.rs"
-
-[[bin]]
-name = "chat_stats"
-path = "src/bin/data/chat_stats.rs"
-
-[[bin]]
-name = "search_messages"
-path = "src/bin/data/search_messages.rs"
-
-[[bin]]
-name = "delete_unanswered"
-path = "src/bin/moderation/delete_unanswered.rs"
-
-[[bin]]
-name = "find_user"
-path = "src/bin/chat/find_user.rs"
-
-[[bin]]
-name = "like_messages"
-path = "src/bin/moderation/like_messages.rs"
-
-[[bin]]
-name = "message_digest"
-path = "src/bin/chat/message_digest.rs"
-
-[[bin]]
-name = "chat_analyzer"
-path = "src/bin/analysis/chat_analyzer.rs"
-
-[[bin]]
-name = "site_monitor"
-path = "src/bin/ops/site_monitor.rs"
-
-[[bin]]
-name = "devops_bot_probe"
-path = "src/bin/ops/devops_bot_probe.rs"
-
-[[bin]]
-name = "http_bench"
-path = "src/bin/ops/http_bench.rs"
-
-[[bin]]
-name = "test_gemini"
-path = "src/bin/dev/test_gemini.rs"
-
-[[bin]]
-name = "k8s_dash"
-path = "src/bin/ops/k8s_dash.rs"
-
-[[bin]]
-name = "lightrag"
-path = "src/bin/data/lightrag.rs"
-
-[[bin]]
-name = "community_game_bot"
-path = "src/bin/bots/community_game_bot.rs"
-
-[[bin]]
-name = "sales_bot"
-path = "src/bin/bots/sales_bot.rs"
-
-[[bin]]
-name = "ab_test_report"
-path = "src/bin/analysis/ab_test_report.rs"
-
-[[bin]]
-name = "bot_analytics"
-path = "src/bin/analysis/bot_analytics.rs"
-
-[[bin]]
-name = "evaluate_dialogs"
-path = "src/bin/analysis/evaluate_dialogs.rs"
-
-[[bin]]
-name = "n8n_backup"
-path = "src/bin/ops/n8n_backup.rs"
-
-[[bin]]
-name = "n8n_monitor"
-path = "src/bin/ops/n8n_monitor.rs"
-
-[[bin]]
-name = "bulk_reactions"
-path = "src/bin/moderation/bulk_reactions.rs"
-
-[[bin]]
-name = "credit_expert_bot"
-path = "src/bin/bots/credit_expert_bot.rs"
-
-[[bin]]
-name = "task_assistant_bot"
-path = "src/bin/bots/task_assistant_bot.rs"
-
-[[bin]]
-name = "ai_project_consultant"
-path = "src/bin/bots/ai_project_consultant.rs"
-
-[[bin]]
-name = "devops_ai_bot"
-path = "src/bin/bots/devops_ai_bot.rs"
-
-[[bin]]
-name = "export_chats_to_mysql"
-path = "src/bin/export/export_chats_to_mysql.rs"
-
-[[bin]]
-name = "export_linear_to_mysql"
-path = "src/bin/export/export_linear_to_mysql.rs"
+[workspace]
 
 [dependencies]
 # Telegram MTProto client
@@ -335,50 +165,237 @@ panic = "unwind"          # Criterion requires unwind for benchmarks
 lto = false               # Faster compilation for benchmarks
 incremental = true
 
+# =============================================================================
+# Benchmarks (criterion; benches/*.rs are auto-discovered, harness=false here)
+# =============================================================================
 [[bench]]
 name = "text_processing"
 harness = false
 
+# =============================================================================
+# Binaries — grouped by domain to mirror src/bin/<category>/, sorted within
+# each group. `autobins = false`, so every binary must be listed here.
+# 53 binaries total. Names/paths must match the files under src/bin/.
+# =============================================================================
+
+# --- Main CLI ---------------------------------------------------------------
 [[bin]]
-name = "test_bot_dialogue"
-path = "src/bin/dev/test_bot_dialogue.rs"
+name = "telegram_reader"
+path = "src/main.rs"
+
+# --- Chat operations (src/bin/chat) -----------------------------------------
+[[bin]]
+name = "autoanswer"
+path = "src/bin/chat/autoanswer.rs"
 
 [[bin]]
-name = "create_linear_tasks"
-path = "src/bin/linear/create_linear_tasks.rs"
-
-[workspace]
-
-# Binaries previously auto-discovered (now grouped under src/bin/<category>/)
+name = "find_user"
+path = "src/bin/chat/find_user.rs"
 
 [[bin]]
-name = "delete_my_messages"
-path = "src/bin/moderation/delete_my_messages.rs"
+name = "get_active_chats"
+path = "src/bin/chat/get_active_chats.rs"
 
 [[bin]]
-name = "collect_chat_ideas"
-path = "src/bin/analysis/collect_chat_ideas.rs"
+name = "list_chats"
+path = "src/bin/chat/list_chats.rs"
+
+[[bin]]
+name = "message_digest"
+path = "src/bin/chat/message_digest.rs"
+
+[[bin]]
+name = "read_chat"
+path = "src/bin/chat/read_chat.rs"
+
+[[bin]]
+name = "send_message"
+path = "src/bin/chat/send_message.rs"
+
+[[bin]]
+name = "send_viral_question"
+path = "src/bin/chat/send_viral_question.rs"
 
 [[bin]]
 name = "send_viral_questions"
 path = "src/bin/chat/send_viral_questions.rs"
 
 [[bin]]
-name = "sync_linear_tasks"
-path = "src/bin/linear/sync_linear_tasks.rs"
+name = "tg"
+path = "src/bin/chat/tg.rs"
+
+# --- Data processing (src/bin/data) -----------------------------------------
+[[bin]]
+name = "chat_stats"
+path = "src/bin/data/chat_stats.rs"
+
+[[bin]]
+name = "index_messages"
+path = "src/bin/data/index_messages.rs"
+
+[[bin]]
+name = "lightrag"
+path = "src/bin/data/lightrag.rs"
 
 [[bin]]
 name = "load_messages_to_db"
 path = "src/bin/data/load_messages_to_db.rs"
 
 [[bin]]
-name = "analyze_contacts"
-path = "src/bin/analysis/analyze_contacts.rs"
+name = "search_messages"
+path = "src/bin/data/search_messages.rs"
+
+# --- Export (src/bin/export) ------------------------------------------------
+[[bin]]
+name = "download_chat"
+path = "src/bin/export/download_chat.rs"
+
+[[bin]]
+name = "download_user_chat"
+path = "src/bin/export/download_user_chat.rs"
 
 [[bin]]
 name = "export_any_chat"
 path = "src/bin/export/export_any_chat.rs"
 
 [[bin]]
+name = "export_chat"
+path = "src/bin/export/export_chat.rs"
+
+[[bin]]
+name = "export_chats_mysql"
+path = "src/bin/export/export_chats_mysql.rs"
+
+[[bin]]
+name = "export_chats_to_mysql"
+path = "src/bin/export/export_chats_to_mysql.rs"
+
+[[bin]]
+name = "export_linear_to_mysql"
+path = "src/bin/export/export_linear_to_mysql.rs"
+
+# --- Moderation (src/bin/moderation) ----------------------------------------
+[[bin]]
+name = "bulk_reactions"
+path = "src/bin/moderation/bulk_reactions.rs"
+
+[[bin]]
+name = "delete_my_messages"
+path = "src/bin/moderation/delete_my_messages.rs"
+
+[[bin]]
+name = "delete_unanswered"
+path = "src/bin/moderation/delete_unanswered.rs"
+
+[[bin]]
+name = "delete_zoom_messages"
+path = "src/bin/moderation/delete_zoom_messages.rs"
+
+[[bin]]
+name = "like_messages"
+path = "src/bin/moderation/like_messages.rs"
+
+# --- Analysis (src/bin/analysis) --------------------------------------------
+[[bin]]
+name = "ab_test_report"
+path = "src/bin/analysis/ab_test_report.rs"
+
+[[bin]]
+name = "analyze_contacts"
+path = "src/bin/analysis/analyze_contacts.rs"
+
+[[bin]]
+name = "bot_analytics"
+path = "src/bin/analysis/bot_analytics.rs"
+
+[[bin]]
+name = "chat_analyzer"
+path = "src/bin/analysis/chat_analyzer.rs"
+
+[[bin]]
 name = "check_all_chats_tasks"
 path = "src/bin/analysis/check_all_chats_tasks.rs"
+
+[[bin]]
+name = "collect_chat_ideas"
+path = "src/bin/analysis/collect_chat_ideas.rs"
+
+[[bin]]
+name = "evaluate_dialogs"
+path = "src/bin/analysis/evaluate_dialogs.rs"
+
+# --- Bots (src/bin/bots) ----------------------------------------------------
+[[bin]]
+name = "ai_project_consultant"
+path = "src/bin/bots/ai_project_consultant.rs"
+
+[[bin]]
+name = "community_game_bot"
+path = "src/bin/bots/community_game_bot.rs"
+
+[[bin]]
+name = "credit_expert_bot"
+path = "src/bin/bots/credit_expert_bot.rs"
+
+[[bin]]
+name = "devops_ai_bot"
+path = "src/bin/bots/devops_ai_bot.rs"
+
+[[bin]]
+name = "linear_bot"
+path = "src/bin/bots/linear_bot.rs"
+
+[[bin]]
+name = "sales_bot"
+path = "src/bin/bots/sales_bot.rs"
+
+[[bin]]
+name = "task_assistant_bot"
+path = "src/bin/bots/task_assistant_bot.rs"
+
+# --- Ops / DevOps (src/bin/ops) ---------------------------------------------
+[[bin]]
+name = "devops_bot_probe"
+path = "src/bin/ops/devops_bot_probe.rs"
+
+[[bin]]
+name = "http_bench"
+path = "src/bin/ops/http_bench.rs"
+
+[[bin]]
+name = "k8s_dash"
+path = "src/bin/ops/k8s_dash.rs"
+
+[[bin]]
+name = "n8n_backup"
+path = "src/bin/ops/n8n_backup.rs"
+
+[[bin]]
+name = "n8n_monitor"
+path = "src/bin/ops/n8n_monitor.rs"
+
+[[bin]]
+name = "site_monitor"
+path = "src/bin/ops/site_monitor.rs"
+
+# --- Linear integration (src/bin/linear) ------------------------------------
+[[bin]]
+name = "create_linear_tasks"
+path = "src/bin/linear/create_linear_tasks.rs"
+
+[[bin]]
+name = "sync_linear_tasks"
+path = "src/bin/linear/sync_linear_tasks.rs"
+
+# --- Development & local testing (src/bin/dev) ------------------------------
+[[bin]]
+name = "init_session"
+path = "src/bin/dev/init_session.rs"
+
+[[bin]]
+name = "test_bot_dialogue"
+path = "src/bin/dev/test_bot_dialogue.rs"
+
+[[bin]]
+name = "test_gemini"
+path = "src/bin/dev/test_gemini.rs"

@@ -138,7 +138,7 @@ cargo run --bin task_assistant_bot
 cargo run -- n8n-monitor
 cargo run -- n8n-backup backup
 ```
-MySQL tables expected for bots: `bot_users`, `bot_sessions`, `bot_messages`, and `bot_experiments` (DDL in the bot bin tests under `src/bin/bots/`).
+MySQL tables expected for bots: `bot_users`, `bot_sessions`, `bot_messages`, and `bot_experiments`. The single source of truth for this schema is `migrations/002_create_bot_tables.sql` — apply it before running `community_game_bot`/`credit_expert_bot` (`sales_bot` self-bootstraps the same tables via `ensure_tables()` on startup).
 
 ## 🗂️ Project layout
 ```
@@ -183,12 +183,11 @@ uv run pytest -v
 ```
 
 ## 📚 Documentation
-- `AGENTS.md` — project overview and quickstart for operators.
+- `AGENTS.md` — living architecture map, reorganization plan, and codev structure.
 - `CLAUDE.md` — Rust-first engineering guidelines and CLI reference.
-- `CODEX.md` — testing playbook for bots and data flows.
-- `ENV_SETUP.md` — full `.env` reference (Telegram/AI/N8N/MySQL/etc.).
-- `CONFIGURATION_SUMMARY.md` — minimal env variable sets per feature.
-- `OPS_TOOLS.md` — ops runbook (N8N monitor/backup + templates).
+- `docs/configuration.md` — full `.env` reference + copy-paste quick-starts (Telegram/AI/N8N/MySQL/etc.).
+- `docs/operations.md` — ops runbook (N8N monitor/backup + `scripts/ops/` templates).
+- `docs/testing.md` — testing playbook for bots and data flows.
 - `docs/architecture.md` — 🏗️ visual textbook: C4 context/containers, components, sequences, ER schema, CI (Mermaid).
 - `docs/github-actions-performance.md` — CI/CD speed playbook: what works in GitHub Actions and why.
 - `codev/plans/0006-development-roadmap.md` — current priorities and roadmap.
@@ -196,6 +195,6 @@ uv run pytest -v
 
 ## ✅ Testing
 
-- Bot and data-flow testing playbook: `CODEX.md`
+- Bot and data-flow testing playbook: `docs/testing.md`
 - Rust/Python command checklist: run `cargo fmt --all`, `cargo clippy --all-targets -- -D warnings`, `cargo test --all`, and `uv run pytest -v`
 - CI performance notes: `docs/github-actions-performance.md`

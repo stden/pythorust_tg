@@ -15,9 +15,9 @@ Env:
 - Optional alerts: `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`
 
 ### systemd template
-`n8n_monitor.service` is a template: update `WorkingDirectory`, `EnvironmentFile`, and `ExecStart`, then install:
+`scripts/ops/n8n_monitor.service` is a template: update `WorkingDirectory`, `EnvironmentFile`, and `ExecStart`, then install:
 ```bash
-sudo cp n8n_monitor.service /etc/systemd/system/n8n_monitor.service
+sudo cp scripts/ops/n8n_monitor.service /etc/systemd/system/n8n_monitor.service
 sudo systemctl daemon-reload
 sudo systemctl enable --now n8n_monitor.service
 ```
@@ -33,7 +33,7 @@ cargo run -- n8n-backup restore --file /srv/backups/n8n/n8n_backup_YYYYMMDD_HHMM
 ```
 
 Cron template:
-- `n8n_backup_cron.sh` is a template; set `PROJECT_DIR` inside and add to crontab.
+- `scripts/ops/n8n_backup_cron.sh` is a template; set `PROJECT_DIR` inside and add to crontab.
 
 ## Task Assistant bot (Rust)
 ```bash

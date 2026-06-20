@@ -160,7 +160,7 @@ Universal sales agent for Telegram (chat-first, voice as an option) that knows i
 ## References
 - `autoanswer.py`, `telegram_session.py`, `chat_export_utils.py` — current Telegram logic.
 - `integrations/` — OpenAI/Ollama/tts/stt clients.
-- `AGENTS.md`, `OPS_TOOLS.md`, `ENV_SETUP.md` — general instructions and environment variables.
+- `AGENTS.md`, `docs/operations.md`, `docs/configuration.md` — general instructions and environment variables.
 
 ## Approval
 - [ ] Technical Lead Review

@@ -366,6 +366,23 @@ impl MySqlLogger {
         let mut conn = self.pool.get_conn().await?;
         conn.exec_drop(
             r#"
+            CREATE TABLE IF NOT EXISTS bot_users (
+                id BIGINT PRIMARY KEY,
+                username VARCHAR(255) NOT NULL DEFAULT '',
+                first_name VARCHAR(255) NOT NULL DEFAULT '',
+                last_name VARCHAR(255) NOT NULL DEFAULT '',
+                language_code VARCHAR(16) NOT NULL DEFAULT '',
+                is_premium TINYINT(1) NOT NULL DEFAULT 0,
+                is_bot TINYINT(1) NOT NULL DEFAULT 0,
+                first_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_seen_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        "#,
+            (),
+        )
+        .await?;
+        conn.exec_drop(
+            r#"
             CREATE TABLE IF NOT EXISTS bot_sessions (
                 id BIGINT AUTO_INCREMENT PRIMARY KEY,
                 user_id BIGINT NOT NULL,

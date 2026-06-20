@@ -216,11 +216,6 @@ session*/
 !README.md
 !CLAUDE.md
 !AGENTS.md
-!ACTION_PLAN.md
-!CODEX.md
-!ENV_SETUP.md
-!CONFIGURATION_SUMMARY.md
-!OPS_TOOLS.md
 !codev/**/*.md
 !rust_telegram/README.md
 !prompts/*.md
@@ -241,6 +236,8 @@ telegram_session_py.lock
 
 # Local data dumps and personal notes
 *.sql
+# schema migrations are version-controlled
+!migrations/*.sql
 *.csv
 personal*.md
 prompts/hara_website_design.md
@@ -252,8 +249,10 @@ prompts/hara_website_design.md
 # Local-only cargo config (sccache wrapper etc.) — not for CI
 .cargo/config.toml
 
-# Cargo lockfile — intentionally not tracked (resolved from Cargo.toml on build)
-/Cargo.lock
+# Cargo lockfile — this crate ships binaries (an application), so the lockfile
+# SHOULD be committed for reproducible builds. Generate & commit it once the
+# dependency graph resolves (see AGENTS.md §6 — yanked transitive deps block a
+# clean `cargo generate-lockfile` at the moment).
 
 # Coverage output
 cov.json

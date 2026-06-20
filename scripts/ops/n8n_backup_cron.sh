@@ -1,7 +1,7 @@
 #!/bin/bash
 # N8N Automatic Backup Script
 # IMPORTANT: Replace /path/to/project with the actual path
-# Add to crontab: 0 2 * * * /path/to/project/n8n_backup_cron.sh
+# Add to crontab: 0 2 * * * /path/to/project/scripts/ops/n8n_backup_cron.sh
 
 set -e
 
