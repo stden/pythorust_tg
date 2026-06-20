@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# Pre-commit hook: format all Rust and Python sources before each commit.
+#
+# Enable with:  ./scripts/install-git-hooks.sh
+# Skip once:    git commit --no-verify
+#
+# Deterministic, no network, no LLM. Mirrors the CI formatting gates
+# (cargo fmt --check, ruff format --check) so commits land pre-formatted.
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+[ -n "$ROOT" ] || { echo "not a git repository" >&2; exit 1; }
+cd "$ROOT"
+
+# Remember what was staged so we only re-stage those files after formatting.
+STAGED="$(git diff --name-only --cached --diff-filter=ACMR)"
+
+# --- Rust: cargo fmt ---
+if command -v cargo >/dev/null 2>&1; then
+    cargo fmt --all
+fi
+
+# --- Python: ruff safe-autofix + format ---
+if command -v ruff >/dev/null 2>&1; then
+    RUFF=(ruff)
+elif command -v uv >/dev/null 2>&1; then
+    RUFF=(uv run ruff)
+else
+    RUFF=()
+fi
+if [ "${#RUFF[@]}" -gt 0 ]; then
+    "${RUFF[@]}" check --fix . >/dev/null 2>&1 || true
+    "${RUFF[@]}" format . >/dev/null 2>&1 || true
+fi
+
+# Re-stage the originally-staged files if the formatters changed them.
+if [ -n "$STAGED" ]; then
+    echo "$STAGED" | while IFS= read -r f; do
+        [ -f "$f" ] && git add -- "$f"
+    done
+fi
