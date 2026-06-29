@@ -64,7 +64,7 @@ fs2 = "0.4"
 walkdir = "2.5"
 
 # HTTP client for OpenAI
-reqwest = { version = "0.12", features = ["json", "multipart", "stream"] }
+reqwest = { version = "0.13", features = ["json", "multipart", "stream"] }
 
 # Async OpenAI client
 async-openai = { version = "0.32", features = ["chat-completion", "embedding"] }
