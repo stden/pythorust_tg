@@ -27,7 +27,7 @@ core2 = { path = "vendor/core2-0.4.0" }
 grammers-client = "0.8"
 grammers-session = "0.8"
 grammers-tl-types = "0.8"
-grammers-mtsender = "0.8"
+grammers-mtsender = "0.9"
 
 # Async runtime
 tokio = { version = "1.52", features = ["full", "signal"] }
