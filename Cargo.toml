@@ -24,7 +24,7 @@ core2 = { path = "vendor/core2-0.4.0" }
 
 [dependencies]
 # Telegram MTProto client
-grammers-client = "0.8"
+grammers-client = "0.9"
 grammers-session = "0.8"
 grammers-tl-types = "0.8"
 grammers-mtsender = "0.8"
