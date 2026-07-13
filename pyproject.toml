@@ -5,7 +5,7 @@ description = "Telegram chat reader and auto-responder toolkit"
 requires-python = ">=3.11"
 dependencies = [
     "telethon>=1.44.0",
-    "openai>=2.44.0",
+    "openai>=2.45.0",
     "mcp>=1.28.1,<2.0.0",
     "requests>=2.34.2",
     "pytest>=9.1.1",
