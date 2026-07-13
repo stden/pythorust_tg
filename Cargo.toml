@@ -67,7 +67,7 @@ walkdir = "2.5"
 reqwest = { version = "0.12", features = ["json", "multipart", "stream"] }
 
 # Async OpenAI client
-async-openai = { version = "0.32", features = ["chat-completion", "embedding"] }
+async-openai = { version = "0.41", features = ["chat-completion", "embedding"] }
 
 # Environment variables
 dotenvy = "0.15"
