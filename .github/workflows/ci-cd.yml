@@ -184,7 +184,7 @@ jobs:
         uses: rui314/setup-mold@v1
 
       - name: Install cargo-nextest
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@v2.85.5
         with:
           tool: cargo-nextest
 
@@ -232,7 +232,7 @@ jobs:
           cache-on-failure: true
 
       - name: Install tarpaulin
-        uses: taiki-e/install-action@v2
+        uses: taiki-e/install-action@v2.85.5
         with:
           tool: cargo-tarpaulin
 
