@@ -1,0 +1,37 @@
+bot:
+  token: ${DEVOPS_BOT_TOKEN}
+  allowed_users: []  # Telegram user_id list; empty means open access
+
+monitor:
+  enabled: true
+  interval_seconds: 300
+  cooldown_seconds: 300
+  alert_chat_id: ${DEVOPS_ALERT_CHAT_ID}
+
+services:
+  n8n:
+    kind: http
+    url: ${N8N_URL}
+    expected_status: 200
+    timeout: 10
+    restart_command: ${N8N_RESTART_COMMAND}
+    log_command: ${N8N_LOG_COMMAND}
+
+  megacascade:
+    kind: http
+    url: ${MEGACASCADE_URL}
+    expected_status: 200
+    log_command: ${MEGACASCADE_LOG_COMMAND}
+
+  whatsapp:
+    kind: http
+    url: ${WHATSAPP_URL}
+    timeout: 8
+    restart_command: ${WHATSAPP_RESTART_COMMAND}
+    log_command: ${WHATSAPP_LOG_COMMAND}
+
+  caddy:
+    kind: systemd
+    service_name: ${CADDY_SERVICE_NAME}
+    status_command: ${CADDY_STATUS_COMMAND}
+    log_command: ${CADDY_LOG_COMMAND}

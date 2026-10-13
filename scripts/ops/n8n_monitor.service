@@ -1,0 +1,19 @@
+[Unit]
+Description=N8N Health Monitor with Auto-Restart
+After=network.target n8n.service
+Wants=n8n.service
+
+[Service]
+Type=simple
+User=root
+# IMPORTANT: Replace /path/to/project with the actual project path
+WorkingDirectory=/path/to/project
+EnvironmentFile=/path/to/project/.env
+ExecStart=/path/to/project/.venv/bin/python /path/to/project/n8n_monitor.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
