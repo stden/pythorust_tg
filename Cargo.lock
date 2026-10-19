@@ -1621,8 +1621,8 @@ dependencies = [
  "futures-util",
  "grammers-crypto",
  "grammers-mtsender",
- "grammers-session",
- "grammers-tl-types",
+ "grammers-session 0.10.0",
+ "grammers-tl-types 0.10.0",
  "log",
  "md5",
  "mime_guess",
@@ -1659,7 +1659,7 @@ dependencies = [
  "flate2",
  "getrandom 0.4.3",
  "grammers-crypto",
- "grammers-tl-types",
+ "grammers-tl-types 0.10.0",
  "log",
  "num-bigint",
  "sha1 0.11.0",
@@ -1674,8 +1674,8 @@ dependencies = [
  "bytes",
  "grammers-crypto",
  "grammers-mtproto",
- "grammers-session",
- "grammers-tl-types",
+ "grammers-session 0.10.0",
+ "grammers-tl-types 0.10.0",
  "locate-locale",
  "log",
  "os_info",
@@ -1688,10 +1688,21 @@ version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e4d5b9e434c6b9fc1e091fe82d1f201d8e19df5005d2c19e218b4977b4df506"
 dependencies = [
- "grammers-tl-types",
- "libsql",
+ "grammers-tl-types 0.10.0",
  "log",
  "tokio",
+]
+
+[[package]]
+name = "grammers-session"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f34260cb63ecf5901e735a5f088ba6cb837d954649c223d5a53e7e980468ae0"
+dependencies = [
+ "grammers-tl-types 0.11.0",
+ "libsql",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]
@@ -1699,6 +1710,15 @@ name = "grammers-tl-gen"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1a37dda68c9e775dfbffb85b99826b5ac8144e9da40be3327e77cbcd8618fc30"
+dependencies = [
+ "grammers-tl-parser",
+]
+
+[[package]]
+name = "grammers-tl-gen"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf49f6769cffae7ea376669f3073c70eeb16ccc38f00ff019394069f3d401a4c"
 dependencies = [
  "grammers-tl-parser",
 ]
@@ -1718,7 +1738,17 @@ version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67d450e2f2588af535fe85a17b9a6df8338794ee8ad6bcb1b97d61a14d472fc5"
 dependencies = [
- "grammers-tl-gen",
+ "grammers-tl-gen 0.10.0",
+ "grammers-tl-parser",
+]
+
+[[package]]
+name = "grammers-tl-types"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "069e64c424bde5764391bc72f07085a12177d7053c8a0da355425527fd7c221f"
+dependencies = [
+ "grammers-tl-gen 0.11.0",
  "grammers-tl-parser",
 ]
 
@@ -2599,9 +2629,9 @@ dependencies = [
 
 [[package]]
 name = "libsql"
-version = "0.9.30"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30fe980ac5693ed1f3db490559fb578885e913a018df64af8a1a46e1959a78df"
+checksum = "d6bca1704194048f0f0bbc8a8e05ba85c0c67628b03bd59346dd2fdd946a1588"
 dependencies = [
  "async-trait",
  "bitflags 2.13.2",
@@ -2615,9 +2645,9 @@ dependencies = [
 
 [[package]]
 name = "libsql-ffi"
-version = "0.9.30"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0be1da6f123ceb2cd23f469883415cab9ee963286a85d61e22afb8b12e15e681"
+checksum = "f232292810b6298d17466b59bf8077d075fb016d89c281ca9dc968ea4a3b9d03"
 dependencies = [
  "bindgen",
  "cc",
@@ -2627,9 +2657,9 @@ dependencies = [
 
 [[package]]
 name = "libsql-sys"
-version = "0.9.30"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90725458cc4461bc82f8f7983e80b002ea4f64b5184e1462f252d0dd74b122f5"
+checksum = "cf4a7f2d76f49442c273a892a574a272b8b35f4bf0b1b25a475f2cc95885fe0f"
 dependencies = [
  "bytes",
  "libsql-ffi",
@@ -4859,8 +4889,8 @@ dependencies = [
  "futures",
  "grammers-client",
  "grammers-mtsender",
- "grammers-session",
- "grammers-tl-types",
+ "grammers-session 0.11.0",
+ "grammers-tl-types 0.10.0",
  "http-body-util",
  "httpmock",
  "hyper",
@@ -4955,7 +4985,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.3.4",
+ "getrandom 0.4.3",
  "once_cell",
  "rustix 1.1.5",
  "windows-sys 0.61.2",
@@ -5077,9 +5107,9 @@ checksum = "fd3ca314f692efd6c868f8408f53fe444634a845f96c028b97d35f6a1f79f0ee"
 
 [[package]]
 name = "tokio"
-version = "1.53.2"
+version = "1.54.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e95f91fcc7a621e8b030f6aa23c71fe9838ae2fb4d8118b75602a328f5144044"
+checksum = "a0c168a474b95bfecfe908a65d4bdffc523144b649a74c09c286afb35d53e0bc"
 dependencies = [
  "bytes",
  "libc",
