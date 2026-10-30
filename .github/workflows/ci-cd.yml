@@ -233,14 +233,14 @@ jobs:
           shared-key: rust-coverage
           cache-on-failure: true
 
-      - name: Install tarpaulin
+      - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@v2.85.5
         with:
-          tool: cargo-tarpaulin
+          tool: cargo-llvm-cov
 
       - name: Generate coverage
         # Measure the library (the tested core); thin/bot bins are CLI entry points.
-        run: cargo tarpaulin --locked --lib --engine llvm --out xml --skip-clean --fail-under 30
+        run: cargo llvm-cov --locked --lib --cobertura --output-path cobertura.xml --fail-under-lines 30
 
   ci-status:
     name: CI status
