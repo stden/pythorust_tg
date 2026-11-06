@@ -386,6 +386,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "base16ct"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fd307490d624467aa6f74b0eabb77633d1f758a7b25f12bceb0b22e08d9726f6"
+
+[[package]]
 name = "base64"
 version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -866,6 +872,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "460fbee9c2c2f33933d720630a6a0bac33ba7053db5344fac858d4b8952d77d5"
 
 [[package]]
+name = "crypto-bigint"
+version = "0.7.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1a52aa3fcda4e6302a9f48734f234d35d4721b96f8fe07d073f07ce9df4f0271"
+dependencies = [
+ "cpubits",
+ "ctutils",
+ "num-traits",
+ "rand_core 0.10.1",
+ "serdect",
+]
+
+[[package]]
 name = "crypto-common"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -882,6 +901,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce6e4c961d6cd6c9a86db418387425e8bdeaf05b3c8bc1411e6dca4c252f1453"
 dependencies = [
  "hybrid-array",
+]
+
+[[package]]
+name = "crypto-primes"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3633a51a39c69ebbaa4feaa694bd83d241e4093901c84a0963b19d9bb3f0cf8f"
+dependencies = [
+ "crypto-bigint",
+ "rand_core 0.10.1",
 ]
 
 [[package]]
@@ -1581,16 +1610,18 @@ dependencies = [
 
 [[package]]
 name = "glass_pumpkin"
-version = "2.0.0-rc0"
+version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec260059e5d59a4899d78dff8bf59abf81f8f5b3b44e9d3ba25c9dade1390a36"
+checksum = "6ff9ef01d1ba41822349a2a9970e706dc6035637957cdddecf32482a8a90e86e"
 dependencies = [
+ "crypto-bigint",
+ "crypto-primes",
  "getrandom 0.4.3",
- "num-bigint",
+ "num-bigint 0.5.1",
  "num-integer",
  "num-traits",
- "once_cell",
  "rand_core 0.10.1",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -1619,10 +1650,10 @@ checksum = "0f330139772e71b5e104f5a7bbf43bbda92fd8a734b4cf9c57839e04e949cf9b"
 dependencies = [
  "chrono",
  "futures-util",
- "grammers-crypto",
- "grammers-mtsender",
- "grammers-session",
- "grammers-tl-types",
+ "grammers-crypto 0.10.0",
+ "grammers-mtsender 0.10.0",
+ "grammers-session 0.10.0",
+ "grammers-tl-types 0.10.0",
  "log",
  "md5",
  "mime_guess",
@@ -1641,7 +1672,25 @@ dependencies = [
  "getrandom 0.4.3",
  "glass_pumpkin",
  "hmac",
- "num-bigint",
+ "num-bigint 0.4.8",
+ "num-traits",
+ "pbkdf2",
+ "sha1 0.11.0",
+ "sha2 0.11.1",
+]
+
+[[package]]
+name = "grammers-crypto"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c0154344dab25d8365408df205e4440b432cae02ef9dae2df478434be77c7075"
+dependencies = [
+ "aes",
+ "ctr",
+ "getrandom 0.4.3",
+ "glass_pumpkin",
+ "hmac",
+ "num-bigint 0.5.1",
  "num-traits",
  "pbkdf2",
  "sha1 0.11.0",
@@ -1658,11 +1707,28 @@ dependencies = [
  "crc32fast",
  "flate2",
  "getrandom 0.4.3",
- "grammers-crypto",
- "grammers-tl-types",
+ "grammers-crypto 0.10.0",
+ "grammers-tl-types 0.10.0",
  "log",
- "num-bigint",
+ "num-bigint 0.4.8",
  "sha1 0.11.0",
+]
+
+[[package]]
+name = "grammers-mtproto"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ecead7953adb1c9ad6a2bdcea9f9931414be54246bdb4c722e990f7ade1193d3"
+dependencies = [
+ "bytes",
+ "crc32fast",
+ "flate2",
+ "getrandom 0.4.3",
+ "grammers-crypto 0.11.0",
+ "grammers-tl-types 0.11.0",
+ "num-bigint 0.5.1",
+ "sha1 0.11.0",
+ "tracing",
 ]
 
 [[package]]
@@ -1672,14 +1738,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f39b8556ddc94f7ec935135dcfbf84ca8628538e103779cdc701423b759b078e"
 dependencies = [
  "bytes",
- "grammers-crypto",
- "grammers-mtproto",
- "grammers-session",
- "grammers-tl-types",
+ "grammers-crypto 0.10.0",
+ "grammers-mtproto 0.10.0",
+ "grammers-session 0.10.0",
+ "grammers-tl-types 0.10.0",
  "locate-locale",
  "log",
  "os_info",
  "tokio",
+]
+
+[[package]]
+name = "grammers-mtsender"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b009d7d0f571cabac15e1ac7f588fefb764f23aba13bf8b9063a0a32a036075d"
+dependencies = [
+ "bytes",
+ "grammers-crypto 0.11.0",
+ "grammers-mtproto 0.11.0",
+ "grammers-session 0.11.0",
+ "grammers-tl-types 0.11.0",
+ "locate-locale",
+ "os_info",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]
@@ -1688,10 +1771,21 @@ version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e4d5b9e434c6b9fc1e091fe82d1f201d8e19df5005d2c19e218b4977b4df506"
 dependencies = [
- "grammers-tl-types",
+ "grammers-tl-types 0.10.0",
  "libsql",
  "log",
  "tokio",
+]
+
+[[package]]
+name = "grammers-session"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f34260cb63ecf5901e735a5f088ba6cb837d954649c223d5a53e7e980468ae0"
+dependencies = [
+ "grammers-tl-types 0.11.0",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]
@@ -1699,6 +1793,15 @@ name = "grammers-tl-gen"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1a37dda68c9e775dfbffb85b99826b5ac8144e9da40be3327e77cbcd8618fc30"
+dependencies = [
+ "grammers-tl-parser",
+]
+
+[[package]]
+name = "grammers-tl-gen"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf49f6769cffae7ea376669f3073c70eeb16ccc38f00ff019394069f3d401a4c"
 dependencies = [
  "grammers-tl-parser",
 ]
@@ -1718,7 +1821,17 @@ version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67d450e2f2588af535fe85a17b9a6df8338794ee8ad6bcb1b97d61a14d472fc5"
 dependencies = [
- "grammers-tl-gen",
+ "grammers-tl-gen 0.10.0",
+ "grammers-tl-parser",
+]
+
+[[package]]
+name = "grammers-tl-types"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "069e64c424bde5764391bc72f07085a12177d7053c8a0da355425527fd7c221f"
+dependencies = [
+ "grammers-tl-gen 0.11.0",
  "grammers-tl-parser",
 ]
 
@@ -2814,7 +2927,7 @@ dependencies = [
  "darling 0.23.0",
  "heck",
  "manyhow",
- "num-bigint",
+ "num-bigint 0.4.8",
  "proc-macro-crate",
  "proc-macro2",
  "quote",
@@ -2867,7 +2980,7 @@ dependencies = [
  "flate2",
  "getrandom 0.3.4",
  "mysql-common-derive",
- "num-bigint",
+ "num-bigint 0.4.8",
  "num-traits",
  "regex",
  "saturating",
@@ -2979,6 +3092,17 @@ checksum = "c89e69e7e0f03bea5ef08013795c25018e101932225a656383bd384495ecc367"
 dependencies = [
  "num-integer",
  "num-traits",
+]
+
+[[package]]
+name = "num-bigint"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93e7820bc0a80a0238e650327316f929ba18d5be054b647490a3a6a339f3e7c0"
+dependencies = [
+ "num-integer",
+ "num-traits",
+ "rand_core 0.10.1",
 ]
 
 [[package]]
@@ -4574,6 +4698,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "serdect"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "66cf8fedced2fcf12406bcb34223dffb92eaf34908ede12fed414c82b7f00b3e"
+dependencies = [
+ "base16ct",
+ "serde",
+]
+
+[[package]]
 name = "sha1"
 version = "0.10.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4858,9 +4992,9 @@ dependencies = [
  "fs2",
  "futures",
  "grammers-client",
- "grammers-mtsender",
- "grammers-session",
- "grammers-tl-types",
+ "grammers-mtsender 0.11.0",
+ "grammers-session 0.10.0",
+ "grammers-tl-types 0.10.0",
  "http-body-util",
  "httpmock",
  "hyper",
@@ -4955,7 +5089,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd"
 dependencies = [
  "fastrand",
- "getrandom 0.3.4",
+ "getrandom 0.4.3",
  "once_cell",
  "rustix 1.1.5",
  "windows-sys 0.61.2",
@@ -5077,9 +5211,9 @@ checksum = "fd3ca314f692efd6c868f8408f53fe444634a845f96c028b97d35f6a1f79f0ee"
 
 [[package]]
 name = "tokio"
-version = "1.53.2"
+version = "1.54.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e95f91fcc7a621e8b030f6aa23c71fe9838ae2fb4d8118b75602a328f5144044"
+checksum = "a0c168a474b95bfecfe908a65d4bdffc523144b649a74c09c286afb35d53e0bc"
 dependencies = [
  "bytes",
  "libc",
