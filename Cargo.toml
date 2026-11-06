@@ -16,7 +16,7 @@ crate-type = ["lib", "cdylib"]
 [dependencies]
 # Telegram MTProto client
 grammers-client = "0.10.0"
-grammers-session = "0.10.0"
+grammers-session = "0.11.0"
 grammers-tl-types = "0.10.0"
 grammers-mtsender = "0.10.0"
 
