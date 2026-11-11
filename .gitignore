@@ -252,3 +252,7 @@ prompts/hara_website_design.md
 
 # Coverage output
 cov.json
+
+# mise writes mise.lock with checksums for installed tools.
+# It is machine-specific, so it is not stored in git.
+mise.lock
