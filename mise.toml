@@ -1,3 +1,24 @@
 [tools]
 python = "3.11"
 node = "26"
+rust = "stable"
+uv = "0.13.7"
+
+[tasks.check]
+run = "git diff --check"
+
+[tasks."tests:playwright:test"]
+run = "npm run test"
+dir = "tests/playwright"
+
+[tasks.test]
+run = "uv run pytest"
+
+[tasks."rust:check"]
+run = "cargo check"
+
+[tasks."rust:test"]
+run = "cargo test"
+
+[tasks.build]
+run = "cargo build"
