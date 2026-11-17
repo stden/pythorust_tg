@@ -21,7 +21,7 @@ grammers-tl-types = "0.10.0"
 grammers-mtsender = "0.10.0"
 
 # Async runtime
-tokio = { version = "1.53.2", features = ["full", "signal"] }
+tokio = { version = "1.54.1", features = ["full", "signal"] }
 
 # CLI argument parsing
 clap = { version = "4.6.7", features = ["derive", "env"] }
@@ -58,7 +58,7 @@ walkdir = "2.5.0"
 reqwest = { version = "0.13.5", features = ["json", "multipart", "stream", "form"] }
 
 # Async OpenAI client
-async-openai = { version = "0.42.2", features = ["chat-completion", "embedding"] }
+async-openai = { version = "0.42.3", features = ["chat-completion", "embedding"] }
 
 # Environment variables
 dotenvy = "0.15.7"
@@ -73,13 +73,13 @@ base64 = "0.23.1"
 hyper = { version = "1.12.0", features = ["server", "http1"] }
 
 # Vector database (Qdrant)
-qdrant-client = { version = "1.19.0", default-features = false, features = ["download_snapshots", "serde"] }
+qdrant-client = { version = "1.20.0", default-features = false, features = ["download_snapshots", "serde"] }
 
 # Graph database (Neo4j)
 neo4rs = "0.8.0"
 
 # UUID generation
-uuid = { version = "1.28.0", features = ["v4", "serde"] }
+uuid = { version = "1.29.2", features = ["v4", "serde"] }
 
 # Futures utilities
 futures = "0.3.34"
@@ -99,7 +99,7 @@ mysql_async = { version = "0.37.1", features = ["chrono"] }
 # Telegram bot framework (polling mode)
 teloxide = { version = "0.17.0", default-features = true }
 # Random prompt selection
-rand = "0.10.3"
+rand = "0.10.4"
 
 # Kubernetes client
 kube = { version = "4.2.0", features = ["client", "config", "runtime", "derive"] }

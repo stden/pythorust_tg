@@ -9,10 +9,14 @@
     "test:chromium": "npx playwright test --project=chromium",
     "test:report": "npx playwright show-report"
   },
-  "keywords": ["playwright", "testing", "example"],
+  "keywords": [
+    "playwright",
+    "testing",
+    "example"
+  ],
   "author": "Example Author",
   "license": "ISC",
   "devDependencies": {
-    "@playwright/test": "^1.64.0"
+    "@playwright/test": "^1.65.1"
   }
 }
