@@ -24,7 +24,7 @@ grammers-mtsender = "0.10.0"
 tokio = { version = "1.54.1", features = ["full", "signal"] }
 
 # CLI argument parsing
-clap = { version = "4.6.7", features = ["derive", "env"] }
+clap = { version = "4.6.8", features = ["derive", "env"] }
 
 # Serialization
 serde = { version = "1.0.229", features = ["derive"] }
@@ -46,7 +46,7 @@ chrono = { version = "0.4.45", features = ["serde"] }
 prometheus = { version = "0.14.0", features = ["process"] }
 http-body-util = "0.1.5"
 hyper-util = { version = "0.1.21", features = ["server", "tokio"] }
-bytes = "1.12.1"
+bytes = "1.12.2"
 
 # File locking (cross-platform)
 fs2 = "0.4.3"
@@ -64,7 +64,7 @@ async-openai = { version = "0.43.0", features = ["chat-completion", "embedding"]
 dotenvy = "0.15.7"
 
 # Regex for message filtering
-regex = "1.13.1"
+regex = "1.13.2"
 
 # Base64 encoding (for Gemini image API)
 base64 = "0.23.1"
@@ -79,7 +79,7 @@ qdrant-client = { version = "1.20.0", default-features = false, features = ["dow
 neo4rs = "0.8.0"
 
 # UUID generation
-uuid = { version = "1.29.2", features = ["v4", "serde"] }
+uuid = { version = "1.29.3", features = ["v4", "serde"] }
 
 # Futures utilities
 futures = "0.3.34"

@@ -1,8 +1,8 @@
 [tools]
 python = "3.11"
 node = "26"
-rust = "stable"
-uv = "0.13.7"
+rust = "1.100.0"
+uv = "0.13.9"
 
 [tasks.check]
 run = "git diff --check"

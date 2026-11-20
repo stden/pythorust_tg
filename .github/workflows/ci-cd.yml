@@ -33,7 +33,7 @@ jobs:
       rust: ${{ steps.filter.outputs.rust }}
       workflows: ${{ steps.filter.outputs.workflows }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Filter changed files
         id: filter
@@ -71,7 +71,7 @@ jobs:
       needs.changes.outputs.python == 'true' ||
       needs.changes.outputs.workflows == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -116,11 +116,12 @@ jobs:
       needs.changes.outputs.rust == 'true' ||
       needs.changes.outputs.workflows == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install Rust formatter
         uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: 1.100.0
           components: rustfmt
 
       - name: Check formatting
@@ -140,11 +141,12 @@ jobs:
       needs.changes.outputs.rust == 'true' ||
       needs.changes.outputs.workflows == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: 1.100.0
           components: clippy
 
       - name: Setup mold linker
@@ -177,16 +179,18 @@ jobs:
       needs.changes.outputs.rust == 'true' ||
       needs.changes.outputs.workflows == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.100.0
 
       - name: Setup mold linker
         uses: rui314/setup-mold@v1
 
       - name: Install cargo-nextest
-        uses: taiki-e/install-action@v2.90.3
+        uses: taiki-e/install-action@v2.90.5
         with:
           tool: cargo-nextest
 
@@ -217,11 +221,12 @@ jobs:
         needs.changes.outputs.workflows == 'true'
       )
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
+          toolchain: 1.100.0
           components: llvm-tools-preview
 
       - name: Setup mold linker
@@ -234,7 +239,7 @@ jobs:
           cache-on-failure: true
 
       - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@v2.90.3
+        uses: taiki-e/install-action@v2.90.5
         with:
           tool: cargo-llvm-cov
 
@@ -268,10 +273,12 @@ jobs:
     timeout-minutes: 30
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.100.0
 
       - name: Cache Rust build
         uses: Swatinem/rust-cache@v2
@@ -302,7 +309,7 @@ jobs:
     timeout-minutes: 15
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Python
         uses: actions/setup-python@v7
