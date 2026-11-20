@@ -1593,8 +1593,8 @@ dependencies = [
  "futures-util",
  "grammers-crypto",
  "grammers-mtsender",
- "grammers-session",
- "grammers-tl-types",
+ "grammers-session 0.10.0",
+ "grammers-tl-types 0.10.0",
  "log",
  "md5",
  "mime_guess",
@@ -1631,7 +1631,7 @@ dependencies = [
  "flate2",
  "getrandom 0.4.3",
  "grammers-crypto",
- "grammers-tl-types",
+ "grammers-tl-types 0.10.0",
  "log",
  "num-bigint",
  "sha1 0.11.0",
@@ -1646,8 +1646,8 @@ dependencies = [
  "bytes",
  "grammers-crypto",
  "grammers-mtproto",
- "grammers-session",
- "grammers-tl-types",
+ "grammers-session 0.10.0",
+ "grammers-tl-types 0.10.0",
  "locate-locale",
  "log",
  "os_info",
@@ -1660,10 +1660,21 @@ version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3e4d5b9e434c6b9fc1e091fe82d1f201d8e19df5005d2c19e218b4977b4df506"
 dependencies = [
- "grammers-tl-types",
- "libsql",
+ "grammers-tl-types 0.10.0",
  "log",
  "tokio",
+]
+
+[[package]]
+name = "grammers-session"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "221a58eaf6bfb61ecd1cb8bc58c20d2bc7ec3749b968bc90d52bcf9a8547d4e6"
+dependencies = [
+ "grammers-tl-types 0.12.0",
+ "libsql",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]
@@ -1672,7 +1683,16 @@ version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1a37dda68c9e775dfbffb85b99826b5ac8144e9da40be3327e77cbcd8618fc30"
 dependencies = [
- "grammers-tl-parser",
+ "grammers-tl-parser 1.2.2",
+]
+
+[[package]]
+name = "grammers-tl-gen"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9d0672f6b59ba19c8946f934ddc005a9f44761e0a6e01867fcd7109e87c1614"
+dependencies = [
+ "grammers-tl-parser 2.0.0",
 ]
 
 [[package]]
@@ -1685,13 +1705,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "grammers-tl-parser"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "501ee4653d8328c5a3e8d1dd41825ed3bd9226a621b835ffacea8b1722ebe758"
+dependencies = [
+ "crc32fast",
+]
+
+[[package]]
 name = "grammers-tl-types"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67d450e2f2588af535fe85a17b9a6df8338794ee8ad6bcb1b97d61a14d472fc5"
 dependencies = [
- "grammers-tl-gen",
- "grammers-tl-parser",
+ "grammers-tl-gen 0.10.0",
+ "grammers-tl-parser 1.2.2",
+]
+
+[[package]]
+name = "grammers-tl-types"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb4da570f8dbcea3e0d0a1746240045555bacc56b4d57d3a81204ee0e84736bd"
+dependencies = [
+ "grammers-tl-gen 0.12.0",
+ "grammers-tl-parser 2.0.0",
 ]
 
 [[package]]
@@ -2569,9 +2608,9 @@ dependencies = [
 
 [[package]]
 name = "libsql"
-version = "0.9.30"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "30fe980ac5693ed1f3db490559fb578885e913a018df64af8a1a46e1959a78df"
+checksum = "d6bca1704194048f0f0bbc8a8e05ba85c0c67628b03bd59346dd2fdd946a1588"
 dependencies = [
  "async-trait",
  "bitflags",
@@ -2585,9 +2624,9 @@ dependencies = [
 
 [[package]]
 name = "libsql-ffi"
-version = "0.9.30"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0be1da6f123ceb2cd23f469883415cab9ee963286a85d61e22afb8b12e15e681"
+checksum = "f232292810b6298d17466b59bf8077d075fb016d89c281ca9dc968ea4a3b9d03"
 dependencies = [
  "bindgen",
  "cc",
@@ -2597,9 +2636,9 @@ dependencies = [
 
 [[package]]
 name = "libsql-sys"
-version = "0.9.30"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90725458cc4461bc82f8f7983e80b002ea4f64b5184e1462f252d0dd74b122f5"
+checksum = "cf4a7f2d76f49442c273a892a574a272b8b35f4bf0b1b25a475f2cc95885fe0f"
 dependencies = [
  "bytes",
  "libsql-ffi",
@@ -4847,8 +4886,8 @@ dependencies = [
  "futures",
  "grammers-client",
  "grammers-mtsender",
- "grammers-session",
- "grammers-tl-types",
+ "grammers-session 0.12.0",
+ "grammers-tl-types 0.10.0",
  "http-body-util",
  "httpmock",
  "hyper",
